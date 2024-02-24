@@ -22,8 +22,8 @@ export default {
         console.log(this.cards)
         // generalStore.initializeCards()
         generalStore.generateDeck()
-        generalStore.generateFirstHand(generalStore.playerDeck)
-        this.playerHand = generalStore.playerHand
+        generalStore.generateFirstHand(generalStore.player.deck)
+        this.playerHand = generalStore.player.hand
 
 
     },

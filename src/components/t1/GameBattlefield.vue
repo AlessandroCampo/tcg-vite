@@ -32,7 +32,7 @@ export default {
     components: { PlayerHand, PlayerField, ManaBar },
     created() {
         const generalStore = useGeneralStore()
-        this.playerMana = generalStore.playerMana
+        this.playerMana = generalStore.player.mana
         this.enemyMana = generalStore.enemyMana
     }
 }
