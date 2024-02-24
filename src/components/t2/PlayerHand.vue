@@ -1,32 +1,31 @@
 <template>
     <div class="hand-container">
-        <gameCard v-for="(card, index) in playerHand" :key="index" :propCard=card></gameCard>
+        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card></gameCard>
     </div>
 </template>
 
 <script>
 import GameCard from '../t3/GameCard.vue';
 import { useGeneralStore } from '../../stores/generalStore'
+import { useFirestore, useDocument } from 'vuefire'
+import { doc, collection, setDoc } from 'firebase/firestore'
+const db = useFirestore()
+// const docRef = doc(db, 'Users');
+
 
 export default {
     data() {
         return {
-            cards: [],
-            playerHand: []
+            generalStore: useGeneralStore()
         };
     },
     components: { GameCard },
-    created() {
-        const generalStore = useGeneralStore()
-        this.cards = generalStore.cards;
-        console.log(this.cards)
-        // generalStore.initializeCards()
-        generalStore.generateDeck()
-        generalStore.generateFirstHand(generalStore.player.deck)
-        this.playerHand = generalStore.player.hand
+    async created() {
 
-
-    },
+        this.generalStore.generateDeck()
+        this.generalStore.generateFirstHand(this.generalStore.player.deck)
+        await this.generalStore.updateDB()
+    }
 }
 </script>
 

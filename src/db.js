@@ -11,6 +11,12 @@ class gameCard {
     }
 }
 
+export const abilities = {
+    increaseOp: (card) => {
+        card.op++;
+    },
+};
+
 
 
 let wolf = new gameCard({
@@ -20,9 +26,7 @@ let wolf = new gameCard({
     description: 'This card is a wolf',
     imgPath: './src/assets/img/cards/wolf.png',
     cost: 1,
-    ability: function () {
-        this.op++;
-    },
+    ability: null,
     triggerTiming: 'onPlay'
 });
 
@@ -32,9 +36,7 @@ let knight = new gameCard({
     op: 1,
     hp: 2,
     description: 'This card  is a knight',
-    ability: function () {
-        this.hp++;
-    },
+    ability: null,
     imgPath: './src/assets/img/cards/knight.png',
     cost: 1,
     triggerTiming: 'onPlay'
@@ -46,7 +48,7 @@ let ogre = new gameCard({
     hp: 1,
     description: 'This card is an ogre',
     imgPath: './src/assets/img/cards/ogre.png',
-    cost: 2,
+    cost: 1,
     ability: null,
     triggerTiming: null
 });
@@ -57,7 +59,7 @@ let sorceress = new gameCard({
     hp: 1,
     description: 'This card is an sorceress',
     imgPath: './src/assets/img/cards/sorceress.png',
-    cost: 2,
+    cost: 1,
     ability: null,
     triggerTiming: null
 });
@@ -68,7 +70,7 @@ let reaper = new gameCard({
     hp: 2,
     description: 'This card is an reaper',
     imgPath: './src/assets/img/cards/reaper.png',
-    cost: 4,
+    cost: 1,
     ability: null,
     triggerTiming: null
 });

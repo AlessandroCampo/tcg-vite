@@ -2,6 +2,8 @@
     <div id="battlefield-container">
         <PlayerHand></PlayerHand>
         <PlayerField></PlayerField>
+        <OppoField></OppoField>
+        <OppoHand></OppoHand>
 
         <figure class="player-hero">
             <img src="../../assets/img/commanders/black.png" alt="" id="player-hero" class="hero-avatar">
@@ -19,21 +21,41 @@
 
 import PlayerHand from '../t2/PlayerHand.vue';
 import PlayerField from '../t2/PlayerField.vue';
+import OppoField from '../t2/OppoField.vue';
+import OppoHand from '../t2/OppoHand.vue';
 import ManaBar from '../t2/ManaBar.vue';
 import { useGeneralStore } from '../../stores/generalStore'
+import { useFirestore, useDocument } from 'vuefire'
+import { doc, collection, setDoc } from 'firebase/firestore'
+const db = useFirestore()
+const playerRef = doc(db, 'Users', 'Player1');
+
 
 export default {
     data() {
         return {
             playerMana: undefined,
-            enemyMana: undefined
+            enemyMana: undefined,
+            playerDoc: null
         }
     },
-    components: { PlayerHand, PlayerField, ManaBar },
-    created() {
+    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand },
+    async created() {
         const generalStore = useGeneralStore()
-        this.playerMana = generalStore.player.mana
+        this.playerDoc = useDocument(doc(collection(db, 'Users'), generalStore.player.uid))
+        this.playerMana = this.playerDoc?.mana
         this.enemyMana = generalStore.enemyMana
+    },
+    computed: {
+        getPlayerMana() {
+            return this.playerDoc ? this.playerDoc.mana : null
+        },
+
+    },
+    watch: {
+        getPlayerMana(newValue) {
+            this.playerMana = newValue
+        }
     }
 }
 </script>

@@ -1,0 +1,56 @@
+<template>
+    <div>
+        <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)"
+            @drop="attack($event)">
+            <GameCardVue v-for="(card, index) in generalStore.opponent.field" :key="index" :propCard="card"
+                :isPlayerOwned="false"></GameCardVue>
+        </div>
+    </div>
+</template>
+
+<script>
+
+import { useGeneralStore } from '../../stores/generalStore'
+import GameCardVue from '../t3/GameCard.vue'
+
+
+
+
+
+export default {
+    data() {
+        return {
+            generalStore: useGeneralStore()
+        }
+    },
+    methods: {
+        allowDrop(event) {
+            event.preventDefault();
+        },
+        attack(event) {
+            const attackingCard = this.generalStore.draggedCardObj
+            const attackedCard = event.target
+        },
+    },
+    components: { GameCardVue },
+
+
+}
+</script>
+
+<style lang="scss" scoped>
+.playerfield-container {
+    height: 25%;
+    width: 80%;
+    border: 2px solid lime;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+
+
+
+}
+</style>
