@@ -1,10 +1,7 @@
 <template>
-    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" draggable="true"
-        @dragstart="(e) => {
-            generalStore.draggedCard = e.target
-            generalStore.draggedCardObj = propCard
-            console.log(propCard)
-        }" @drop="attacked($event)" ref="card" :class="propCard.hp <= 0 ? 'fading' : ''">
+    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
+        :draggable="generalStore.player.activeTurn" @dragstart="startDrag($event)" @drop="attacked($event)" ref="card"
+        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']">
         <span class="cost stat" :class="statClass(propCard.cost, originalStats.original_cost)"> {{ propCard.cost }}
         </span>
         <span class="op stat" :class="statClass(propCard.op, originalStats.original_op)"> {{ propCard.op }} </span>
@@ -29,13 +26,20 @@ export default {
         }
     },
     props: ['propCard', 'isPlayerOwned'],
-    created() {
+    mounted() {
+        gsap.to(this.$refs.card, {
+            width: 170 + 'px',
+            height: 250 + 'px',
+            duration: 1,
+        })
+
         this.originalStats.original_op = this.propCard.op
         this.originalStats.original_hp = this.propCard.hp
         this.originalStats.original_cost = this.propCard.cost
     },
     methods: {
         attacked(e) {
+            if (this.isPlayerOwned) return
             const attacker = this.generalStore.draggedCardObj
             const target = this.propCard
             const attackerProxy = this.generalStore.draggedCard
@@ -52,6 +56,17 @@ export default {
                 return "";
             }
         },
+        disable() {
+            if (this.generalStore.player.activeTurn === false && this.isPlayerOwned) {
+                return true
+            } else {
+                return false
+            }
+        },
+        startDrag(e) {
+            this.generalStore.draggedCard = e.target
+            this.generalStore.draggedCardObj = this.propCard
+        }
     },
     watch: {
         'propCard.hp': async function (newHP, oldHP) {
@@ -74,8 +89,9 @@ export default {
 
 <style lang="scss" scoped>
 .card-base {
-    height: 250px;
-    width: 170px;
+    height: 0;
+    width: 0px;
+    overflow: hidden;
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
@@ -120,6 +136,11 @@ export default {
         left: 10%;
         top: 5%;
     }
+}
+
+.card-base.disabled {
+    cursor: not-allowed;
+    filter: grayscale(70%);
 }
 
 .stat.lower {

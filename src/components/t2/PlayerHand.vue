@@ -1,6 +1,7 @@
 <template>
     <div class="hand-container">
-        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card></gameCard>
+        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card :isPlayerOwned=true>
+        </gameCard>
     </div>
 </template>
 
@@ -25,6 +26,15 @@ export default {
         this.generalStore.generateDeck()
         this.generalStore.generateFirstHand(this.generalStore.player.deck)
         await this.generalStore.updateDB()
+    },
+    watch: {
+        'generalStore.player.activeTurn': async function (newTurn, oldTurn) {
+            if (newTurn) {
+                console.log('turn change')
+                this.generalStore.drawOne()
+
+            }
+        }
     }
 }
 </script>
@@ -36,9 +46,10 @@ export default {
     position: absolute;
     width: 75%;
     display: flex;
+    flex-direction: row-reverse;
     padding-block: 0.5em;
     bottom: 1%;
-    left: 50%;
+    left: 52%;
     transform: translateX(-50%);
     justify-content: center;
 }

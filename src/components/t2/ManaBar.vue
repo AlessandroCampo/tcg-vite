@@ -25,8 +25,9 @@ export default {
         'propMana.current': function (newValue, oldValue) {
             let mana_bar = this.$refs.mana_bar;
             const percentage = (this.propMana.current / this.propMana.total) * 100;
+            console.log(percentage)
             gsap.to(mana_bar, {
-                width: percentage
+                width: percentage + '%'
             });
         }
     }

@@ -28,14 +28,19 @@ export default {
         async playCard(event) {
 
             const propCard = this.generalStore.draggedCardObj
+            if (propCard.status !== 'inHand') {
+                return
+            }
             if (propCard.cost > this.generalStore.player.mana.current) {
                 return
             }
+
             this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost
             const playerHandArray = this.generalStore.player.hand
             const playerFieldArray = this.generalStore.player.field
             const propCardIndex = playerHandArray.indexOf(propCard)
             playerHandArray.splice(propCardIndex, 1)
+            propCard.status = 'onField'
             playerFieldArray.push(propCard)
             // event.target.append(this.generalStore.draggedCard)
             this.generalStore.draggedCard.classList.remove('in-hand')
@@ -63,7 +68,7 @@ export default {
     bottom: 25%;
     left: 50%;
     transform: translateX(-50%);
-    border: 2px solid palevioletred;
+
 
 
 

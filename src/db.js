@@ -1,5 +1,5 @@
 class gameCard {
-    constructor({ name, op, hp, ability, description, imgPath, cost, triggerTiming }) {
+    constructor({ name, op, hp, ability, description, imgPath, cost, triggerTiming, status, canAttack }) {
         this.name = name
         this.op = op
         this.hp = hp
@@ -8,6 +8,8 @@ class gameCard {
         this.imgPath = imgPath
         this.cost = cost
         this.triggerTiming = triggerTiming
+        this.status = status
+        this.canAttack = canAttack
     }
 }
 
@@ -17,6 +19,20 @@ export const abilities = {
     },
 };
 
+////**** COMMANDERS //// */
+
+let black = {
+
+    name: 'black',
+    artwork: './src/assets/img/commanders/black.png',
+    colors: ['black']
+}
+
+let green = {
+    name: 'green',
+    artwork: './src/assets/img/commanders/green.png',
+    colors: ['green']
+}
 
 
 let wolf = new gameCard({
@@ -26,8 +42,10 @@ let wolf = new gameCard({
     description: 'This card is a wolf',
     imgPath: './src/assets/img/cards/wolf.png',
     cost: 1,
-    ability: null,
-    triggerTiming: 'onPlay'
+    ability: 'increaseOp',
+    triggerTiming: 'onPlay',
+    status: 'none',
+    canAttack: false,
 });
 
 
@@ -36,10 +54,12 @@ let knight = new gameCard({
     op: 1,
     hp: 2,
     description: 'This card  is a knight',
-    ability: null,
+    ability: 'increaseOp',
     imgPath: './src/assets/img/cards/knight.png',
     cost: 1,
-    triggerTiming: 'onPlay'
+    triggerTiming: 'onPlay',
+    status: 'none',
+    canAttack: false,
 })
 
 let ogre = new gameCard({
@@ -49,8 +69,10 @@ let ogre = new gameCard({
     description: 'This card is an ogre',
     imgPath: './src/assets/img/cards/ogre.png',
     cost: 1,
-    ability: null,
-    triggerTiming: null
+    ability: 'increaseOp',
+    triggerTiming: null,
+    status: 'none',
+    canAttack: false,
 });
 
 let sorceress = new gameCard({
@@ -61,7 +83,9 @@ let sorceress = new gameCard({
     imgPath: './src/assets/img/cards/sorceress.png',
     cost: 1,
     ability: null,
-    triggerTiming: null
+    triggerTiming: null,
+    status: 'none',
+    canAttack: false,
 });
 
 let reaper = new gameCard({
@@ -72,7 +96,9 @@ let reaper = new gameCard({
     imgPath: './src/assets/img/cards/reaper.png',
     cost: 1,
     ability: null,
-    triggerTiming: null
+    triggerTiming: null,
+    status: 'none',
+    canAttack: false,
 });
 
 let skeleton = new gameCard({
@@ -83,7 +109,10 @@ let skeleton = new gameCard({
     imgPath: './src/assets/img/cards/skeleton.png',
     cost: 1,
     ability: null,
-    triggerTiming: null
+    triggerTiming: null,
+    status: 'none',
+    canAttack: false,
 });
 
 export const allCards = [wolf, knight, ogre, sorceress, skeleton, reaper]
+export const allCommanders = [black, green]

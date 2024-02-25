@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { allCards, abilities } from '../db.js'
+import { allCards, abilities, allCommanders } from '../db.js'
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, setDoc } from 'firebase/firestore'
 import gsap from 'gsap'
@@ -12,33 +12,59 @@ export const useGeneralStore = defineStore('generalStore', {
     state: () => ({
         cards: [...allCards.map(card => ({ ...card }))],
         user: null,
-        activeTurn: false,
         opponentUid: undefined,
         draggedCard: undefined,
         draggedCardObj: undefined,
         player: {
             uid: '',
             username: '',
+            activeTurn: true,
             deck: [],
             hand: [],
             field: [],
+            commander: {},
+            lp: 30,
             mana:
             {
-                current: 3,
-                total: 2
+                current: 1,
+                total: 1
             }
 
         },
         opponent: {},
         enemyMana: {
-            current: 3,
-            total: 2
+            current: 1,
+            total: 1
         },
     }),
     getters: {
 
     },
     actions: {
+        firstTurn() {
+            // if (this.player.activeTurn) {
+            //     return
+            // }
+            let fiftyhChance = Math.floor(Math.random() * 2)
+            console.log(fiftyhChance)
+            if (fiftyhChance === 1 && this.isPlayerOne(this.player.uid)) {
+                this.player.activeTurn = true
+                this.opponent.activeTurn = false
+            } else if (fiftyhChance === 0 && this.isPlayerOne(this.player.uid)) {
+                this.player.activeTurn = false
+                this.opponent.activeTurn = true
+            }
+            console.log(this.player.activeTurn)
+            this.updateDB()
+            this.updateOpponentDB()
+        },
+        isPlayerOne(id) {
+            if (id === 'KNOiaPNOj3V7LNq9rvH8zvtR4Hp1') {
+                return true
+            } else if (id === 'PPMzIrPbubaazLC7Es7RDtI93mI3') {
+                return false
+            }
+        },
         generateDeck() {
             for (let i = 0;i < 4;i++) {
                 this.cards.forEach((card) => {
@@ -52,17 +78,35 @@ export const useGeneralStore = defineStore('generalStore', {
         generateFirstHand(deck) {
             for (let i = 0;i < 5;i++) {
                 let randomIndex = Math.floor(Math.random() * deck.length)
-
+                deck[randomIndex].status = 'inHand'
                 this.player.hand.push(deck[randomIndex])
                 deck.splice(randomIndex, 1)
             }
+            console.log(this.player.hand)
 
+        },
+        assignCommander() {
+            if (this.isPlayerOne(this.player.uid)) {
+                this.player.leader = allCommanders[0]
+            } else {
+                this.player.leader = allCommanders[1]
+            }
+            this.updateDB()
+            this.updateOpponentDB()
         },
         async updateDB() {
             const playerRef = doc(db, 'Users', this.player.uid);
             const playerObjCopy = { ...this.player }
+
+            if (this.isPlayerOne(this.player.uid)) {
+                this.opponentUid = 'PPMzIrPbubaazLC7Es7RDtI93mI3'
+                this.player.leader = allCommanders[0]
+            } else {
+                this.opponentUid = 'KNOiaPNOj3V7LNq9rvH8zvtR4Hp1'
+                this.player.leader = allCommanders[1]
+            }
             await setDoc(playerRef, playerObjCopy)
-            this.player.uid === 'gMopyAIBdRe8HOTkXQ2dCe86V2k1' ? this.opponentUid = 'gEnS7hbk5zMwMRPiU5CvuBTU1As1' : this.opponentUid = 'gMopyAIBdRe8HOTkXQ2dCe86V2k1'
+            console.log(this.player.leader)
 
         },
         async updateOpponentDB() {
@@ -99,18 +143,18 @@ export const useGeneralStore = defineStore('generalStore', {
 
             this.updateDB()
             this.updateOpponentDB()
+        },
+        drawOne() {
+            let randomIndex = Math.floor(Math.random() * this.player.deck.length)
+            this.player.deck[randomIndex].status = 'inHand'
+            this.player.hand.unshift(this.player.deck[randomIndex])
+            this.player.deck.splice(randomIndex, 1)
+            this.updateBothDb()
+        },
+        updateBothDb() {
+            this.updateDB()
+            this.updateOpponentDB()
         }
-
-        ,
-        // destroyedByBattle(proxy) {
-        //     gsap.to(proxy, {
-        //         opacity: 0,
-        //         duration: 0.7,
-        //         onComplete() {
-        //             proxy.remove()
-        //         }
-        //     })
-        // }
 
     },
 })

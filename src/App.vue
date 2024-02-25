@@ -1,5 +1,6 @@
 
 <template>
+  <img src="../src/assets/img/loading.gif" alt="" v-show="loading" id="loading_screen">
   <LoginScreen v-if="!generalStore.user"></LoginScreen>
   <GameBattlefield v-else></GameBattlefield>
 </template>
@@ -18,15 +19,20 @@ const db = useFirestore()
 export default {
   data() {
     return {
+      loading: true,
       generalStore: useGeneralStore()
     }
   },
   mounted() {
+    // window.addEventListener('contextmenu', (e) => {
+    //   e.preventDefault()
+    // })
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         this.generalStore.user = user;
         this.generalStore.player.uid = user.uid
         await this.generalStore.updateDB()
+
 
         const player_unsub = onSnapshot(doc(db, "Users", this.generalStore?.user.uid), (doc) => {
           this.generalStore.player = doc.data()
@@ -36,8 +42,17 @@ export default {
           this.generalStore.opponent = doc.data()
         });
 
+        setTimeout(() => {
+          this.generalStore.firstTurn()
+          this.generalStore.assignCommander()
+          this.loading = false
+        }, 500)
+
+
+
 
       } else {
+        this.loading = false
         console.log('no user')
         this.generalStore.user = null;
       }
@@ -50,4 +65,11 @@ export default {
 </script>
 
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+#loading_screen {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  z-index: 120;
+}
+</style>

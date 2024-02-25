@@ -4,15 +4,15 @@
         <PlayerField></PlayerField>
         <OppoField></OppoField>
         <OppoHand></OppoHand>
+        <TurnButton></TurnButton>
+        <LpCounter :propLp="generalStore.player.lp" :playerLp="true"></LpCounter>
+        <LpCounter :propLp="generalStore.opponent.lp" :playerLp="false"></LpCounter>
+        <DeckProxy :propDeck="generalStore.player.deck" :playerDeck="true"></DeckProxy>
+        <DeckProxy :propDeck="generalStore.opponent.deck" :playerDeck="false"></DeckProxy>
+        <PlayerCommander></PlayerCommander>
+        <OppoCommander></OppoCommander>
 
-        <figure class="player-hero">
-            <img src="../../assets/img/commanders/black.png" alt="" id="player-hero" class="hero-avatar">
-            <ManaBar :propMana="playerMana"></ManaBar>
-        </figure>
-        <figure class="enemy-hero">
-            <img src="../../assets/img/commanders/green.png" alt="" id="enemy-hero" class="hero-avatar">
-            <ManaBar :propMana="enemyMana"></ManaBar>
-        </figure>
+
 
     </div>
 </template>
@@ -24,6 +24,11 @@ import PlayerField from '../t2/PlayerField.vue';
 import OppoField from '../t2/OppoField.vue';
 import OppoHand from '../t2/OppoHand.vue';
 import ManaBar from '../t2/ManaBar.vue';
+import TurnButton from '../t2/TurnButton.vue';
+import DeckProxy from '../t2/DeckProxy.vue';
+import LpCounter from '../t2/LpCounter.vue';
+import PlayerCommander from '../t2/PlayerCommander.vue';
+import OppoCommander from '../t2/OppoCommander.vue';
 import { useGeneralStore } from '../../stores/generalStore'
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, setDoc } from 'firebase/firestore'
@@ -34,17 +39,11 @@ const playerRef = doc(db, 'Users', 'Player1');
 export default {
     data() {
         return {
-            playerMana: undefined,
-            enemyMana: undefined,
-            playerDoc: null
+            generalStore: useGeneralStore()
         }
     },
-    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand },
+    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander },
     async created() {
-        const generalStore = useGeneralStore()
-        this.playerDoc = useDocument(doc(collection(db, 'Users'), generalStore.player.uid))
-        this.playerMana = this.playerDoc?.mana
-        this.enemyMana = generalStore.enemyMana
     },
     computed: {
         getPlayerMana() {
@@ -67,21 +66,5 @@ export default {
     background-position: center;
     height: 100vh;
     width: 100vw;
-}
-
-
-.hero-avatar {
-    clip-path: circle();
-    position: absolute;
-    right: 12.8%;
-    width: 205px;
-}
-
-#player-hero {
-    bottom: 1.7%;
-}
-
-#enemy-hero {
-    top: 1.7%;
 }
 </style>

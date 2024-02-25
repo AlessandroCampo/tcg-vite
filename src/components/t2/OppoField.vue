@@ -42,7 +42,6 @@ export default {
 .playerfield-container {
     height: 25%;
     width: 80%;
-    border: 2px solid lime;
     position: absolute;
     display: flex;
     justify-content: center;
