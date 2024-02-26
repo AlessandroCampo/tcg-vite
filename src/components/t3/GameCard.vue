@@ -57,11 +57,12 @@ export default {
                 action: 'attack'
             }
             this.generalStore.updateBothDb()
+
+            this.generalStore.battle(attacker, target)
+
             this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op, target.op)
-            // setTimeout(() => {
-            //     this.generalStore.battle(attacker, target, attackerProxy, targetProxy)
-            // }, 700)
+
 
         },
         targetted(e) {
@@ -138,7 +139,6 @@ export default {
         'generalStore.opponent.lastAction': function (newValue, oldValue) {
             if (newValue !== oldValue) {
                 let action = this.generalStore.opponent.lastAction
-                console.log('generalStore.opponent.lastAction changed:', newValue);
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
 
             }
@@ -155,6 +155,7 @@ export default {
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
+    z-index: 10;
 
     &:hover {
         scale: 1.8;
@@ -162,7 +163,7 @@ export default {
         border: 2px solid aqua inset;
         box-shadow: 5px 10px 20px aqua inset;
         border-radius: 20px;
-        z-index: 2;
+        z-index: 20;
         cursor: grab;
     }
 
@@ -198,10 +199,13 @@ export default {
     }
 }
 
+
+
 .card-base.disabled {
     cursor: not-allowed;
     filter: grayscale(70%);
 }
+
 
 .stat.lower {
     color: red;

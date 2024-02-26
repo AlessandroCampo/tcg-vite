@@ -49,9 +49,10 @@ export default {
     display: flex;
     flex-direction: row-reverse;
     padding-block: 0.5em;
-    bottom: 1%;
+    bottom: 0%;
     left: 50%;
     transform: translateX(-50%);
     justify-content: center;
+    z-index: 4;
 }
 </style>

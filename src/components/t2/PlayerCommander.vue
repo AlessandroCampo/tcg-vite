@@ -1,5 +1,5 @@
 <template>
-    <figure class="player-hero">
+    <figure class="player-hero" id="player-hero-cont">
         <img :src="generalStore.player.leader?.artwork" alt="" id="player-hero" class="hero-avatar"
             :class="generalStore.player.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.player.mana"></ManaBar>

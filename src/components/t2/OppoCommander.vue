@@ -1,5 +1,5 @@
 <template>
-    <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent>
+    <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent id="enemy-hero-cont">
         <img :src="generalStore.opponent.leader?.artwork" alt="" id="enemy-hero" class="hero-avatar"
             :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
@@ -19,11 +19,22 @@ export default {
     methods: {
         directAttack(e) {
             const attacker = this.generalStore.draggedCardObj;
+            const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;
             const damage = attacker.op;
             const interval = 150; // Interval between LP updates in milliseconds
             const iterations = damage; // Number of LP updates
             attacker.canAttack = false
+            this.generalStore.player.lastAction = {
+                card: attackerProxy.id,
+                target: 'player-hero-cont',
+                cardObj: attacker,
+                targetObj: null,
+                action: 'attack'
+            }
+            this.generalStore.updateBothDb()
+            this.generalStore.resetActionObj()
+            this.generalStore.animateAttack(attackerProxy, document.getElementById('enemy-hero-cont'), damage)
             // Function to update LP value gradually
             const updateLP = () => {
                 if (this.generalStore.opponent.lp > initialLP - damage) {

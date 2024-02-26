@@ -105,8 +105,8 @@ let sorceress = new unit({
 
 let reaper = new unit({
     name: 'reaper',
-    op: 4,
-    hp: 2,
+    op: 2,
+    hp: 5,
     imgPath: './src/assets/img/cards/reaper.png',
     cost: 1,
     ability: null,
@@ -140,5 +140,5 @@ let inner_fear = new gameCard({
     type: 'spell'
 })
 
-export const allCards = [wolf, knight, ogre, inner_fear]
+export const allCards = [wolf, knight, ogre, skeleton, reaper]
 export const allCommanders = [black, green]

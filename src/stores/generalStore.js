@@ -27,7 +27,7 @@ export const useGeneralStore = defineStore('generalStore', {
             commander: {},
             lp: 30,
             lastAction: {
-                type: '',
+                action: '',
                 card: null,
                 target: null
             },
@@ -125,13 +125,13 @@ export const useGeneralStore = defineStore('generalStore', {
                 console.error(`Ability "${name}" not found.`);
             }
         },
-        battle(attacker, target, attackerProxy, targetProxy) {
+        battle(attacker, target) {
+
             attacker.canAttack = false
             attacker.hp -= target.op;
             target.hp -= attacker.op;
 
-            this.updateDB()
-            this.updateOpponentDB()
+            this.updateBothDb()
         },
         drawOne() {
             let randomIndex = Math.floor(Math.random() * this.player.deck.length)
@@ -188,7 +188,10 @@ export const useGeneralStore = defineStore('generalStore', {
                     dmgIcon2.style.backgroundImage = "url('./src/assets/img/animations/icon_damage.png')"
                     dmgIcon.innerText = '-' + defDmg
                     dmgIcon2.innerText = '-' + attackDmg
-                    attackingCard.append(dmgIcon)
+                    if (defDmg) {
+                        attackingCard.append(dmgIcon)
+                    }
+
                     targetCard.append(dmgIcon2)
                     setTimeout(() => { dmgIcon.remove(), dmgIcon2.remove() }, 1100)
                     gsap.to(attackingCard, {
@@ -207,12 +210,12 @@ export const useGeneralStore = defineStore('generalStore', {
             const target = document.getElementById(targetID)
 
             if (action === 'attack') {
-                this.animateAttack(card, target, cardObj.op, targetObj.op)
+                this.animateAttack(card, target, cardObj?.op, targetObj?.op)
             }
         },
         resetActionObj() {
             this.player.lastAction = {
-                type: '',
+                action: '',
                 card: null,
                 target: null
             }

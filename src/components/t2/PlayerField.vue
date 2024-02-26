@@ -40,11 +40,14 @@ export default {
             }
 
             this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost
+            propProxy.classList.remove('in-hand')
+            console.log(propProxy.classList)
 
             this.generalStore.draggedCard = undefined
             this.generalStore.draggedCardObj = undefined
 
             if (propCard.type === 'unit') {
+
                 this.generalStore.summonUnit(propCard)
             }
 
@@ -68,7 +71,9 @@ export default {
     left: 50%;
     transform: translateX(-50%);
 
-
+    .card-base {
+        z-index: 1;
+    }
 
 
 }
