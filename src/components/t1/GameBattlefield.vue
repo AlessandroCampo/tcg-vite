@@ -62,7 +62,7 @@ export default {
 <style lang="scss" scoped>
 #battlefield-container {
     background-image: url('../../assets/img/gameboard.png');
-    background-size: cover;
+    background-size: contain;
     background-position: center;
     height: 100vh;
     width: 100vw;

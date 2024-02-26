@@ -27,5 +27,25 @@ figure.player-hero .mana-bar {
 
 figure.enemy-hero .mana-bar {
   right: 14.2%;
-  top: 18%;
+  top: 80%;
+}
+
+.icon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  height: 50%;
+  width: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: yellow;
+  font-size: 25px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12024;
+
 }

@@ -23,7 +23,7 @@ export default {
             const damage = attacker.op;
             const interval = 150; // Interval between LP updates in milliseconds
             const iterations = damage; // Number of LP updates
-
+            attacker.canAttack = false
             // Function to update LP value gradually
             const updateLP = () => {
                 if (this.generalStore.opponent.lp > initialLP - damage) {
@@ -58,13 +58,11 @@ export default {
     width: 205px;
 }
 
-#player-hero {
-    bottom: 1.7%;
-}
 
 .enemy-hero {
     position: absolute;
     right: 12.8%;
+    top: 2.3%;
     width: fit-content;
     z-index: 4200;
 }

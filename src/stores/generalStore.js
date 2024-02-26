@@ -15,6 +15,8 @@ export const useGeneralStore = defineStore('generalStore', {
         opponentUid: undefined,
         draggedCard: undefined,
         draggedCardObj: undefined,
+        clickedCard: undefined,
+        clickedCardObj: undefined,
         player: {
             uid: '',
             username: '',
@@ -42,9 +44,6 @@ export const useGeneralStore = defineStore('generalStore', {
     },
     actions: {
         firstTurn() {
-            // if (this.player.activeTurn) {
-            //     return
-            // }
             let fiftyhChance = Math.floor(Math.random() * 2)
             console.log(fiftyhChance)
             if (fiftyhChance === 1 && this.isPlayerOne(this.player.uid)) {
@@ -122,24 +121,9 @@ export const useGeneralStore = defineStore('generalStore', {
             }
         },
         battle(attacker, target, attackerProxy, targetProxy) {
-            let killedIndexAttacker = -1;
-            let killedIndexTarget = -1;
-
-            // Decrease HP of attacker and target
+            attacker.canAttack = false
             attacker.hp -= target.op;
             target.hp -= attacker.op;
-
-            // Check if attacker is killed
-            // if (attacker.hp <= 0) {
-            //     killedIndexAttacker = this.player.field.indexOf(attacker);
-            //     this.player.field.splice(killedIndexAttacker, 1);
-            // }
-
-            // // Check if target is killed
-            // if (target.hp <= 0) {
-            //     killedIndexTarget = this.opponent.field.indexOf(target);
-            //     this.opponent.field.splice(killedIndexTarget, 1);
-            // }
 
             this.updateDB()
             this.updateOpponentDB()
@@ -154,6 +138,62 @@ export const useGeneralStore = defineStore('generalStore', {
         updateBothDb() {
             this.updateDB()
             this.updateOpponentDB()
+        },
+        summonUnit(propCard) {
+            const playerFieldArray = this.player.field
+            const playerHandArray = this.player.hand
+            const propCardIndex = playerHandArray.indexOf(propCard)
+            playerHandArray.splice(propCardIndex, 1)
+            propCard.status = 'onField'
+            playerFieldArray.push(propCard)
+        },
+        animateAttack(attackingCard, targetCard, attackDmg, defDmg) {
+            var attackingRect = attackingCard.getBoundingClientRect();
+            var targetRect = targetCard.getBoundingClientRect();
+            var deltaX = targetRect.left - attackingRect.left;
+            var deltaY = targetRect.top - attackingRect.top;
+            var angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+            var angleBetweenCards = Math.atan2(deltaY, deltaX);
+            var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+
+            if (deltaX < 0) {
+                angle = -45;
+            } else {
+                angle = 45;
+            }
+
+            var stopDistance = distance - 50;
+
+            var normalizedDeltaX = deltaX / distance * stopDistance;
+            var normalizedDeltaY = deltaY / distance * stopDistance;
+
+            gsap.to(attackingCard, {
+                rotation: angle,
+                x: attackingRect.left + normalizedDeltaX - attackingRect.left,
+                y: attackingRect.top + normalizedDeltaY - attackingRect.top,
+                duration: 0.2,
+                scale: 0.8,
+                onComplete: function () {
+                    let dmgIcon = document.createElement('div')
+                    dmgIcon.classList.add('icon')
+                    let dmgIcon2 = document.createElement('div')
+                    dmgIcon2.classList.add('icon')
+                    dmgIcon.style.backgroundImage = "url('./src/assets/img/animations/icon_damage.png')"
+                    dmgIcon2.style.backgroundImage = "url('./src/assets/img/animations/icon_damage.png')"
+                    dmgIcon.innerText = '-' + defDmg
+                    dmgIcon2.innerText = '-' + attackDmg
+                    attackingCard.append(dmgIcon)
+                    targetCard.append(dmgIcon2)
+                    setTimeout(() => { dmgIcon.remove(), dmgIcon2.remove() }, 1100)
+                    gsap.to(attackingCard, {
+                        rotation: 0,
+                        x: 0,
+                        y: 0,
+                        duration: 0.5
+                    });
+                }
+            });
         }
 
     },

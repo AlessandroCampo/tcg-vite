@@ -26,18 +26,19 @@ export default {
 <style lang="scss" scoped>
 .hero-avatar {
     clip-path: circle();
-    position: absolute;
     right: 12.8%;
     width: 205px;
 }
 
-#player-hero {
-    bottom: 1.7%;
+.player-hero {
+    position: absolute;
+    right: 12.8%;
+    bottom: 1.6%;
+    width: fit-content;
+    z-index: 4200;
 }
 
-#enemy-hero {
-    top: 1.7%;
-}
+
 
 img.disabled {
     filter: grayscale(70%);

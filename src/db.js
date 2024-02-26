@@ -1,22 +1,32 @@
 class gameCard {
-    constructor({ name, op, hp, ability, description, imgPath, cost, triggerTiming, status, canAttack }) {
+    constructor({ name, ability, imgPath, cost, triggerTiming, type }) {
         this.name = name
-        this.op = op
-        this.hp = hp
         this.ability = ability
-        this.description = description
         this.imgPath = imgPath
         this.cost = cost
         this.triggerTiming = triggerTiming
-        this.status = status
-        this.canAttack = canAttack
+        this.type = type
     }
 }
+
+class unit extends gameCard {
+    constructor({ name, ability, imgPath, cost, triggerTiming, type, op, hp, canAttack, status }) {
+        super({ name, ability, imgPath, cost, triggerTiming, type });
+        this.op = op;
+        this.hp = hp;
+        this.canAttack = canAttack;
+        this.status = status;
+    }
+}
+
 
 export const abilities = {
     increaseOp: (card) => {
         card.op++;
     },
+    reduceHpBy2: (target) => {
+        target.hp -= 2
+    }
 };
 
 ////**** COMMANDERS //// */
@@ -35,84 +45,100 @@ let green = {
 }
 
 
-let wolf = new gameCard({
+//** CARDS [UNITS] */
+
+let wolf = new unit({
     name: 'wolf',
     op: 2,
     hp: 1,
-    description: 'This card is a wolf',
     imgPath: './src/assets/img/cards/wolf.png',
     cost: 1,
-    ability: 'increaseOp',
+    ability: {
+        name: 'increaseOp',
+        type: 'self_buff'
+    },
     triggerTiming: 'onPlay',
     status: 'none',
     canAttack: false,
+    type: 'unit'
 });
 
 
-let knight = new gameCard({
+let knight = new unit({
     name: 'knight',
     op: 1,
-    hp: 2,
-    description: 'This card  is a knight',
-    ability: 'increaseOp',
+    hp: 3,
+    ability: null,
     imgPath: './src/assets/img/cards/knight.png',
     cost: 1,
     triggerTiming: 'onPlay',
     status: 'none',
     canAttack: false,
+    type: 'unit'
 })
 
-let ogre = new gameCard({
+let ogre = new unit({
     name: 'ogre',
     op: 4,
     hp: 1,
-    description: 'This card is an ogre',
     imgPath: './src/assets/img/cards/ogre.png',
     cost: 1,
-    ability: 'increaseOp',
+    ability: null,
     triggerTiming: null,
     status: 'none',
     canAttack: false,
+    type: 'unit'
 });
 
-let sorceress = new gameCard({
+let sorceress = new unit({
     name: 'sorceress',
     op: 0,
     hp: 1,
-    description: 'This card is an sorceress',
     imgPath: './src/assets/img/cards/sorceress.png',
     cost: 1,
     ability: null,
     triggerTiming: null,
     status: 'none',
     canAttack: false,
+    type: 'unit'
 });
 
-let reaper = new gameCard({
+let reaper = new unit({
     name: 'reaper',
     op: 4,
     hp: 2,
-    description: 'This card is an reaper',
     imgPath: './src/assets/img/cards/reaper.png',
     cost: 1,
     ability: null,
     triggerTiming: null,
     status: 'none',
     canAttack: false,
+    type: 'unit'
 });
 
-let skeleton = new gameCard({
+let skeleton = new unit({
     name: 'skeleton',
     op: 1,
     hp: 1,
-    description: 'This card is an skeleton',
     imgPath: './src/assets/img/cards/skeleton.png',
     cost: 1,
     ability: null,
     triggerTiming: null,
     status: 'none',
     canAttack: false,
+    type: 'unit'
 });
 
-export const allCards = [wolf, knight, ogre, sorceress, skeleton, reaper]
+//*** CARDS [SPELLS] */
+
+let inner_fear = new gameCard({
+    name: 'Inner Fear',
+    imgPath: './src/assets/img/cards/inner_fear.png',
+    cost: 1,
+    ability: { name: 'reduceHpBy2', type: 'target_enemy' },
+    triggerTiming: null,
+    type: 'spell'
+})
+
+export const allCards = [wolf, knight, ogre, inner_fear]
 export const allCommanders = [black, green]

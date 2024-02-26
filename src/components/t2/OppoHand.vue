@@ -20,12 +20,12 @@ export default {
 <style lang="scss" scoped>
 .hand-container {
     position: absolute;
-    width: 75%;
+    width: 42%;
     display: flex;
     flex-direction: row-reverse;
     padding-block: 0.5em;
     top: -8%;
-    left: 52%;
+    left: 50%;
     transform: translateX(-50%);
     justify-content: center;
 }

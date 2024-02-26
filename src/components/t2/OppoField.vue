@@ -1,7 +1,6 @@
 <template>
     <div>
-        <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)"
-            @drop="attack($event)">
+        <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)">
             <GameCardVue v-for="(card, index) in generalStore.opponent.field" :key="index" :propCard="card"
                 :isPlayerOwned="false"></GameCardVue>
         </div>
@@ -26,11 +25,7 @@ export default {
     methods: {
         allowDrop(event) {
             event.preventDefault();
-        },
-        attack(event) {
-            const attackingCard = this.generalStore.draggedCardObj
-            const attackedCard = event.target
-        },
+        }
     },
     components: { GameCardVue },
 

@@ -27,7 +27,11 @@ export default {
         },
         async playCard(event) {
 
+            const propProxy = this.generalStore.draggedCard
             const propCard = this.generalStore.draggedCardObj
+            if (propCard.ability && propCard.type === 'spell' && propCard.ability.type === 'target_enemy' && this.generalStore.opponent.field.length === 0) {
+                return
+            }
             if (propCard.status !== 'inHand') {
                 return
             }
@@ -36,21 +40,16 @@ export default {
             }
 
             this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost
-            const playerHandArray = this.generalStore.player.hand
-            const playerFieldArray = this.generalStore.player.field
-            const propCardIndex = playerHandArray.indexOf(propCard)
-            playerHandArray.splice(propCardIndex, 1)
-            propCard.status = 'onField'
-            playerFieldArray.push(propCard)
-            // event.target.append(this.generalStore.draggedCard)
-            this.generalStore.draggedCard.classList.remove('in-hand')
+
             this.generalStore.draggedCard = undefined
             this.generalStore.draggedCardObj = undefined
 
+            if (propCard.type === 'unit') {
+                this.generalStore.summonUnit(propCard)
+            }
 
-
-            if (propCard && propCard.triggerTiming == 'onPlay' && propCard.ability) {
-                this.generalStore.checkAbility(propCard.ability, propCard)
+            if (propCard && propCard.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
+                this.generalStore.checkAbility(propCard.ability.name, propCard)
             }
             this.generalStore.updateDB()
         }

@@ -1,12 +1,13 @@
 <template>
-    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
-        :draggable="generalStore.player.activeTurn" @dragstart="startDrag($event)" @drop="attacked($event)" ref="card"
+    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" :draggable="!disable()"
+        @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
         :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']">
         <span class="cost stat" :class="statClass(propCard.cost, originalStats.original_cost)"> {{ propCard.cost }}
         </span>
         <span class="op stat" :class="statClass(propCard.op, originalStats.original_op)"> {{ propCard.op }} </span>
         <span class="hp stat" :class="statClass(propCard.hp, originalStats.original_hp)"> {{ propCard.hp }} </span>
-
+        <img src="../../assets/img/animations/sleep.gif" alt="" class="animation"
+            v-if="propCard.status === 'onField' && !propCard.canAttack">
     </div>
 </template>
   
@@ -39,12 +40,38 @@ export default {
     },
     methods: {
         attacked(e) {
-            if (this.isPlayerOwned) return
             const attacker = this.generalStore.draggedCardObj
-            const target = this.propCard
             const attackerProxy = this.generalStore.draggedCard
+            const target = this.propCard
             const targetProxy = e.target
-            this.generalStore.battle(attacker, target, attackerProxy, targetProxy)
+
+
+            if (this.isPlayerOwned) return
+            if (attacker.status !== 'onField') return
+            this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op, target.op)
+            // setTimeout(() => {
+            //     this.generalStore.battle(attacker, target, attackerProxy, targetProxy)
+            // }, 700)
+
+        },
+        targetted(e) {
+            const targettingProxy = this.generalStore.draggedCard
+            console.log(targettingProxy)
+            const targettingCard = this.generalStore.draggedCardObj
+            const target = this.propCard
+            const targetProxy = e.target
+            const spliceIndex = this.generalStore.player.hand.indexOf(targettingCard)
+            if (this.isPlayerOwned) return
+            if (targettingCard.type !== 'spell') return
+            this.generalStore.player.mana.current -= targettingCard.cost
+            this.generalStore.checkAbility(targettingCard.ability.name, target)
+            setTimeout(() => {
+                this.generalStore.player.hand.splice(spliceIndex, 1)
+                this.generalStore.updateBothDb()
+            }, 500)
+
+
+
         },
         statClass(currentValue, originalValue) {
             if (currentValue > originalValue) {
@@ -57,23 +84,25 @@ export default {
             }
         },
         disable() {
+            let disable = false
             if (this.generalStore.player.activeTurn === false && this.isPlayerOwned) {
-                return true
-            } else {
-                return false
+                disable = true
             }
+            if (!this.propCard.canAttack && this.propCard.status === 'onField') {
+                disable = true
+            }
+
+            return disable
         },
         startDrag(e) {
             this.generalStore.draggedCard = e.target
+            console.log(this.generalStore.draggedCard)
             this.generalStore.draggedCardObj = this.propCard
         }
     },
     watch: {
         'propCard.hp': async function (newHP, oldHP) {
-            console.log(newHP)
             if (newHP <= 0 && !this.isPlayerOwned) {
-
-
                 setTimeout(async (
                 ) => {
                     const index = this.generalStore.opponent.field.indexOf(this.propCard);
@@ -153,6 +182,16 @@ export default {
 
 .fading.fading {
     animation: fadeOut 0.6s ease forwards;
+}
+
+.animation {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    pointer-events: none;
 }
 
 @keyframes fadeOut {

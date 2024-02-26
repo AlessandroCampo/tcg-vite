@@ -44,12 +44,12 @@ export default {
 <style lang="scss" scoped>
 .hand-container {
     position: absolute;
-    width: 75%;
+    width: 42%;
     display: flex;
     flex-direction: row-reverse;
     padding-block: 0.5em;
     bottom: 1%;
-    left: 52%;
+    left: 50%;
     transform: translateX(-50%);
     justify-content: center;
 }

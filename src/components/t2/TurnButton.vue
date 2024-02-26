@@ -20,6 +20,12 @@ export default {
             if (!this.generalStore.player.activeTurn) {
                 return
             }
+            let enemyUnits = this.generalStore.opponent.field
+            enemyUnits.forEach(unit => {
+                if (!unit.canAttack) {
+                    unit.canAttack = true
+                }
+            });
             this.generalStore.player.activeTurn = !this.generalStore.player.activeTurn
             this.generalStore.opponent.activeTurn = !this.generalStore.opponent.activeTurn
             this.generalStore.opponent.mana.total++
@@ -34,20 +40,21 @@ export default {
 <style lang="scss" scoped>
 button {
     position: absolute;
-    width: 130px;
+    width: 150px;
     padding-block: 22px;
     border: 2px solid black;
     border-radius: 20px;
-    right: 12.5%;
+    right: 11.9%;
     top: 50%;
     transform: translateY(-50%);
     background-color: #e74c3c;
     color: #f0f0f0;
+    font-size: 20px;
 
 }
 
 button.active {
-    background-color: #2ecc71;
+    background-color: green;
     color: #f0f0f0;
 }
 </style>
