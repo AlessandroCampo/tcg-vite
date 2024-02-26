@@ -26,6 +26,11 @@ export const useGeneralStore = defineStore('generalStore', {
             field: [],
             commander: {},
             lp: 30,
+            lastAction: {
+                type: '',
+                card: null,
+                target: null
+            },
             mana:
             {
                 current: 1,
@@ -194,6 +199,24 @@ export const useGeneralStore = defineStore('generalStore', {
                     });
                 }
             });
+        },
+        performLastAction(action, cardID, targetID, cardObj, targetObj) {
+            if (!action) return
+
+            const card = document.getElementById(cardID)
+            const target = document.getElementById(targetID)
+
+            if (action === 'attack') {
+                this.animateAttack(card, target, cardObj.op, targetObj.op)
+            }
+        },
+        resetActionObj() {
+            this.player.lastAction = {
+                type: '',
+                card: null,
+                target: null
+            }
+            this.updateBothDb()
         }
 
     },

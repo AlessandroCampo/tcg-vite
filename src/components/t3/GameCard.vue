@@ -1,7 +1,7 @@
 <template>
     <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" :draggable="!disable()"
         @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
-        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']">
+        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="generateCardId()">
         <span class="cost stat" :class="statClass(propCard.cost, originalStats.original_cost)"> {{ propCard.cost }}
         </span>
         <span class="op stat" :class="statClass(propCard.op, originalStats.original_op)"> {{ propCard.op }} </span>
@@ -26,7 +26,7 @@ export default {
             }
         }
     },
-    props: ['propCard', 'isPlayerOwned'],
+    props: ['propCard', 'isPlayerOwned', 'propIndex'],
     mounted() {
         gsap.to(this.$refs.card, {
             width: 170 + 'px',
@@ -48,6 +48,16 @@ export default {
 
             if (this.isPlayerOwned) return
             if (attacker.status !== 'onField') return
+
+            this.generalStore.player.lastAction = {
+                card: attackerProxy.id,
+                target: targetProxy.id,
+                cardObj: attacker,
+                targetObj: target,
+                action: 'attack'
+            }
+            this.generalStore.updateBothDb()
+            this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op, target.op)
             // setTimeout(() => {
             //     this.generalStore.battle(attacker, target, attackerProxy, targetProxy)
@@ -98,6 +108,19 @@ export default {
             this.generalStore.draggedCard = e.target
             console.log(this.generalStore.draggedCard)
             this.generalStore.draggedCardObj = this.propCard
+        },
+        generateCardId() {
+            const myID = this.generalStore.player.uid
+            const oppoID = this.generalStore.opponentUid
+            const cardIndex = this.propIndex
+            const cardName = this.propCard.name
+            let ID
+            if (this.isPlayerOwned) {
+                ID = myID
+            } else {
+                ID = oppoID
+            }
+            return ID + '-' + cardName + '-' + cardIndex
         }
     },
     watch: {
@@ -109,6 +132,14 @@ export default {
                     this.generalStore.opponent.field.splice(index, 1);
                     await this.generalStore.updateOpponentDB()
                 }, 600)
+
+            }
+        },
+        'generalStore.opponent.lastAction': function (newValue, oldValue) {
+            if (newValue !== oldValue) {
+                let action = this.generalStore.opponent.lastAction
+                console.log('generalStore.opponent.lastAction changed:', newValue);
+                this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
 
             }
         }

@@ -1,6 +1,7 @@
 <template>
     <div class="hand-container">
-        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card :isPlayerOwned=true>
+        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card :isPlayerOwned=true
+            :propIndex="index">
         </gameCard>
     </div>
 </template>
