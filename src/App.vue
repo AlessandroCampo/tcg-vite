@@ -31,7 +31,6 @@ export default {
       if (user) {
         this.generalStore.user = user;
         this.generalStore.player.uid = user.uid
-        console.log(this.generalStore.player)
         await this.generalStore.updateDB()
 
 

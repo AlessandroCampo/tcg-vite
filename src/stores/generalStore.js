@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { allCards, abilities, allCommanders } from '../db.js'
 import { useFirestore, useDocument } from 'vuefire'
-import { doc, collection, setDoc } from 'firebase/firestore'
+import { doc, collection, setDoc, updateDoc } from 'firebase/firestore'
 import gsap from 'gsap'
 const db = useFirestore()
 
@@ -17,6 +17,8 @@ export const useGeneralStore = defineStore('generalStore', {
         draggedCardObj: undefined,
         clickedCard: undefined,
         clickedCardObj: undefined,
+        summonedUnitCard: undefined,
+        summonedUnitObj: undefined,
         player: {
             uid: '',
             username: '',
@@ -39,10 +41,6 @@ export const useGeneralStore = defineStore('generalStore', {
 
         },
         opponent: {},
-        enemyMana: {
-            current: 1,
-            total: 1
-        },
     }),
     getters: {
 
@@ -50,7 +48,7 @@ export const useGeneralStore = defineStore('generalStore', {
     actions: {
         firstTurn() {
             let fiftyhChance = Math.floor(Math.random() * 2)
-            console.log(fiftyhChance)
+
             if (fiftyhChance === 1 && this.isPlayerOne(this.player.uid)) {
                 this.player.activeTurn = true
                 this.opponent.activeTurn = false
@@ -58,7 +56,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 this.player.activeTurn = false
                 this.opponent.activeTurn = true
             }
-            console.log(this.player.activeTurn)
+
             this.updateDB()
             this.updateOpponentDB()
         },
@@ -69,11 +67,25 @@ export const useGeneralStore = defineStore('generalStore', {
                 return false
             }
         },
+        generateCardId(index, name) {
+            const myID = this.player.uid
+            const oppoID = this.opponentUid
+            const cardIndex = index
+            const cardName = name
+            let ID
+            if (this.isPlayerOwned) {
+                ID = myID
+            } else {
+                ID = oppoID
+            }
+            return ID + '-' + cardName + '-' + cardIndex
+        },
         generateDeck() {
             for (let i = 0;i < 4;i++) {
                 this.cards.forEach((card) => {
                     // Create a shallow copy of the card object
                     const cardCopy = { ...card };
+                    cardCopy.id = this.generateCardId(i, card.name)
                     this.player.deck.push(cardCopy);
                 });
             }
@@ -86,7 +98,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 this.player.hand.push(deck[randomIndex])
                 deck.splice(randomIndex, 1)
             }
-            console.log(this.player.hand)
+
 
         },
         assignCommander() {
@@ -109,20 +121,28 @@ export const useGeneralStore = defineStore('generalStore', {
                 this.opponentUid = 'KNOiaPNOj3V7LNq9rvH8zvtR4Hp1'
                 this.player.leader = allCommanders[1]
             }
-            await setDoc(playerRef, playerObjCopy)
-            console.log(this.player.leader)
+            await updateDoc(playerRef, playerObjCopy)
 
         },
         async updateOpponentDB() {
             const opponentRef = doc(db, 'Users', this.opponentUid);
             const opponentObjCopy = { ...this.opponent }
-            await setDoc(opponentRef, opponentObjCopy)
+            await updateDoc(opponentRef, opponentObjCopy)
         },
-        checkAbility(name, card) {
+        checkAbility(name, card, proxyID) {
+
             if (abilities.hasOwnProperty(name)) {
-                abilities[name](card);
-            } else {
-                console.error(`Ability "${name}" not found.`);
+                setTimeout(() => {
+                    abilities[name](card);
+                    const playerfield = document.querySelector('.playerfield-container')
+                    const proxy = document.querySelector('#' + proxyID)
+                    gsap.to(proxy, {
+                        filter: 'brightness(120%)',
+                        duration: 0.3,
+                        repeat: 10
+                    })
+                }, 1000)
+
             }
         },
         battle(attacker, target) {
@@ -153,6 +173,7 @@ export const useGeneralStore = defineStore('generalStore', {
             playerFieldArray.push(propCard)
         },
         animateAttack(attackingCard, targetCard, attackDmg, defDmg) {
+            console.log(targetCard)
             var attackingRect = attackingCard.getBoundingClientRect();
             var targetRect = targetCard.getBoundingClientRect();
             var deltaX = targetRect.left - attackingRect.left;
@@ -168,7 +189,10 @@ export const useGeneralStore = defineStore('generalStore', {
                 angle = 45;
             }
 
-            var stopDistance = distance - 50;
+            var stopDistance = distance + 200;
+            if (targetCard.id == 'enemy-hero-cont' || targetCard.id == 'player-hero-cont') {
+                stopDistance += 2500
+            }
 
             var normalizedDeltaX = deltaX / distance * stopDistance;
             var normalizedDeltaY = deltaY / distance * stopDistance;
@@ -177,7 +201,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 rotation: angle,
                 x: attackingRect.left + normalizedDeltaX - attackingRect.left,
                 y: attackingRect.top + normalizedDeltaY - attackingRect.top,
-                duration: 0.2,
+                duration: 0.1,
                 scale: 0.8,
                 onComplete: function () {
                     let dmgIcon = document.createElement('div')
@@ -206,8 +230,14 @@ export const useGeneralStore = defineStore('generalStore', {
         performLastAction(action, cardID, targetID, cardObj, targetObj) {
             if (!action) return
 
+            console.log(cardID, targetID)
+
             const card = document.getElementById(cardID)
             const target = document.getElementById(targetID)
+
+            console.log(card)
+            console.log(target)
+
 
             if (action === 'attack') {
                 this.animateAttack(card, target, cardObj?.op, targetObj?.op)

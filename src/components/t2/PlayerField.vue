@@ -1,7 +1,8 @@
 <template>
     <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)"
         @drop="playCard($event)">
-        <GameCard v-for="(card, index) in generalStore.player.field" :key="index" :propCard="card" :isPlayerOwned="true">
+        <GameCard v-for="(card, index) in generalStore.player.field" :key="index" :propCard="card" :isPlayerOwned="true"
+            :propIndex="index">
         </GameCard>
     </div>
 </template>
@@ -11,6 +12,7 @@ import GameCard from '../t3/GameCard.vue'
 import { useGeneralStore } from '../../stores/generalStore'
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, setDoc } from 'firebase/firestore'
+import gsap from 'gsap'
 const db = useFirestore()
 const playerRef = doc(db, 'Users', 'Player1');
 const player_db = useDocument(doc(collection(db, 'Users'), 'Player1'));
@@ -25,9 +27,10 @@ export default {
         allowDrop(event) {
             event.preventDefault();
         },
-        async playCard(event) {
+        playCard(event) {
+            //FIXME - draggedCad isnt the expectedone
+            const propProxy = this.generalStore.draggedCard.id
 
-            const propProxy = this.generalStore.draggedCard
             const propCard = this.generalStore.draggedCardObj
             if (propCard.ability && propCard.type === 'spell' && propCard.ability.type === 'target_enemy' && this.generalStore.opponent.field.length === 0) {
                 return
@@ -40,11 +43,10 @@ export default {
             }
 
             this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost
-            propProxy.classList.remove('in-hand')
-            console.log(propProxy.classList)
-
             this.generalStore.draggedCard = undefined
             this.generalStore.draggedCardObj = undefined
+
+
 
             if (propCard.type === 'unit') {
 
@@ -52,7 +54,8 @@ export default {
             }
 
             if (propCard && propCard.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
-                this.generalStore.checkAbility(propCard.ability.name, propCard)
+
+                // this.generalStore.checkAbility(propCard.ability.name, propCard, propProxy)
             }
             this.generalStore.updateDB()
         }
@@ -70,6 +73,7 @@ export default {
     bottom: 25%;
     left: 50%;
     transform: translateX(-50%);
+    perspective: 1000px;
 
     .card-base {
         z-index: 1;

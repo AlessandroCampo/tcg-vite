@@ -31,7 +31,7 @@ export default {
     watch: {
         'generalStore.player.activeTurn': async function (newTurn, oldTurn) {
             if (newTurn) {
-                console.log('turn change')
+
                 this.generalStore.drawOne()
 
             }

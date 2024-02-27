@@ -68,7 +68,10 @@ let knight = new unit({
     name: 'knight',
     op: 1,
     hp: 3,
-    ability: null,
+    ability: {
+        name: 'increaseOp',
+        type: 'self_buff'
+    },
     imgPath: './src/assets/img/cards/knight.png',
     cost: 1,
     triggerTiming: 'onPlay',
@@ -83,7 +86,10 @@ let ogre = new unit({
     hp: 1,
     imgPath: './src/assets/img/cards/ogre.png',
     cost: 1,
-    ability: null,
+    ability: {
+        name: 'increaseOp',
+        type: 'self_buff'
+    },
     triggerTiming: null,
     status: 'none',
     canAttack: false,

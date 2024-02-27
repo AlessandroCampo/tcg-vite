@@ -1,7 +1,7 @@
 <template>
     <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" :draggable="!disable()"
         @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
-        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="generateCardId()">
+        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
         <span class="cost stat" :class="statClass(propCard.cost, originalStats.original_cost)"> {{ propCard.cost }}
         </span>
         <span class="op stat" :class="statClass(propCard.op, originalStats.original_op)"> {{ propCard.op }} </span>
@@ -34,6 +34,7 @@ export default {
             duration: 1,
         })
 
+
         this.originalStats.original_op = this.propCard.op
         this.originalStats.original_hp = this.propCard.hp
         this.originalStats.original_cost = this.propCard.cost
@@ -45,21 +46,21 @@ export default {
             const target = this.propCard
             const targetProxy = e.target
 
+            console.log(this.propCard)
+
+
 
             if (this.isPlayerOwned) return
             if (attacker.status !== 'onField') return
-
             this.generalStore.player.lastAction = {
-                card: attackerProxy.id,
-                target: targetProxy.id,
+                card: attacker.id,
+                target: target.id,
                 cardObj: attacker,
                 targetObj: target,
                 action: 'attack'
             }
             this.generalStore.updateBothDb()
-
             this.generalStore.battle(attacker, target)
-
             this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op, target.op)
 
@@ -67,7 +68,6 @@ export default {
         },
         targetted(e) {
             const targettingProxy = this.generalStore.draggedCard
-            console.log(targettingProxy)
             const targettingCard = this.generalStore.draggedCardObj
             const target = this.propCard
             const targetProxy = e.target
@@ -106,22 +106,8 @@ export default {
             return disable
         },
         startDrag(e) {
-            this.generalStore.draggedCard = e.target
-            console.log(this.generalStore.draggedCard)
+            this.generalStore.draggedCard = this.$refs.card
             this.generalStore.draggedCardObj = this.propCard
-        },
-        generateCardId() {
-            const myID = this.generalStore.player.uid
-            const oppoID = this.generalStore.opponentUid
-            const cardIndex = this.propIndex
-            const cardName = this.propCard.name
-            let ID
-            if (this.isPlayerOwned) {
-                ID = myID
-            } else {
-                ID = oppoID
-            }
-            return ID + '-' + cardName + '-' + cardIndex
         }
     },
     watch: {
@@ -132,12 +118,13 @@ export default {
                     const index = this.generalStore.opponent.field.indexOf(this.propCard);
                     this.generalStore.opponent.field.splice(index, 1);
                     await this.generalStore.updateOpponentDB()
-                }, 600)
+                }, 1500)
 
             }
         },
         'generalStore.opponent.lastAction': function (newValue, oldValue) {
             if (newValue !== oldValue) {
+                console.log(newValue)
                 let action = this.generalStore.opponent.lastAction
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
 
@@ -155,10 +142,13 @@ export default {
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
     z-index: 10;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
 
     &:hover {
-        scale: 1.8;
+        scale: 1.4;
         transform: translateY(-30%);
         border: 2px solid aqua inset;
         box-shadow: 5px 10px 20px aqua inset;
@@ -216,7 +206,7 @@ export default {
 }
 
 .fading.fading {
-    animation: fadeOut 0.6s ease forwards;
+    animation: fadeOut 1.5s ease-in forwards;
 }
 
 .animation {
