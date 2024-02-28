@@ -35,14 +35,14 @@ export default {
             if (propCard.ability && propCard.type === 'spell' && propCard.ability.type === 'target_enemy' && this.generalStore.opponent.field.length === 0) {
                 return
             }
-            if (propCard.status !== 'inHand') {
+            if (propCard.status !== 'inHand' || this.generalStore.selecting) {
                 return
             }
-            if (propCard.cost > this.generalStore.player.mana.current) {
+            if (propCard.cost.current > this.generalStore.player.mana.current) {
                 return
             }
 
-            this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost
+            this.generalStore.player.mana.current = this.generalStore.player.mana.current - propCard.cost.current
             this.generalStore.draggedCard = undefined
             this.generalStore.draggedCardObj = undefined
 
@@ -54,8 +54,12 @@ export default {
             }
 
             if (propCard && propCard.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
+                this.generalStore.checkAbility(propCard.ability.name, propCard)
+                propCard.canAttack = true
+                if (propCard.ability.type === 'target' && this.generalStore.opponent.field.length == 0) {
+                    propCard.canAttack = false
+                }
 
-                // this.generalStore.checkAbility(propCard.ability.name, propCard, propProxy)
             }
             this.generalStore.updateDB()
         }

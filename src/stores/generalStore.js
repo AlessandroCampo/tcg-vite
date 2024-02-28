@@ -1,9 +1,14 @@
 import { defineStore } from 'pinia'
-import { allCards, abilities, allCommanders } from '../db.js'
+import { reactive } from 'vue';
+import { allCards, allCommanders } from '../db.js'
+import { abilities } from './abilities.js';
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, setDoc, updateDoc } from 'firebase/firestore'
 import gsap from 'gsap'
+
+
 const db = useFirestore()
+
 
 
 // const player_db = useDocument(doc(collection(db, 'Users'), 'Player1'));
@@ -13,6 +18,8 @@ export const useGeneralStore = defineStore('generalStore', {
         cards: [...allCards.map(card => ({ ...card }))],
         user: null,
         opponentUid: undefined,
+        dummyProperty: 0,
+        freeze: false,
         draggedCard: undefined,
         draggedCardObj: undefined,
         clickedCard: undefined,
@@ -40,7 +47,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
 
         },
-        opponent: {},
+        opponent: {}
     }),
     getters: {
 
@@ -83,13 +90,12 @@ export const useGeneralStore = defineStore('generalStore', {
         generateDeck() {
             for (let i = 0;i < 4;i++) {
                 this.cards.forEach((card) => {
-                    // Create a shallow copy of the card object
                     const cardCopy = { ...card };
-                    cardCopy.id = this.generateCardId(i, card.name)
-                    this.player.deck.push(cardCopy);
+                    const reactiveCard = reactive(cardCopy);
+                    reactiveCard.id = this.generateCardId(i, card.name);
+                    this.player.deck.push(reactiveCard);
                 });
             }
-
         },
         generateFirstHand(deck) {
             for (let i = 0;i < 5;i++) {
@@ -129,40 +135,88 @@ export const useGeneralStore = defineStore('generalStore', {
             const opponentObjCopy = { ...this.opponent }
             await updateDoc(opponentRef, opponentObjCopy)
         },
-        checkAbility(name, card, proxyID) {
-
+        checkAbility(name, card) {
+            if (card.ability.type === 'target' && this.opponent.field.length == 0) {
+                return
+            } else {
+                this.freeze = true
+            }
             if (abilities.hasOwnProperty(name)) {
                 setTimeout(() => {
-                    abilities[name](card);
-                    const playerfield = document.querySelector('.playerfield-container')
-                    const proxy = document.querySelector('#' + proxyID)
-                    gsap.to(proxy, {
-                        filter: 'brightness(120%)',
-                        duration: 0.3,
-                        repeat: 10
-                    })
-                }, 1000)
-
+                    this.player.field.forEach((unit) => {
+                        if (unit.id == card.id) {
+                            const cardElement = document.getElementById(unit.id);
+                            this.animateAbility(cardElement, unit)
+                            this.sendActionObj(unit, unit, 'effectTrigger')
+                            this.resetActionObj()
+                        }
+                    });
+                }, 700);
             }
+        },
+        animateAbility(cardElement, unit) {
+            let effect = new Image()
+            effect.src = "./src/assets/img/animations/effect.gif"
+            effect.className = "icon"
+            cardElement.append(effect)
+            gsap.timeline()
+                .to(cardElement, {
+                    y: -20,
+                    scale: 1.2,
+
+                    opacity: 0.8,
+                    duration: 0.5,
+                    ease: 'power1.inOut'
+                })
+                .to(cardElement, {
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                    duration: 0.5,
+                    onComplete: () => {
+                        effect.remove();
+                        this.resolveAbility(unit)
+                    }
+                });
+        },
+        resolveAbility(unit) {
+            if (unit.status == 'onField' && unit.triggerTiming == 'onPlay') {
+                this.player.field.forEach((card) => {
+                    if (card.id === unit.id) {
+                        card.canAttack = false;
+                        if (card.ability.type == 'self_buff') {
+                            abilities[card.ability.name](card);
+                        } else if (card.ability.type == 'target_nerf') {
+
+                        } else {
+                            abilities[card.ability.name](card);
+                        }
+
+                        this.updateBothDb()
+                    }
+                });
+            }
+
         },
         battle(attacker, target) {
 
             attacker.canAttack = false
-            attacker.hp -= target.op;
-            target.hp -= attacker.op;
+            attacker.hp.current -= target.op.current;
+            target.hp.current -= attacker.op.current;
 
             this.updateBothDb()
         },
         drawOne() {
             let randomIndex = Math.floor(Math.random() * this.player.deck.length)
             this.player.deck[randomIndex].status = 'inHand'
-            this.player.hand.unshift(this.player.deck[randomIndex])
+            this.player.hand.push(this.player.deck[randomIndex])
             this.player.deck.splice(randomIndex, 1)
             this.updateBothDb()
         },
         updateBothDb() {
             this.updateDB()
             this.updateOpponentDB()
+            console.log('updated')
         },
         summonUnit(propCard) {
             const playerFieldArray = this.player.field
@@ -229,19 +283,24 @@ export const useGeneralStore = defineStore('generalStore', {
         },
         performLastAction(action, cardID, targetID, cardObj, targetObj) {
             if (!action) return
-
-            console.log(cardID, targetID)
-
             const card = document.getElementById(cardID)
             const target = document.getElementById(targetID)
-
-            console.log(card)
-            console.log(target)
-
-
             if (action === 'attack') {
-                this.animateAttack(card, target, cardObj?.op, targetObj?.op)
+                this.animateAttack(card, target, cardObj?.op.current, targetObj?.op.current)
             }
+            if (action == 'effectTrigger') {
+                this.animateAbility(target, targetObj)
+            }
+        },
+        sendActionObj(attacker, target, action) {
+            this.player.lastAction = {
+                card: attacker.id,
+                target: target.id,
+                cardObj: attacker,
+                targetObj: target,
+                action: action
+            }
+            this.updateBothDb()
         },
         resetActionObj() {
             this.player.lastAction = {
@@ -250,7 +309,9 @@ export const useGeneralStore = defineStore('generalStore', {
                 target: null
             }
             this.updateBothDb()
-        }
+        },
+
 
     },
+
 })

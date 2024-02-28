@@ -1,8 +1,10 @@
 <template>
     <div class="hand-container">
-        <gameCard v-for="(card, index) in generalStore.player?.hand" :key="index" :propCard=card :isPlayerOwned=true
+
+        <gameCard v-for="(card, index) in generalStore.player.hand" :key="index" :propCard="card" :isPlayerOwned="true"
             :propIndex="index">
         </gameCard>
+
     </div>
 </template>
 
@@ -22,12 +24,18 @@ export default {
         };
     },
     components: { GameCard },
+    computed: {
+
+    },
+
     async created() {
 
         this.generalStore.generateDeck()
         this.generalStore.generateFirstHand(this.generalStore.player.deck)
         await this.generalStore.updateDB()
     },
+
+
     watch: {
         'generalStore.player.activeTurn': async function (newTurn, oldTurn) {
             if (newTurn) {
@@ -54,5 +62,6 @@ export default {
     transform: translateX(-50%);
     justify-content: center;
     z-index: 4;
+
 }
 </style>

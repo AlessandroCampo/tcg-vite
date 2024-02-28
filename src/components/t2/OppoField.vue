@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)">
+        <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)" id="oppoField">
             <GameCardVue v-for="(card, index) in generalStore.opponent.field" :key="index" :propCard="card"
                 :isPlayerOwned="false"></GameCardVue>
         </div>

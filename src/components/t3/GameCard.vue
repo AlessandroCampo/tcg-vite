@@ -1,11 +1,14 @@
 <template>
-    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" :draggable="!disable()"
-        @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
-        :class="[propCard.hp <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
-        <span class="cost stat" :class="statClass(propCard.cost, originalStats.original_cost)"> {{ propCard.cost }}
+    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
+        :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
+        :class="[propCard.hp.current <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
+        <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{ propCard.cost.current
+        }}
         </span>
-        <span class="op stat" :class="statClass(propCard.op, originalStats.original_op)"> {{ propCard.op }} </span>
-        <span class="hp stat" :class="statClass(propCard.hp, originalStats.original_hp)"> {{ propCard.hp }} </span>
+        <span class="op stat" :class="statClass(propCard.op.current, propCard.op.original)"> {{ propCard.op.current }}
+        </span>
+        <span class="hp stat" :class="statClass(propCard.hp.current, propCard.hp.original)"> {{ propCard.hp.current }}
+        </span>
         <img src="../../assets/img/animations/sleep.gif" alt="" class="animation"
             v-if="propCard.status === 'onField' && !propCard.canAttack">
     </div>
@@ -28,16 +31,12 @@ export default {
     },
     props: ['propCard', 'isPlayerOwned', 'propIndex'],
     mounted() {
-        gsap.to(this.$refs.card, {
+        gsap.to(document.getElementById(this.propCard.id), {
             width: 170 + 'px',
             height: 250 + 'px',
             duration: 1,
         })
 
-
-        this.originalStats.original_op = this.propCard.op
-        this.originalStats.original_hp = this.propCard.hp
-        this.originalStats.original_cost = this.propCard.cost
     },
     methods: {
         attacked(e) {
@@ -52,17 +51,11 @@ export default {
 
             if (this.isPlayerOwned) return
             if (attacker.status !== 'onField') return
-            this.generalStore.player.lastAction = {
-                card: attacker.id,
-                target: target.id,
-                cardObj: attacker,
-                targetObj: target,
-                action: 'attack'
-            }
-            this.generalStore.updateBothDb()
+
+            this.generalStore.sendActionObj(attacker, target, 'attack')
             this.generalStore.battle(attacker, target)
             this.generalStore.resetActionObj()
-            this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op, target.op)
+            this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op.current, target.op.current)
 
 
         },
@@ -74,7 +67,7 @@ export default {
             const spliceIndex = this.generalStore.player.hand.indexOf(targettingCard)
             if (this.isPlayerOwned) return
             if (targettingCard.type !== 'spell') return
-            this.generalStore.player.mana.current -= targettingCard.cost
+            this.generalStore.player.mana.current -= targettingCard.cost.current
             this.generalStore.checkAbility(targettingCard.ability.name, target)
             setTimeout(() => {
                 this.generalStore.player.hand.splice(spliceIndex, 1)
@@ -96,6 +89,9 @@ export default {
         },
         disable() {
             let disable = false
+            if (this.generalStore.freeze && this.isPlayerOwned) {
+                disable = true
+            }
             if (this.generalStore.player.activeTurn === false && this.isPlayerOwned) {
                 disable = true
             }
@@ -105,13 +101,31 @@ export default {
 
             return disable
         },
+        isDraggable() {
+            let draggable = true
+
+            if (this.generalStore.freeze) {
+                draggable = false
+            }
+
+            if (!this.isPlayerOwned) {
+                draggable = false
+            }
+            if (this.generalStore.player.activeTurn === false && this.isPlayerOwned) {
+                draggable = false
+            }
+            if (!this.propCard.canAttack && this.propCard.status === 'onField') {
+                draggable = false
+            }
+            return draggable
+        },
         startDrag(e) {
             this.generalStore.draggedCard = this.$refs.card
             this.generalStore.draggedCardObj = this.propCard
         }
     },
     watch: {
-        'propCard.hp': async function (newHP, oldHP) {
+        'propCard.hp.current': async function (newHP, oldHP) {
             if (newHP <= 0 && !this.isPlayerOwned) {
                 setTimeout(async (
                 ) => {
@@ -124,7 +138,6 @@ export default {
         },
         'generalStore.opponent.lastAction': function (newValue, oldValue) {
             if (newValue !== oldValue) {
-                console.log(newValue)
                 let action = this.generalStore.opponent.lastAction
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
 
@@ -145,7 +158,7 @@ export default {
     box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
     z-index: 10;
     transform-style: preserve-3d;
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease, opacity 1.2s ease;
 
     &:hover {
         scale: 1.4;

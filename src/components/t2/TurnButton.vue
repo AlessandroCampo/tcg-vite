@@ -17,7 +17,7 @@ export default {
     },
     methods: {
         changeTurn() {
-            if (!this.generalStore.player.activeTurn) {
+            if (!this.generalStore.player.activeTurn || this.generalStore.freeze) {
                 return
             }
             let enemyUnits = this.generalStore.opponent.field

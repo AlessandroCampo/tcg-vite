@@ -1,7 +1,7 @@
 
 <template>
   <img src="../src/assets/img/loading.gif" alt="" v-show="loading" id="loading_screen">
-  <LoginScreen v-if="!generalStore.user"></LoginScreen>
+  <LoginScreen v-if="!generalStore.user && loading"></LoginScreen>
   <GameBattlefield v-else></GameBattlefield>
 </template>
 

@@ -21,7 +21,7 @@ export default {
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;
-            const damage = attacker.op;
+            const damage = attacker.op.current;
             const interval = 150; // Interval between LP updates in milliseconds
             const iterations = damage; // Number of LP updates
             attacker.canAttack = false

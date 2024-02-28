@@ -31,3 +31,4 @@ app.use(VueFire, {
 })
 
 app.mount('#app')
+export { app }
