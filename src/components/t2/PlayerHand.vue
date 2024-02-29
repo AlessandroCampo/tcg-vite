@@ -51,7 +51,7 @@ export default {
 <style lang="scss" scoped>
 .hand-container {
     position: absolute;
-    width: 42%;
+    width: 52%;
     display: flex;
     flex-direction: row-reverse;
     padding-block: 0.5em;

@@ -1,13 +1,15 @@
 <template>
     <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
         :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
-        :class="[propCard.hp.current <= 0 ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
+        :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
         <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{ propCard.cost.current
         }}
         </span>
-        <span class="op stat" :class="statClass(propCard.op.current, propCard.op.original)"> {{ propCard.op.current }}
+        <span class="op stat" :class="statClass(propCard?.op.current, propCard?.op.original)"
+            v-if="propCard.type == 'unit'"> {{ propCard?.op.current }}
         </span>
-        <span class="hp stat" :class="statClass(propCard.hp.current, propCard.hp.original)"> {{ propCard.hp.current }}
+        <span class="hp stat" :class="statClass(propCard?.hp.current, propCard?.hp.original)"
+            v-if="propCard.type == 'unit'"> {{ propCard?.hp.current }}
         </span>
         <img src="../../assets/img/animations/sleep.gif" alt="" class="animation"
             v-if="propCard.status === 'onField' && !propCard.canAttack">
@@ -131,6 +133,7 @@ export default {
         'propCard.hp.current': async function (newHP, oldHP) {
             if (newHP <= 0 && !this.isPlayerOwned) {
                 this.propCard.killed = true
+                this.generalStore.updateOpponentDB()
                 console.log(this.propCard.killed)
                 setTimeout(async (
                 ) => {

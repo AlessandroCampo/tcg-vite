@@ -1,5 +1,10 @@
 <template>
     <div id="battlefield-container">
+        <transition name="fade">
+            <div v-if="generalStore.player.activatedCard || generalStore.opponent.activatedCard">
+                <ProxyBig :propCard="generalStore.player.activatedCard || generalStore.opponent.activatedCard"></ProxyBig>
+            </div>
+        </transition>
         <PlayerHand></PlayerHand>
         <PlayerField></PlayerField>
         <OppoField></OppoField>
@@ -29,6 +34,7 @@ import DeckProxy from '../t2/DeckProxy.vue';
 import LpCounter from '../t2/LpCounter.vue';
 import PlayerCommander from '../t2/PlayerCommander.vue';
 import OppoCommander from '../t2/OppoCommander.vue';
+import ProxyBig from '../t3/ProxyBig.vue';
 import { useGeneralStore } from '../../stores/generalStore'
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, setDoc } from 'firebase/firestore'
@@ -42,7 +48,7 @@ export default {
             generalStore: useGeneralStore()
         }
     },
-    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander },
+    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander, ProxyBig },
     async created() {
     },
     computed: {
@@ -65,5 +71,15 @@ export default {
     background-size: cover;
     height: 100vh;
     width: 100vw;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 1s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>

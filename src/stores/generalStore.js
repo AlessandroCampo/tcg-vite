@@ -30,6 +30,7 @@ export const useGeneralStore = defineStore('generalStore', {
             uid: '',
             username: '',
             activeTurn: true,
+            activatedCard: null,
             deck: [],
             hand: [],
             field: [],
@@ -55,23 +56,22 @@ export const useGeneralStore = defineStore('generalStore', {
     actions: {
         generateChoice(targets, condition, selectionCallback) {
             let selectedCard;
+            console.log(condition)
             targets.forEach((unit) => {
-                if (condition(unit)) { // Check if the unit meets the condition
-                    // Highlight the unit as a possible target
+                if (condition(unit)) { // 
                     const proxy = document.getElementById(unit.id);
                     proxy.style.cursor = 'pointer';
                     this.$state.freeze = true;
 
-                    // Cancel any existing tweens on the proxy
+
                     gsap.killTweensOf(proxy);
 
-                    // Reset brightness and scale to initial values
+
                     gsap.set(proxy, {
                         scale: 1,
                         filter: "brightness(1)"
                     });
 
-                    // Apply new tween
                     gsap.to(proxy, {
                         scale: 1.1,
                         filter: "brightness(1.2)",
@@ -156,6 +156,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
 
 
+
         },
         assignCommander() {
             if (this.isPlayerOne(this.player.uid)) {
@@ -186,27 +187,40 @@ export const useGeneralStore = defineStore('generalStore', {
             await updateDoc(opponentRef, opponentObjCopy)
         },
         checkAbility(name, card) {
-            if (card.ability.type === 'target' && this.opponent.field.length == 0) {
+            if (card.ability.target && this.opponent.field.length == 0) {
+                if (card.type == 'spell') {
+                    this.player.activatedCard = null
+                    this.updateBothDb()
+                }
                 return
             } else {
                 this.freeze = true
             }
             if (abilities.hasOwnProperty(name)) {
-                setTimeout(() => {
-                    this.player.field.forEach((unit) => {
-                        if (unit.id == card.id) {
-                            const playerField = document.getElementById('player-field')
-                            // const cardElement = playerField.querySelector('#' + unit.id);
-                            console.log(card.id)
-                            const cardElement = document.getElementById(unit.id)
-                            console.log(unit)
+                if (card.type == 'unit') {
+                    setTimeout(() => {
+                        this.player.field.forEach((unit) => {
+                            if (unit.id == card.id) {
+                                const playerField = document.getElementById('player-field')
+                                // const cardElement = playerField.querySelector('#' + unit.id);
+                                console.log(card.id)
+                                const cardElement = document.getElementById(unit.id)
+                                console.log(unit)
 
-                            this.animateAbility(cardElement, unit)
-                            this.sendActionObj(unit, unit, 'effectTrigger')
-                            this.resetActionObj()
-                        }
-                    });
-                }, 700);
+                                this.animateAbility(cardElement, unit)
+                                this.sendActionObj(unit, unit, 'effectTrigger')
+                                this.resetActionObj()
+                            }
+                        });
+                    }, 700);
+                } else if (card.type == 'spell') {
+                    console.log('spell activated')
+                    this.player.activatedCard = card
+                    this.updateBothDb()
+                    setTimeout(() => { this.resolveAbility(card) }, 500)
+
+                }
+
             }
         },
         animateAbility(cardElement, unit) {
@@ -235,15 +249,18 @@ export const useGeneralStore = defineStore('generalStore', {
                     }
                 });
         },
-        resolveAbility(unit) {
-            if (unit.status == 'onField' && unit.ability.triggerTiming == 'onPlay') {
+        resolveAbility(activated) {
+            if (activated.status == 'onField' && activated.ability.triggerTiming == 'onPlay' && activated.type == 'unit') {
                 this.player.field.forEach((card) => {
-                    if (card.id === unit.id) {
+                    if (card.id === activated.id) {
                         card.canAttack = false;
                         abilities[card.ability.effect](card);
                         this.updateBothDb()
                     }
                 });
+            } else if (activated.type == 'spell') {
+                abilities[activated.ability.effect](activated);
+                this.updateBothDb()
             }
 
         },
@@ -273,6 +290,11 @@ export const useGeneralStore = defineStore('generalStore', {
             playerHandArray.splice(propCardIndex, 1)
             propCard.status = 'onField'
             playerFieldArray.push(propCard)
+        },
+        playSpell(propCard) {
+            const playerHandArray = this.player.hand
+            const propCardIndex = playerHandArray.indexOf(propCard)
+            playerHandArray.splice(propCardIndex, 1)
         },
         animateAttack(attackingCard, targetCard, attackDmg, defDmg) {
             var attackingRect = attackingCard.getBoundingClientRect();
@@ -357,6 +379,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
             this.updateBothDb()
         },
+
 
 
 

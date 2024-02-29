@@ -148,7 +148,7 @@ let reaper = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null },
+    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null, target: true },
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -180,15 +180,26 @@ let skeleton = new unit({
 
 //*** CARDS [SPELLS] */
 
-// let inner_fear = new gameCard({
-//     name: 'Inner Fear',
-//     imgPath: './src/assets/img/cards/inner_fear.png',
-//     cost: 1,
-//     ability: { name: 'reduceHpBy2', type: 'target_enemy' },
-//     type: 'spell'
-// })
+let inner_fear = new gameCard({
+    name: 'Inner Fear',
+    imgPath: './src/assets/img/cards/inner_fear.png',
+    cost: 1,
+    ability: { effect: 'modifyStat', amount: 2, selfTarget: false, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null, condition: null, target: true },
+    type: 'spell'
+})
 
-export const allCards = [knight, sorceress, ogre]
+let pot_of_malice = new gameCard({
+    name: 'Pot of Malice',
+    imgPath: './src/assets/img/cards/pot_of_malice.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: { effect: 'draw', amount: 2 },
+    type: 'spell'
+})
+
+export const allCards = [reaper, inner_fear, pot_of_malice]
 export const allCommanders = [black, green]
 
 

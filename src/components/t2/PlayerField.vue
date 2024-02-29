@@ -45,8 +45,9 @@ export default {
 
 
             if (propCard.type === 'unit') {
-
                 this.generalStore.summonUnit(propCard)
+            } else if (propCard.type === 'spell') {
+                this.generalStore.playSpell(propCard)
             }
 
             const propProxy = document.getElementById(propCard.id)
@@ -58,6 +59,9 @@ export default {
                     propCard.canAttack = false
                 }
 
+            } else if (propCard && propCard.ability && propCard.type == 'spell') {
+                console.log('spell plyed')
+                this.generalStore.checkAbility(propCard.ability.effect, propCard)
             }
             this.generalStore.updateDB()
         }
