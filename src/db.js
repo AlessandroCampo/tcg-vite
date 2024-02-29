@@ -9,24 +9,25 @@
 
 
 class gameCard {
-    constructor({ name, ability, imgPath, cost, triggerTiming, type }) {
+    constructor({ name, ability, imgPath, cost, type }) {
         this.name = name
         this.ability = ability
         this.imgPath = imgPath
         this.cost = cost
-        this.triggerTiming = triggerTiming
         this.type = type
+
 
     }
 }
 
 class unit extends gameCard {
-    constructor({ name, ability, imgPath, cost, triggerTiming, type, op, hp, canAttack, status }) {
-        super({ name, ability, imgPath, cost, triggerTiming, type });
+    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed }) {
+        super({ name, ability, imgPath, cost, type });
         this.op = op;
         this.hp = hp;
         this.canAttack = canAttack;
         this.status = status;
+        this.killed = killed
     }
 }
 
@@ -53,28 +54,17 @@ let green = {
 
 let wolf = new unit({
     name: 'wolf',
-    op: {
-        original: 2,
-        current: 2
-    },
-    hp: {
-        original: 1,
-        current: 1
-    },
+    op: { original: 2, current: 2 },
+    hp: { original: 1, current: 1 },
     imgPath: './src/assets/img/cards/wolf.png',
-    cost: {
-        original: 1,
-        current: 1
-    },
-    ability: {
-        name: 'targetKillCost2OrLess',
-        type: 'target'
-    },
-    triggerTiming: 'onPlay',
+    cost: { original: 1, current: 1 },
+    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null },
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 });
+
 
 
 let knight = new unit({
@@ -87,19 +77,16 @@ let knight = new unit({
         original: 3,
         current: 3
     },
-    ability: {
-        name: 'targetKillCost2OrLess',
-        type: 'target'
-    },
+    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: true, targetStat: 'hp', cost: null },
     imgPath: './src/assets/img/cards/knight.png',
     cost: {
         original: 1,
         current: 1
     },
-    triggerTiming: 'onPlay',
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 })
 
 let ogre = new unit({
@@ -109,22 +96,19 @@ let ogre = new unit({
         current: 4
     },
     hp: {
-        original: 1,
-        current: 1
+        original: 2,
+        current: 2
     },
     imgPath: './src/assets/img/cards/ogre.png',
     cost: {
         original: 1,
         current: 1
     },
-    ability: {
-        name: 'targetKillCost2OrLess',
-        type: 'target'
-    },
-    triggerTiming: 'onPlay',
+    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null },
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 });
 
 let sorceress = new unit({
@@ -142,14 +126,11 @@ let sorceress = new unit({
         original: 1,
         current: 1
     },
-    ability: {
-        name: 'pay2Discard1',
-        type: 'discard'
-    },
-    triggerTiming: 'onPlay',
+    ability: { effect: 'discard', condition: null, triggerTiming: 'onPlay', cost: { from: 'hp', amount: 2 }, amount: 1 },
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 });
 
 let reaper = new unit({
@@ -167,14 +148,11 @@ let reaper = new unit({
         original: 1,
         current: 1
     },
-    ability: {
-        name: 'targetKillCost2OrLess',
-        type: 'target'
-    },
-    triggerTiming: 'onPlay',
+    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null },
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 });
 
 let skeleton = new unit({
@@ -192,26 +170,25 @@ let skeleton = new unit({
         original: 1,
         current: 1
     },
-    ability: null,
-    triggerTiming: null,
+    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null },
     status: 'none',
     canAttack: false,
-    type: 'unit'
+    type: 'unit',
+    killed: false
 });
 
 
 //*** CARDS [SPELLS] */
 
-let inner_fear = new gameCard({
-    name: 'Inner Fear',
-    imgPath: './src/assets/img/cards/inner_fear.png',
-    cost: 1,
-    ability: { name: 'reduceHpBy2', type: 'target_enemy' },
-    triggerTiming: null,
-    type: 'spell'
-})
+// let inner_fear = new gameCard({
+//     name: 'Inner Fear',
+//     imgPath: './src/assets/img/cards/inner_fear.png',
+//     cost: 1,
+//     ability: { name: 'reduceHpBy2', type: 'target_enemy' },
+//     type: 'spell'
+// })
 
-export const allCards = [knight, reaper, ogre]
+export const allCards = [knight, sorceress, ogre]
 export const allCommanders = [black, green]
 
 

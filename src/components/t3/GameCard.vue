@@ -31,11 +31,13 @@ export default {
     },
     props: ['propCard', 'isPlayerOwned', 'propIndex'],
     mounted() {
-        gsap.to(document.getElementById(this.propCard.id), {
-            width: 170 + 'px',
-            height: 250 + 'px',
-            duration: 1,
-        })
+        this.$nextTick(() => {
+            gsap.to(this.$el, {
+                width: '170px',
+                height: '250px',
+                duration: 1,
+            });
+        });
 
     },
     methods: {
@@ -120,13 +122,16 @@ export default {
             return draggable
         },
         startDrag(e) {
-            this.generalStore.draggedCard = this.$refs.card
-            this.generalStore.draggedCardObj = this.propCard
+            this.generalStore.draggedCard = this.$el;
+            this.generalStore.draggedCardObj = this.propCard;
         }
+
     },
     watch: {
         'propCard.hp.current': async function (newHP, oldHP) {
             if (newHP <= 0 && !this.isPlayerOwned) {
+                this.propCard.killed = true
+                console.log(this.propCard.killed)
                 setTimeout(async (
                 ) => {
                     const index = this.generalStore.opponent.field.indexOf(this.propCard);
@@ -218,10 +223,6 @@ export default {
     color: green;
 }
 
-.fading.fading {
-    animation: fadeOut 1.5s ease-in forwards;
-}
-
 .animation {
     position: absolute;
     z-index: 100;
@@ -231,6 +232,12 @@ export default {
     width: 50%;
     pointer-events: none;
 }
+
+.fading {
+    animation: fadeOut 1.5s ease-in forwards;
+}
+
+
 
 @keyframes fadeOut {
     from {

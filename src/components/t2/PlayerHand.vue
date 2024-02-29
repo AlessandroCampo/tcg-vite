@@ -1,11 +1,9 @@
 <template>
-    <div class="hand-container">
-
-        <gameCard v-for="(card, index) in generalStore.player.hand" :key="index" :propCard="card" :isPlayerOwned="true"
-            :propIndex="index">
+    <transition-group name="fade" class="hand-container" tag="div">
+        <gameCard v-for="(card, index) in generalStore.player.hand" :key="'card_' + card.id" :propCard="card"
+            :isPlayerOwned="true" :propIndex="index">
         </gameCard>
-
-    </div>
+    </transition-group>
 </template>
 
 <script>
@@ -63,5 +61,17 @@ export default {
     justify-content: center;
     z-index: 4;
 
+}
+
+
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.6s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>

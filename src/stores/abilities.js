@@ -4,67 +4,49 @@ import gsap from 'gsap'
 // const generalStore = useGeneralStore()
 
 export const abilities = {
-    increaseOp: (card) => {
-        card.op.current++;
+    modifyStat(card) {
+        let ability = card.ability;
+        if (card.ability.cost) this.checkCost(card.ability.cost);
+        let target;
+        if (ability.selfTarget) {
+            target = card;
+        }
+        if (ability.buff) {
+            target[ability.targetStat].current += ability.amount;
+        } else {
+            target[ability.targetStat].current -= ability.amount;
+        }
+        useGeneralStore().$state.freeze = false;
     },
-    reduceHpBy2: (target) => {
-        target.hp.current -= 2;
+    discard(card) {
+        if (card.ability.cost) this.checkCost(card.ability.cost);
+        let oppoHand = useGeneralStore().$state.opponent.hand;
+        for (let i = 0;i < card.ability.amount;i++) {
+            let randomOppoHandCardIndex = Math.floor(Math.random() * oppoHand.length);
+            oppoHand.splice(randomOppoHandCardIndex, 1);
+        }
+        useGeneralStore().$state.freeze = false;
     },
-    pay2Discard1: (card) => {
-        let oppoHand = useGeneralStore().$state.opponent.hand
-        let randomOppoHandCardIndex = Math.floor(Math.random() * oppoHand.length);
-        useGeneralStore().$state.player.lp -= 2;
-        oppoHand.splice(randomOppoHandCardIndex, 1)
-    },
-    targetKillCost2OrLess: () => {
+    targetKill(card) {
+        if (card.ability.cost) this.checkCost(card.ability.cost);
         let oppoField = useGeneralStore().$state.opponent.field;
-        oppoField.forEach((unit) => {
-            if (unit.cost.current < 2) {
-                const proxy = document.getElementById(unit.id);
-                proxy.style.cursor = 'pointer';
-                useGeneralStore().$state.freeze = true;
-
-                // Cancel any existing tweens on the proxy
-                gsap.killTweensOf(proxy);
-
-                // Reset brightness and scale to initial values
-                gsap.set(proxy, {
-                    scale: 1,
-                    filter: "brightness(1)"
-                });
-
-                // Apply new tween
-                gsap.to(proxy, {
-                    scale: 1.1,
-                    filter: "brightness(1.2)",
-                    repeat: -1,
-                    yoyo: true
-                });
-
-                const handleClick = (e) => {
-                    useGeneralStore().$state.freeze = false;
-                    oppoField.splice(oppoField.indexOf(unit), 1);
-                    useGeneralStore().updateBothDb();
-
-                    const oppoFieldProxies = document.querySelectorAll(('#oppoField .card-base'))
-                    oppoFieldProxies.forEach((el) => {
-                        gsap.killTweensOf(el);
-                        gsap.set(el, {
-                            scale: 1,
-                            filter: el.classList.contains('disabled') ? "grayscale(70%)" : "brightness(1.0)"
-                        });
-                        el.removeEventListener('click', handleClick);
-                    });
-                };
-
-                proxy.addEventListener('click', handleClick);
+        const condition = eval(card.condition);
+        const selectionCallback = (selectedCard, array) => {
+            const index = array.indexOf(selectedCard);
+            if (index !== -1) {
+                array.splice(index, 1);
             }
-        });
+        };
+        useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
+    },
+    checkCost(cost) {
+        if (cost.from === 'hp') {
+            useGeneralStore().$state.player.lp -= cost.amount;
+        } else if (cost.from === 'mana') {
+            useGeneralStore().$state.player.mana.current -= cost.amount;
+        }
     }
-
-
-
-
 };
+
 
 

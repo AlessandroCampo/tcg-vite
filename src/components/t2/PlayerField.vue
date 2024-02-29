@@ -1,9 +1,8 @@
 <template>
-    <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)"
-        @drop="playCard($event)">
-        <GameCard v-for="(card, index) in generalStore.player.field" :key="index" :propCard="card" :isPlayerOwned="true"
-            :propIndex="index">
-        </GameCard>
+    <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)" @drop="playCard($event)"
+        id="player-field">
+        <GameCard v-for="(card, index) in generalStore.player.field" :key="card.id" :propCard="card" :isPlayerOwned="true"
+            :propIndex="index"></GameCard>
     </div>
 </template>
 
@@ -28,9 +27,6 @@ export default {
             event.preventDefault();
         },
         playCard(event) {
-            //FIXME - draggedCad isnt the expectedone
-            const propProxy = this.generalStore.draggedCard.id
-
             const propCard = this.generalStore.draggedCardObj
             if (propCard.ability && propCard.type === 'spell' && propCard.ability.type === 'target_enemy' && this.generalStore.opponent.field.length === 0) {
                 return
@@ -53,8 +49,10 @@ export default {
                 this.generalStore.summonUnit(propCard)
             }
 
-            if (propCard && propCard.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
-                this.generalStore.checkAbility(propCard.ability.name, propCard)
+            const propProxy = document.getElementById(propCard.id)
+
+            if (propCard && propCard.ability.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
+                this.generalStore.checkAbility(propCard.ability.effect, propCard)
                 propCard.canAttack = true
                 if (propCard.ability.type === 'target' && this.generalStore.opponent.field.length == 0) {
                     propCard.canAttack = false
@@ -82,7 +80,6 @@ export default {
     .card-base {
         z-index: 1;
     }
-
 
 }
 </style>

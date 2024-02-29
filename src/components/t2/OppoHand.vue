@@ -1,7 +1,7 @@
 <template>
-    <div class="hand-container">
-        <FacedownCard v-for=" cards in generalStore.opponent.hand"></FacedownCard>
-    </div>
+    <transition-group name="fade" tag="div" class="hand-container">
+        <FacedownCard v-for="card in generalStore.opponent.hand" :key="card.id"></FacedownCard>
+    </transition-group>
 </template>
 
 <script>
@@ -29,4 +29,13 @@ export default {
     transform: translateX(-50%);
     justify-content: center;
 }
-</style>
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}</style>

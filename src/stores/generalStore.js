@@ -53,6 +53,56 @@ export const useGeneralStore = defineStore('generalStore', {
 
     },
     actions: {
+        generateChoice(targets, condition, selectionCallback) {
+            let selectedCard;
+            targets.forEach((unit) => {
+                if (condition(unit)) { // Check if the unit meets the condition
+                    // Highlight the unit as a possible target
+                    const proxy = document.getElementById(unit.id);
+                    proxy.style.cursor = 'pointer';
+                    this.$state.freeze = true;
+
+                    // Cancel any existing tweens on the proxy
+                    gsap.killTweensOf(proxy);
+
+                    // Reset brightness and scale to initial values
+                    gsap.set(proxy, {
+                        scale: 1,
+                        filter: "brightness(1)"
+                    });
+
+                    // Apply new tween
+                    gsap.to(proxy, {
+                        scale: 1.1,
+                        filter: "brightness(1.2)",
+                        repeat: -1,
+                        yoyo: true
+                    });
+
+                    const handleClick = (e) => {
+                        this.freeze = false;
+                        selectedCard = unit;
+                        selectionCallback(selectedCard, targets);
+                        this.updateBothDb()
+
+
+                        // Remove event listener and reset visuals
+                        const oppoFieldProxies = document.querySelectorAll('#oppoField .card-base');
+                        oppoFieldProxies.forEach((el) => {
+                            gsap.killTweensOf(el);
+                            gsap.set(el, {
+                                scale: 1,
+                                filter: el.classList.contains('disabled') ? "grayscale(70%)" : "brightness(1.0)"
+                            });
+                            el.removeEventListener('click', handleClick);
+                        });
+                    };
+
+                    // Add click event listener
+                    proxy.addEventListener('click', handleClick);
+                }
+            });
+        },
         firstTurn() {
             let fiftyhChance = Math.floor(Math.random() * 2)
 
@@ -145,7 +195,12 @@ export const useGeneralStore = defineStore('generalStore', {
                 setTimeout(() => {
                     this.player.field.forEach((unit) => {
                         if (unit.id == card.id) {
-                            const cardElement = document.getElementById(unit.id);
+                            const playerField = document.getElementById('player-field')
+                            // const cardElement = playerField.querySelector('#' + unit.id);
+                            console.log(card.id)
+                            const cardElement = document.getElementById(unit.id)
+                            console.log(unit)
+
                             this.animateAbility(cardElement, unit)
                             this.sendActionObj(unit, unit, 'effectTrigger')
                             this.resetActionObj()
@@ -155,6 +210,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
         },
         animateAbility(cardElement, unit) {
+            console.log(cardElement, unit)
             let effect = new Image()
             effect.src = "./src/assets/img/animations/effect.gif"
             effect.className = "icon"
@@ -180,18 +236,11 @@ export const useGeneralStore = defineStore('generalStore', {
                 });
         },
         resolveAbility(unit) {
-            if (unit.status == 'onField' && unit.triggerTiming == 'onPlay') {
+            if (unit.status == 'onField' && unit.ability.triggerTiming == 'onPlay') {
                 this.player.field.forEach((card) => {
                     if (card.id === unit.id) {
                         card.canAttack = false;
-                        if (card.ability.type == 'self_buff') {
-                            abilities[card.ability.name](card);
-                        } else if (card.ability.type == 'target_nerf') {
-
-                        } else {
-                            abilities[card.ability.name](card);
-                        }
-
+                        abilities[card.ability.effect](card);
                         this.updateBothDb()
                     }
                 });
@@ -216,7 +265,6 @@ export const useGeneralStore = defineStore('generalStore', {
         updateBothDb() {
             this.updateDB()
             this.updateOpponentDB()
-            console.log('updated')
         },
         summonUnit(propCard) {
             const playerFieldArray = this.player.field
@@ -227,7 +275,6 @@ export const useGeneralStore = defineStore('generalStore', {
             playerFieldArray.push(propCard)
         },
         animateAttack(attackingCard, targetCard, attackDmg, defDmg) {
-            console.log(targetCard)
             var attackingRect = attackingCard.getBoundingClientRect();
             var targetRect = targetCard.getBoundingClientRect();
             var deltaX = targetRect.left - attackingRect.left;
@@ -256,7 +303,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 x: attackingRect.left + normalizedDeltaX - attackingRect.left,
                 y: attackingRect.top + normalizedDeltaY - attackingRect.top,
                 duration: 0.1,
-                scale: 0.8,
+                scale: 1,
                 onComplete: function () {
                     let dmgIcon = document.createElement('div')
                     dmgIcon.classList.add('icon')
@@ -310,6 +357,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
             this.updateBothDb()
         },
+
 
 
     },
