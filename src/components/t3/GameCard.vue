@@ -19,6 +19,7 @@
 
 <script>
 import { useGeneralStore } from '../../stores/generalStore'
+import _ from 'lodash';
 import gsap from 'gsap'
 export default {
     data() {
@@ -28,7 +29,8 @@ export default {
                 original_cost: undefined,
                 original_op: undefined,
                 original_hp: undefined
-            }
+            },
+            cardKilledHandled: false
         }
     },
     props: ['propCard', 'isPlayerOwned', 'propIndex'],
@@ -49,15 +51,11 @@ export default {
             const target = this.propCard
             const targetProxy = e.target
 
-            console.log(this.propCard)
-
-
-
             if (this.isPlayerOwned) return
             if (attacker.status !== 'onField') return
 
-            this.generalStore.sendActionObj(attacker, target, 'attack')
             this.generalStore.battle(attacker, target)
+            this.generalStore.sendActionObj(attacker, target, 'attack')
             this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op.current, target.op.current)
 
@@ -134,7 +132,6 @@ export default {
             if (newHP <= 0 && !this.isPlayerOwned) {
                 this.propCard.killed = true
                 this.generalStore.updateOpponentDB()
-                console.log(this.propCard.killed)
                 setTimeout(async (
                 ) => {
                     const index = this.generalStore.opponent.field.indexOf(this.propCard);
@@ -150,6 +147,16 @@ export default {
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
 
             }
+        },
+        'propCard.killed': {
+            handler: _.debounce(function (newVal, oldVal) {
+                if (newVal && !oldVal && this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled' && !this.cardKilledHandled) {
+                    console.log('activated');
+                    this.generalStore.checkAbility(this.propCard.ability.effect, this.propCard);
+                    this.cardKilledHandled = true;
+                }
+            }, 1000), // Adjust the debounce delay as needed
+            immediate: true
         }
     }
 }
@@ -237,7 +244,7 @@ export default {
 }
 
 .fading {
-    animation: fadeOut 1.5s ease-in forwards;
+    animation: fadeOut 1s ease-in forwards;
 }
 
 

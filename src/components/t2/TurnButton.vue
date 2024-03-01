@@ -28,7 +28,10 @@ export default {
             });
             this.generalStore.player.activeTurn = !this.generalStore.player.activeTurn
             this.generalStore.opponent.activeTurn = !this.generalStore.opponent.activeTurn
-            this.generalStore.opponent.mana.total++
+            if (this.generalStore.opponent.mana.total < 10) {
+                this.generalStore.opponent.mana.total++
+            }
+
             this.generalStore.opponent.mana.current = this.generalStore.opponent.mana.total
             this.generalStore.updateDB()
             this.generalStore.updateOpponentDB()

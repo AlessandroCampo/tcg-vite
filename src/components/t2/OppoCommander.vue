@@ -3,11 +3,14 @@
         <img :src="generalStore.opponent.leader?.artwork" alt="" id="enemy-hero" class="hero-avatar"
             :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
+        <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length > 0"></SecretsCounter>
     </figure>
 </template>
 
 <script>
 import { useGeneralStore } from '../../stores/generalStore';
+import SecretsCounter from '../t3/SecretsCounter.vue';
+
 import ManaBar from './ManaBar.vue'
 
 export default {
@@ -21,10 +24,13 @@ export default {
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;
+            const target = null
             const damage = attacker.op.current;
             const interval = 150; // Interval between LP updates in milliseconds
             const iterations = damage; // Number of LP updates
             attacker.canAttack = false
+
+
             this.generalStore.player.lastAction = {
                 card: attackerProxy.id,
                 target: 'player-hero-cont',
@@ -36,6 +42,10 @@ export default {
             this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, document.getElementById('enemy-hero-cont'), damage)
             // Function to update LP value gradually
+            if (this.generalStore.player.activeTurn && this.generalStore.opponent.traps.length > 0) {
+                const trapFound = this.generalStore.checkTraps(attacker, target, 'onAttack');
+                if (trapFound) return;
+            }
             const updateLP = () => {
                 if (this.generalStore.opponent.lp > initialLP - damage) {
                     // Decrement LP value
@@ -58,7 +68,7 @@ export default {
         }
 
     },
-    components: { ManaBar }
+    components: { ManaBar, SecretsCounter }
 }
 </script>
 
@@ -67,6 +77,13 @@ export default {
     clip-path: circle();
 
     width: 205px;
+}
+
+.secrets {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 

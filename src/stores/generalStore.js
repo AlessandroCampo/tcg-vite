@@ -34,6 +34,7 @@ export const useGeneralStore = defineStore('generalStore', {
             deck: [],
             hand: [],
             field: [],
+            traps: [],
             commander: {},
             lp: 30,
             lastAction: {
@@ -56,7 +57,7 @@ export const useGeneralStore = defineStore('generalStore', {
     actions: {
         generateChoice(targets, condition, selectionCallback) {
             let selectedCard;
-            console.log(condition)
+
             targets.forEach((unit) => {
                 if (condition(unit)) { // 
                     const proxy = document.getElementById(unit.id);
@@ -191,6 +192,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 if (card.type == 'spell') {
                     this.player.activatedCard = null
                     this.updateBothDb()
+                } else if (card.type == 'unit') {
                 }
                 return
             } else {
@@ -198,14 +200,15 @@ export const useGeneralStore = defineStore('generalStore', {
             }
             if (abilities.hasOwnProperty(name)) {
                 if (card.type == 'unit') {
+                    console.log('effect-triggered')
                     setTimeout(() => {
                         this.player.field.forEach((unit) => {
                             if (unit.id == card.id) {
                                 const playerField = document.getElementById('player-field')
-                                // const cardElement = playerField.querySelector('#' + unit.id);
-                                console.log(card.id)
+
+
                                 const cardElement = document.getElementById(unit.id)
-                                console.log(unit)
+
 
                                 this.animateAbility(cardElement, unit)
                                 this.sendActionObj(unit, unit, 'effectTrigger')
@@ -214,7 +217,7 @@ export const useGeneralStore = defineStore('generalStore', {
                         });
                     }, 700);
                 } else if (card.type == 'spell') {
-                    console.log('spell activated')
+
                     this.player.activatedCard = card
                     this.updateBothDb()
                     setTimeout(() => { this.resolveAbility(card) }, 500)
@@ -224,7 +227,11 @@ export const useGeneralStore = defineStore('generalStore', {
             }
         },
         animateAbility(cardElement, unit) {
-            console.log(cardElement, unit)
+            console.log(unit)
+            if (unit.ability.triggerTiming == 'onKilled') {
+                this.resolveAbility(unit)
+                return
+            }
             let effect = new Image()
             effect.src = "./src/assets/img/animations/effect.gif"
             effect.className = "icon"
@@ -253,19 +260,28 @@ export const useGeneralStore = defineStore('generalStore', {
             if (activated.status == 'onField' && activated.ability.triggerTiming == 'onPlay' && activated.type == 'unit') {
                 this.player.field.forEach((card) => {
                     if (card.id === activated.id) {
-                        card.canAttack = false;
                         abilities[card.ability.effect](card);
+                        if (!activated.ability.target) {
+                            card.canAttack = false;
+                        }
                         this.updateBothDb()
+
                     }
                 });
             } else if (activated.type == 'spell') {
+                abilities[activated.ability.effect](activated);
+                this.updateBothDb()
+            } else if (activated.status == 'onField' && activated.ability.triggerTiming == 'onKilled' && activated.type == 'unit') {
                 abilities[activated.ability.effect](activated);
                 this.updateBothDb()
             }
 
         },
         battle(attacker, target) {
-
+            if (this.player.activeTurn && this.opponent.traps.length > 0) {
+                const trapFound = this.checkTraps(attacker, target, 'onAttack');
+                if (trapFound) return;
+            }
             attacker.canAttack = false
             attacker.hp.current -= target.op.current;
             target.hp.current -= attacker.op.current;
@@ -295,6 +311,13 @@ export const useGeneralStore = defineStore('generalStore', {
             const playerHandArray = this.player.hand
             const propCardIndex = playerHandArray.indexOf(propCard)
             playerHandArray.splice(propCardIndex, 1)
+        },
+        playTrap(propCard) {
+            const playerHandArray = this.player.hand
+            const propCardIndex = playerHandArray.indexOf(propCard)
+            playerHandArray.splice(propCardIndex, 1)
+            this.player.traps.push(propCard)
+            this.updateBothDb()
         },
         animateAttack(attackingCard, targetCard, attackDmg, defDmg) {
             var attackingRect = attackingCard.getBoundingClientRect();
@@ -379,10 +402,26 @@ export const useGeneralStore = defineStore('generalStore', {
             }
             this.updateBothDb()
         },
+        checkTraps(trapTarget, attackTarget, triggerType) {
 
 
+            let foundTrap = false
+            this.opponent.traps.forEach((trap, index) => {
+                const condition = trap.ability.condition
+                    ? new Function('trapTarget', `return ${trap.ability.condition}`)
+                    : new Function('trapTarget', 'return true');
+                if (trap.ability.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
 
+                    foundTrap = true
+                    this.opponent.activatedCard = trap
+                    this.opponent.traps.splice(index, 1)
+                    abilities[trap.ability.effect](trap, trapTarget, attackTarget);
+                    this.updateBothDb()
 
+                }
+            })
+            return foundTrap
+        }
     },
 
 })

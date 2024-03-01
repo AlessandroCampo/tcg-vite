@@ -77,7 +77,7 @@ let knight = new unit({
         original: 3,
         current: 3
     },
-    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: true, targetStat: 'hp', cost: null },
+    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: true, targetStat: 'hp', cost: null, target: false },
     imgPath: './src/assets/img/cards/knight.png',
     cost: {
         original: 1,
@@ -170,7 +170,7 @@ let skeleton = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'targetKill', condition: "unit.cost.current < 2", triggerTiming: 'onPlay', cost: null },
+    ability: { effect: 'draw', amount: 1, triggerTiming: 'onKilled', cost: null },
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -199,7 +199,42 @@ let pot_of_malice = new gameCard({
     type: 'spell'
 })
 
-export const allCards = [reaper, inner_fear, pot_of_malice]
+let brain_control = new gameCard({
+    name: 'Pot of Malice',
+    imgPath: './src/assets/img/cards/brain_control.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: { effect: 'steal', amount: 1, target: true, triggerTiming: 'onPlay', cost: null },
+    type: 'spell'
+})
+
+//*** CARDS [TRAPS] */
+
+let dimensional_gate = new gameCard({
+    name: 'Dimensional gate',
+    imgPath: './src/assets/img/cards/dimensional_gate.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onAttack', cost: null },
+    type: 'trap'
+})
+
+let trap_hole = new gameCard({
+    name: 'Trap Hole',
+    imgPath: './src/assets/img/cards/trap_hole.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onSummon', cost: null, condition: "trapTarget.op.current < 2" },
+    type: 'trap'
+})
+
+export const allCards = [trap_hole, skeleton, knight]
 export const allCommanders = [black, green]
 
 

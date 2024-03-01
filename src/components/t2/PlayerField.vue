@@ -46,8 +46,11 @@ export default {
 
             if (propCard.type === 'unit') {
                 this.generalStore.summonUnit(propCard)
+                this.generalStore.checkTraps(propCard, undefined, 'onSummon')
             } else if (propCard.type === 'spell') {
                 this.generalStore.playSpell(propCard)
+            } else if (propCard.type === 'trap') {
+                this.generalStore.playTrap(propCard)
             }
 
             const propProxy = document.getElementById(propCard.id)
@@ -55,12 +58,11 @@ export default {
             if (propCard && propCard.ability.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
                 this.generalStore.checkAbility(propCard.ability.effect, propCard)
                 propCard.canAttack = true
-                if (propCard.ability.type === 'target' && this.generalStore.opponent.field.length == 0) {
+                if (propCard.ability.target && this.generalStore.opponent.field.length == 0) {
                     propCard.canAttack = false
                 }
 
             } else if (propCard && propCard.ability && propCard.type == 'spell') {
-                console.log('spell plyed')
                 this.generalStore.checkAbility(propCard.ability.effect, propCard)
             }
             this.generalStore.updateDB()
