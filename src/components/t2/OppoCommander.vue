@@ -1,6 +1,6 @@
 <template>
     <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent id="enemy-hero-cont">
-        <img :src="generalStore.opponent.leader?.artwork" alt="" id="enemy-hero" class="hero-avatar"
+        <img :src="generalStore.opponent.commander?.artwork" alt="" id="enemy-hero" class="hero-avatar"
             :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
@@ -31,21 +31,16 @@ export default {
             const iterations = damage; // Number of LP updates
             let foundGuardians = false;
             this.generalStore.opponent.field.forEach(unit => {
-        if (unit.attributes.includes('guardian')) {
-            foundGuardians = true;
-        }
-    })
+                if (unit.attributes.includes('guardian')) {
+                    foundGuardians = true;
+                }
+            })
 
-    if (foundGuardians && !attacker.attributes.includes('fly')) {
-        return 
-    }
-
-
-
-
+            if (foundGuardians && !attacker.attributes.includes('fly')) {
+                return
+            }
 
             attacker.canAttack = false
-
 
             this.generalStore.player.lastAction = {
                 card: attackerProxy.id,
@@ -79,10 +74,13 @@ export default {
 
             // Update database after countdown animation completes
             setTimeout(() => {
+                if (this.generalStore.opponent.lp <= 0) {
+                    this.generalStore.player.winner = true
+                }
                 this.generalStore.updateBothDb();
             }, interval * iterations);
         },
-    
+
 
     },
     components: { ManaBar, SecretsCounter }

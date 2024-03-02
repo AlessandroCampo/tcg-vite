@@ -1,8 +1,12 @@
 
 <template>
-  <img src="../src/assets/img/loading.gif" alt="" v-show="loading" id="loading_screen">
-  <LoginScreen v-if="!generalStore.user && loading"></LoginScreen>
-  <GameBattlefield v-else></GameBattlefield>
+   <img src="../src/assets/img/loading.gif" alt="" v-show="loading" id="loading_screen">
+    <LoginScreen v-if="!generalStore.user"></LoginScreen>
+    <!-- <GameMenu v-else></GameMenu> -->
+    <router-view></router-view>
+
+    
+  <!-- <GameBattlefield v-else></GameBattlefield> -->
 </template>
 
 <script 
@@ -10,6 +14,7 @@
 import GameBattlefield from './components/t1/GameBattlefield.vue';
 import { useFirestore, useDocument } from 'vuefire'
 import LoginScreen from './components/t1/LoginScreen.vue';
+import GameMenu from './components/t1/GameMenu.vue';
 import { useGeneralStore } from '../src/stores/generalStore'
 import { auth } from '../src/firebase'
 import { onAuthStateChanged } from "firebase/auth";
@@ -32,25 +37,16 @@ export default {
         this.generalStore.user = user;
         this.generalStore.player.uid = user.uid
         await this.generalStore.updateDB()
+        this.loading = false
 
 
         const player_unsub = onSnapshot(doc(db, "Users", this.generalStore?.user.uid), (doc) => {
           this.generalStore.player = doc.data()
         });
 
-        const oppo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.opponentUid), (doc) => {
-          this.generalStore.opponent = doc.data()
-        });
-
-        setTimeout(() => {
-          this.generalStore.firstTurn()
-          this.generalStore.assignCommander()
-          this.loading = false
-        }, 500)
-
-
-
-
+       
+      
+    
       } else {
         this.loading = false
         console.log('no user')
@@ -59,7 +55,7 @@ export default {
 
     });
   },
-  components: { GameBattlefield, LoginScreen }
+  components: { GameBattlefield, LoginScreen,GameMenu }
 }
 
 </script>

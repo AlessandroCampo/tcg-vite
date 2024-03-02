@@ -1,8 +1,8 @@
 <template>
-    <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)" @drop="playCard($event)"
-        id="player-field">
-        <GameCard v-for="(card, index) in generalStore.player.field" :key="card.id" :propCard="card" :isPlayerOwned="true"
-            :propIndex="index"></GameCard>
+    <div class="playerfield-container" @dragover="allowDrop($event)" @dragenter="allowDrop($event)"
+        @drop="playCard($event)" id="player-field">
+        <GameCard v-for="(card, index) in generalStore.player.field" :key="card.id" :propCard="card"
+            :isPlayerOwned="true" :propIndex="index"></GameCard>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ export default {
         }
     },
     created() {
-        this.generalStore.decideCommander()
+
     },
     components: { GameCard },
     methods: {
@@ -38,6 +38,9 @@ export default {
                 return
             }
             if (propCard.cost.current > this.generalStore.player.mana.current) {
+                return
+            }
+            if (this.generalStore.player.field.length > 7) {
                 return
             }
 

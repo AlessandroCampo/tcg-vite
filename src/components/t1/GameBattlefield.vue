@@ -1,8 +1,9 @@
 <template>
-    <div id="battlefield-container">
+    <div id="battlefield-container" v-if="!this.generalStore.player.winner && !this.generalStore.opponent.winner">
         <transition name="fade">
             <div v-if="generalStore.player.activatedCard || generalStore.opponent.activatedCard">
-                <ProxyBig :propCard="generalStore.player.activatedCard || generalStore.opponent.activatedCard"></ProxyBig>
+                <ProxyBig :propCard="generalStore.player.activatedCard || generalStore.opponent.activatedCard">
+                </ProxyBig>
             </div>
         </transition>
         <PlayerHand></PlayerHand>
@@ -20,10 +21,13 @@
 
 
     </div>
+    <EndgameScreen v-else :propWinner="this.generalStore.player.winner"></EndgameScreen>
+
 </template>
 
 <script>
 
+import EndgameScreen from '../t1/EndgameScreen.vue'
 import PlayerHand from '../t2/PlayerHand.vue';
 import PlayerField from '../t2/PlayerField.vue';
 import OppoField from '../t2/OppoField.vue';
@@ -37,7 +41,7 @@ import OppoCommander from '../t2/OppoCommander.vue';
 import ProxyBig from '../t3/ProxyBig.vue';
 import { useGeneralStore } from '../../stores/generalStore'
 import { useFirestore, useDocument } from 'vuefire'
-import { doc, collection, setDoc } from 'firebase/firestore'
+import { doc, collection, setDoc, onSnapshot } from 'firebase/firestore'
 const db = useFirestore()
 const playerRef = doc(db, 'Users', 'Player1');
 
@@ -48,8 +52,18 @@ export default {
             generalStore: useGeneralStore()
         }
     },
-    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander, ProxyBig },
+    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander, ProxyBig, EndgameScreen },
     async created() {
+        this.generalStore.opponentUid
+
+        const oppo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.opponentUid), (doc) => {
+            this.generalStore.opponent = doc.data()
+        });
+        setTimeout(() => {
+            this.generalStore.firstTurn()
+            this.generalStore.assignCommander()
+            this.generalStore.player.inQueue = false
+        }, 500)
     },
     computed: {
         getPlayerMana() {

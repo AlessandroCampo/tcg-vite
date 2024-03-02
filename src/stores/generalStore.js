@@ -15,7 +15,9 @@ const db = useFirestore()
 
 export const useGeneralStore = defineStore('generalStore', {
     state: () => ({
+        battlePageFlag: false,
         cards: [...allCards.map(card => ({ ...card }))],
+        color: 'black',
         user: null,
         opponentUid: undefined,
         dummyProperty: 0,
@@ -27,6 +29,8 @@ export const useGeneralStore = defineStore('generalStore', {
         summonedUnitCard: undefined,
         summonedUnitObj: undefined,
         player: {
+            inQueue: false,
+            winner: false,
             uid: '',
             username: '',
             activeTurn: true,
@@ -35,7 +39,7 @@ export const useGeneralStore = defineStore('generalStore', {
             hand: [],
             field: [],
             traps: [],
-            commander: {},
+            commander: allCommanders[0],
             lp: 30,
             lastAction: {
                 action: '',
@@ -57,12 +61,13 @@ export const useGeneralStore = defineStore('generalStore', {
     actions: {
         generateChoice(targets, condition, selectionCallback) {
             let selectedCard;
-
+            let foundTargets = false
             targets.forEach((unit) => {
                 if (condition(unit)) { // 
                     const proxy = document.getElementById(unit.id);
                     proxy.style.cursor = 'pointer';
                     this.$state.freeze = true;
+                    foundTargets = true
 
 
                     gsap.killTweensOf(proxy);
@@ -103,30 +108,15 @@ export const useGeneralStore = defineStore('generalStore', {
                     proxy.addEventListener('click', handleClick);
                 }
             });
-        },
-        decideCommander() {
-            if (this.isPlayerOne(this.player.uid)) {
-                this.opponentUid = 'PPMzIrPbubaazLC7Es7RDtI93mI3'
-                this.player.leader = allCommanders[0]
-            } else {
-                this.opponentUid = 'KNOiaPNOj3V7LNq9rvH8zvtR4Hp1'
-                this.player.leader = allCommanders[1]
+            if (!foundTargets) {
+                this.freeze = false;
             }
         },
         firstTurn() {
-            let fiftyhChance = Math.floor(Math.random() * 2)
-
-            if (fiftyhChance === 1 && this.isPlayerOne(this.player.uid)) {
-                this.player.activeTurn = true
-                this.opponent.activeTurn = false
-            } else if (fiftyhChance === 0 && this.isPlayerOne(this.player.uid)) {
-                this.player.activeTurn = false
-                this.opponent.activeTurn = true
-            }
-
-            this.updateDB()
-            this.updateOpponentDB()
-        },
+            this.player.activeTurn = !this.opponent.activeTurn
+            this.updateBothDb();
+        }
+        ,
         isPlayerOne(id) {
             if (id === 'KNOiaPNOj3V7LNq9rvH8zvtR4Hp1') {
                 return true
@@ -152,11 +142,13 @@ export const useGeneralStore = defineStore('generalStore', {
         generateDeck() {
             for (let i = 0;i < 4;i++) {
                 this.cards.forEach((card) => {
-                    const cardCopy = { ...card };
-                    const reactiveCard = reactive(cardCopy);
-                    reactiveCard.id = this.generateCardId(i, card.name);
-                    reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
-                    this.player.deck.push(reactiveCard);
+                    if (card.color == this.color || !card.color) {
+                        const cardCopy = { ...card };
+                        const reactiveCard = reactive(cardCopy);
+                        reactiveCard.id = this.generateCardId(i, card.name);
+                        reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
+                        this.player.deck.push(reactiveCard);
+                    }
                 });
             }
 
@@ -169,17 +161,21 @@ export const useGeneralStore = defineStore('generalStore', {
                 deck.splice(randomIndex, 1)
             }
 
-
-
         },
         assignCommander() {
-            if (this.isPlayerOne(this.player.uid)) {
-                this.player.leader = allCommanders[0]
-            } else {
-                this.player.leader = allCommanders[1]
+            switch (this.color) {
+                case 'black':
+                    this.player.commander = allCommanders[0];
+                    console.log('black')
+                    break;
+                case 'white':
+                    this.player.commander = allCommanders[1];
+                    console.log('white')
+                    break;
+                default:
+                    this.player.commander = allCommanders[0];
             }
             this.updateDB()
-            this.updateOpponentDB()
         },
         async updateDB() {
             const playerRef = doc(db, 'Users', this.player.uid);
@@ -438,7 +434,7 @@ export const useGeneralStore = defineStore('generalStore', {
                     this.opponent.activatedCard = trap
                     this.opponent.traps.splice(index, 1)
                     abilities[trap.ability.effect](trap, trapTarget, attackTarget);
-                    this.updateDB()
+                    this.updateBothDb()
                 }
             })
             return foundTrap

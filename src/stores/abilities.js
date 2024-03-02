@@ -19,6 +19,17 @@ export const abilities = {
     },
     modifyStat(card) {
         let ability = card.ability;
+        let player = useGeneralStore().$state.player;
+        let opponent = useGeneralStore().$state.opponent;
+        const condition = card.ability.condition
+            ? new Function('player', `return ${card.ability.condition}`)
+            : () => true;
+
+        if (!condition(player)) {
+            useGeneralStore().$state.freeze = false
+            return;
+        }
+
         if (card.ability.cost) this.checkCost(card.ability.cost);
         let target;
         if (ability.selfTarget) {
@@ -40,6 +51,9 @@ export const abilities = {
                         selectedCard[ability.targetStat].current += ability.amount;
                     } else {
                         selectedCard[ability.targetStat].current -= ability.amount;
+                    }
+                    if (selectedCard[ability.targetStat].current < 0) {
+                        selectedCard[ability.targetStat].current = 0
                     }
                     useGeneralStore().updateBothDb()
                 }
@@ -63,6 +77,7 @@ export const abilities = {
             oppoHand.splice(randomOppoHandCardIndex, 1);
         }
         useGeneralStore().$state.freeze = false;
+        useGeneralStore().updateBothDb()
     },
     targetKill(card) {
         if (card.ability.cost) {
@@ -102,7 +117,7 @@ export const abilities = {
             setTimeout(() => {
                 useGeneralStore().$state.opponent.activatedCard = null;
                 useGeneralStore().$state.freeze = false;
-                useGeneralStore().updateDB()
+                useGeneralStore().updateBothDb()
             }, 1000)
         }
     },
@@ -123,17 +138,31 @@ export const abilities = {
                 useGeneralStore().$state.player.activatedCard = null
             }
             if (index !== -1) {
+                const modifiedCard = JSON.parse(JSON.stringify(selectedCard));
+                modifiedCard.id = modifiedCard.id += 'copy'
                 selectedCard.killed = true
-                const modifiedCard = { ...selectedCard };
-                modifiedCard.killed = false
+                console.log(modifiedCard)
+                // modifiedCard.killed = false
                 modifiedCard.canAttack = false
                 playerField.push(modifiedCard);
-                useGeneralStore().updateBothDb()
-                // setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb() }, 1000)
+                useGeneralStore().updateOpponentDB()
+
             }
         };
 
         useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
+    },
+    modifyLp(card) {
+        useGeneralStore().$state.freeze = false
+        if (card.ability.cost) {
+            this.checkCost(card.ability.cost);
+        }
+        if (card.ability.gain) {
+            useGeneralStore().$state.player.lp += card.ability.amount
+        } else if (!card.ability.gain) {
+            useGeneralStore().$state.opponent.lp -= card.ability.amount
+        }
+        useGeneralStore().updateDB()
     },
     checkCost(cost) {
         if (cost.from === 'hp') {
@@ -142,6 +171,21 @@ export const abilities = {
             useGeneralStore().$state.player.mana.current -= cost.amount;
         }
     },
+    healAll(card) {
+        if (card.ability.cost) {
+            this.checkCost(card.ability.cost);
+        }
+        useGeneralStore().$state.freeze = false
+        useGeneralStore().$state.player.field.forEach((unit) => {
+            unit.hp.current = unit.hp.original
+        })
+        setTimeout(() => {
+            useGeneralStore().$state.player.activatedCard = null
+            useGeneralStore().updateDB()
+        }, 800)
+
+    }
+
 
 };
 

@@ -77,12 +77,12 @@ export default {
                 this.generalStore.player.username = this.newAccData.username
                 console.log(this.generalStore.player.username)
 
-                // await setDoc(doc(db, "Users", user.uid), {
-                //     username: this.newAccData.username,
-                //     password: this.newAccData.pass,
-                //     email: this.newAccData.mail,
-                //     uid: user.uid,
-                // });
+                await setDoc(doc(db, "Users", user.uid), {
+                    username: this.newAccData.username,
+                    password: this.newAccData.pass,
+                    email: this.newAccData.mail,
+                    uid: user.uid,
+                });
 
                 console.log("User successfully signed up!");
             } catch (error) {

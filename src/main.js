@@ -4,31 +4,57 @@ import { createApp } from 'vue'
 import { VueFire, VueFireAuth, VueFireFirestoreOptionsAPI, VueFireDatabaseOptionsAPI } from 'vuefire'
 import { createPinia } from 'pinia'
 import { firebaseApp } from './firebase'
+import { createRouter, createWebHashHistory } from 'vue-router';
+import GameMenu from './components/t1/GameMenu.vue'
+import GameBattlefield from './components/t1/GameBattlefield.vue'
 import App from './App.vue'
+import { useGeneralStore } from "../src/stores/generalStore";
 
 const pinia = createPinia()
+
+const routes = [
+    { path: '/', component: GameMenu },
+    {
+        path: '/battle',
+        component: GameBattlefield,
+        beforeEnter: (to, from, next) => {
+            if (useGeneralStore().$state.battlePageFlag) {
+                next();
+            } else {
+                next('/');
+            }
+        }
+    }
+]
+
+
+
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes,
+})
+
 const app = createApp(App)
+
+
 
 app.use(pinia)
 
 app.use(VueFire, {
-    // imported above but could also just be created here
     firebaseApp,
     modules: [
-        // we will see other modules later on
         VueFireAuth(),
         VueFireFirestoreOptionsAPI({
-            // this would be the same behavior as VueFire v2
             reset: true,
             wait: false,
         }),
         VueFireDatabaseOptionsAPI({
-            // this would be the same behavior as VueFire v2
             reset: true,
             wait: false,
         }),
     ],
 })
 
+app.use(router)
 app.mount('#app')
 export { app }
