@@ -257,12 +257,12 @@ let golem = new unit({
 let crusader = new unit({
     name: 'crusader',
     op: {
-        original: 2,
-        current: 2
+        original: 1,
+        current: 1
     },
     hp: {
-        original: 3,
-        current: 3
+        original: 2,
+        current: 2
     },
     imgPath: './src/assets/img/cards/crusader.png',
     cost: {
