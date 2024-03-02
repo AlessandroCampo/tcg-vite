@@ -1,6 +1,6 @@
 <template>
     <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
-        :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event); targetted($event)" ref="card"
+        :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
         :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
         <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{ propCard.cost.current
         }}
@@ -21,6 +21,7 @@
 import { useGeneralStore } from '../../stores/generalStore'
 import _ from 'lodash';
 import gsap from 'gsap'
+import { connectStorageEmulator } from 'firebase/storage';
 export default {
     data() {
         return {
@@ -30,10 +31,22 @@ export default {
                 original_op: undefined,
                 original_hp: undefined
             },
-            cardKilledHandled: false
+            cardKilledHandled: false,
         }
     },
-    props: ['propCard', 'isPlayerOwned', 'propIndex'],
+    props: {
+        propCard: {
+            type: Object,
+            required: true
+        },
+        isPlayerOwned: {
+            type: Boolean,
+        },
+        propIndex: {
+            type: Number,
+            default: 0
+        }
+    },
     mounted() {
         this.$nextTick(() => {
             gsap.to(this.$el, {
@@ -51,31 +64,18 @@ export default {
             const target = this.propCard
             const targetProxy = e.target
 
-            if (this.isPlayerOwned) return
-            if (attacker.status !== 'onField') return
+            if (!this.isValidAttackTarget(target, attacker, this.generalStore.opponent.field)) {
+    return
+            }
+
+            
 
             this.generalStore.battle(attacker, target)
             this.generalStore.sendActionObj(attacker, target, 'attack')
+
             this.generalStore.resetActionObj()
+
             this.generalStore.animateAttack(attackerProxy, targetProxy, attacker.op.current, target.op.current)
-
-
-        },
-        targetted(e) {
-            const targettingProxy = this.generalStore.draggedCard
-            const targettingCard = this.generalStore.draggedCardObj
-            const target = this.propCard
-            const targetProxy = e.target
-            const spliceIndex = this.generalStore.player.hand.indexOf(targettingCard)
-            if (this.isPlayerOwned) return
-            if (targettingCard.type !== 'spell') return
-            this.generalStore.player.mana.current -= targettingCard.cost.current
-            this.generalStore.checkAbility(targettingCard.ability.name, target)
-            setTimeout(() => {
-                this.generalStore.player.hand.splice(spliceIndex, 1)
-                this.generalStore.updateBothDb()
-            }, 500)
-
 
 
         },
@@ -124,40 +124,69 @@ export default {
         startDrag(e) {
             this.generalStore.draggedCard = this.$el;
             this.generalStore.draggedCardObj = this.propCard;
+        },
+        isValidAttackTarget(target, attacker, opponentField, ) {
+    // Check if the attacker is owned by the player or if its status isn't 'onField'
+    if (this.isPlayerOwned || attacker.status !== 'onField') {
+        return false;
+    }
+
+    let foundGuardians = false;
+
+    // Check if there are any guardians on the opponent's field
+    opponentField.forEach(unit => {
+        if (unit.attributes.includes('guardian')) {
+            foundGuardians = true;
         }
+    });
+
+    // If guardians are found and the target is not a guardian, return false
+    if (foundGuardians && !target.attributes.includes('guardian') && !attacker.attributes.includes('fly')) {
+        return false;
+    } else {
+        // Otherwise, the attack target is valid
+        return true;
+    }
+}
 
     },
     watch: {
-        'propCard.hp.current': async function (newHP, oldHP) {
-            if (newHP <= 0 && !this.isPlayerOwned) {
-                this.propCard.killed = true
-                this.generalStore.updateOpponentDB()
-                setTimeout(async (
-                ) => {
-                    const index = this.generalStore.opponent.field.indexOf(this.propCard);
-                    this.generalStore.opponent.field.splice(index, 1);
-                    await this.generalStore.updateOpponentDB()
-                }, 1500)
+       'propCard.killed': {
+    handler(newVal, oldVal) {
+        if (newVal) {   
+            if (!this.propCard.cardKilledHandled) {
+                this.propCard.cardKilledHandled = true;
 
-            }
-        },
-        'generalStore.opponent.lastAction': function (newValue, oldValue) {
-            if (newValue !== oldValue) {
-                let action = this.generalStore.opponent.lastAction
-                this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
+                if (this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled'  && this.isPlayerOwned) {
+                        
+                        this.generalStore.resolveAbility(this.propCard)
+                    }
 
+                setTimeout(() => {
+                    const player = this.generalStore.player;
+                    const opponent = this.generalStore.opponent;
+                    const removedFromPlayerField = player.field.some(card => card.id === this.propCard.id);
+                    const removedFromOpponentField = opponent.field.some(card => card.id === this.propCard.id);
+
+                    if (removedFromPlayerField) {
+                        player.field = player.field.filter(card => card.id !== this.propCard.id);
+                        this.generalStore.updateDB();
+                    } else if (removedFromOpponentField) {
+                        opponent.field = opponent.field.filter(card => card.id !== this.propCard.id);
+                        this.generalStore.updateOpponentDB();
+                    }
+
+                    
+                }, 1500);
             }
-        },
-        'propCard.killed': {
-            handler: _.debounce(function (newVal, oldVal) {
-                if (newVal && !oldVal && this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled' && !this.cardKilledHandled) {
-                    console.log('activated');
-                    this.generalStore.checkAbility(this.propCard.ability.effect, this.propCard);
-                    this.cardKilledHandled = true;
-                }
-            }, 1000), // Adjust the debounce delay as needed
-            immediate: true
         }
+    },
+    immediate: true
+}
+
+
+
+
     }
 }
 </script>
@@ -244,18 +273,22 @@ export default {
 }
 
 .fading {
-    animation: fadeOut 1s ease-in forwards;
+    animation: fadeOut 1.8s ease-out forwards;
 }
 
 
 
 @keyframes fadeOut {
-    from {
+    0% {
         opacity: 1;
     }
 
-    to {
-        opacity: 0;
+    35% {
+        opacity: 0.8; 
+    }
+
+    100% {
+        opacity: 0.1; 
     }
 }
 </style>

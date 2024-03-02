@@ -3,7 +3,8 @@
         <img :src="generalStore.opponent.leader?.artwork" alt="" id="enemy-hero" class="hero-avatar"
             :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
-        <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length > 0"></SecretsCounter>
+        <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
+        </SecretsCounter>
     </figure>
 </template>
 
@@ -28,6 +29,21 @@ export default {
             const damage = attacker.op.current;
             const interval = 150; // Interval between LP updates in milliseconds
             const iterations = damage; // Number of LP updates
+            let foundGuardians = false;
+            this.generalStore.opponent.field.forEach(unit => {
+        if (unit.attributes.includes('guardian')) {
+            foundGuardians = true;
+        }
+    })
+
+    if (foundGuardians && !attacker.attributes.includes('fly')) {
+        return 
+    }
+
+
+
+
+
             attacker.canAttack = false
 
 
@@ -65,7 +81,8 @@ export default {
             setTimeout(() => {
                 this.generalStore.updateBothDb();
             }, interval * iterations);
-        }
+        },
+    
 
     },
     components: { ManaBar, SecretsCounter }

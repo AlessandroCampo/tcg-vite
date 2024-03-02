@@ -5,7 +5,7 @@ import gsap from 'gsap'
 
 export const abilities = {
     draw(card) {
-        console.log('drawing')
+        useGeneralStore().$state.freeze = false
         for (let i = 0;i < card.ability.amount;i++) {
             useGeneralStore().drawOne()
         }
@@ -13,10 +13,8 @@ export const abilities = {
         if (card.type == 'spell') {
             setTimeout(() => {
                 useGeneralStore().$state.player.activatedCard = null
-                useGeneralStore().updateBothDb()
+                useGeneralStore().updateDB()
             }, 500)
-
-
         }
     },
     modifyStat(card) {
@@ -80,11 +78,13 @@ export const abilities = {
         const selectionCallback = (selectedCard, array) => {
             const index = array.indexOf(selectedCard);
             if (index !== -1) {
+
                 card.canAttack = false
                 selectedCard.killed = true
-                useGeneralStore().updateBothDb()
+
+                useGeneralStore().updateOpponentDB()
                 // array.splice(index, 1)
-                setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb(); }, 800)
+                // setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb(); }, 1000)
             }
         };
 
@@ -94,13 +94,16 @@ export const abilities = {
         if (card.ability.cost) {
             this.checkCost(card.ability.cost);
         }
-        const oppoField = useGeneralStore().$state.player.field;
-        const index = oppoField.indexOf(target);
+        const cardField = useGeneralStore().$state.player.field;
+        const index = cardField.indexOf(target);
         if (index !== -1) {
-            setTimeout((target) => { target.killed = true, useGeneralStore().updateBothDb() }, 500)
-
-
-            setTimeout(() => { useGeneralStore().$state.player.field.splice(index, 1); useGeneralStore().$state.opponent.activatedCard = null; useGeneralStore().$state.freeze = false; useGeneralStore().updateBothDb(); }, 1000)
+            target.killed = true;
+            useGeneralStore().updateDB()
+            setTimeout(() => {
+                useGeneralStore().$state.opponent.activatedCard = null;
+                useGeneralStore().$state.freeze = false;
+                useGeneralStore().updateDB()
+            }, 1000)
         }
     },
     steal(card) {
@@ -126,7 +129,7 @@ export const abilities = {
                 modifiedCard.canAttack = false
                 playerField.push(modifiedCard);
                 useGeneralStore().updateBothDb()
-                setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb() }, 1000)
+                // setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb() }, 1000)
             }
         };
 

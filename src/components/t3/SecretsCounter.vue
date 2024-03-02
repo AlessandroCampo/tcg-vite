@@ -2,7 +2,7 @@
     <div class="counter-container">
         <img src="../../assets/img/animations/trap.gif" alt="">
         <div class="counter">
-            {{ generalStore.player.traps.length }}
+            {{ propCommander == 'player' ? generalStore.player.traps.length : generalStore.opponent.traps.length }}
         </div>
 
     </div>
@@ -17,7 +17,8 @@ export default {
         return {
             generalStore: useGeneralStore()
         }
-    }
+    },
+    props: ['propCommander']
 }
 </script>
 

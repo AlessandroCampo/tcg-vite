@@ -3,7 +3,8 @@
         <img :src="generalStore.player.leader?.artwork" alt="" id="player-hero" class="hero-avatar"
             :class="generalStore.player.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.player.mana"></ManaBar>
-        <SecretsCounter class="secrets" v-if="generalStore.player.traps.length > 0"></SecretsCounter>
+        <SecretsCounter class="secrets" v-if="generalStore.player.traps.length > 0" :propCommander='"player"'>
+        </SecretsCounter>
     </figure>
 </template>
 

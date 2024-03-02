@@ -14,12 +14,15 @@ import { doc, collection, setDoc } from 'firebase/firestore'
 import gsap from 'gsap'
 const db = useFirestore()
 const playerRef = doc(db, 'Users', 'Player1');
-const player_db = useDocument(doc(collection(db, 'Users'), 'Player1'));
+// const player_db = useDocument(doc(collection(db, 'Users'), 'Player1'));
 export default {
     data() {
         return {
             generalStore: useGeneralStore()
         }
+    },
+    created() {
+        this.generalStore.decideCommander()
     },
     components: { GameCard },
     methods: {
@@ -55,7 +58,7 @@ export default {
 
             const propProxy = document.getElementById(propCard.id)
 
-            if (propCard && propCard.ability.triggerTiming == 'onPlay' && propCard.ability && propCard.type == 'unit') {
+            if (propCard && propCard.ability && propCard.ability.triggerTiming == 'onPlay' && propCard.type == 'unit') {
                 this.generalStore.checkAbility(propCard.ability.effect, propCard)
                 propCard.canAttack = true
                 if (propCard.ability.target && this.generalStore.opponent.field.length == 0) {
@@ -66,6 +69,15 @@ export default {
                 this.generalStore.checkAbility(propCard.ability.effect, propCard)
             }
             this.generalStore.updateDB()
+        }
+    },
+    watch: {
+        'generalStore.opponent.lastAction': function (newValue, oldValue) {
+            if (newValue !== oldValue && newValue.action) {
+                console.log('action')
+                let action = this.generalStore.opponent.lastAction
+                this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
+            }
         }
     }
 }

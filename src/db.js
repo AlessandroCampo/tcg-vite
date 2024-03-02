@@ -9,25 +9,26 @@
 
 
 class gameCard {
-    constructor({ name, ability, imgPath, cost, type }) {
+    constructor({ name, ability, imgPath, cost, type, playerOwned, color }) {
         this.name = name
         this.ability = ability
         this.imgPath = imgPath
         this.cost = cost
         this.type = type
-
-
+        this.playerOwned = playerOwned
+        this.color = color
     }
 }
 
 class unit extends gameCard {
-    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed }) {
-        super({ name, ability, imgPath, cost, type });
+    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed, playerOwned, color, attributes }) {
+        super({ name, ability, imgPath, cost, type, playerOwned, color });
         this.op = op;
         this.hp = hp;
         this.canAttack = canAttack;
         this.status = status;
         this.killed = killed
+        this.attributes = attributes
     }
 }
 
@@ -62,7 +63,10 @@ let wolf = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
 });
 
 
@@ -74,10 +78,10 @@ let knight = new unit({
         current: 1
     },
     hp: {
-        original: 3,
-        current: 3
+        original: 1,
+        current: 1
     },
-    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: true, targetStat: 'hp', cost: null, target: false },
+    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null },
     imgPath: './src/assets/img/cards/knight.png',
     cost: {
         original: 1,
@@ -86,7 +90,10 @@ let knight = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
 })
 
 let ogre = new unit({
@@ -108,7 +115,10 @@ let ogre = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
 });
 
 let sorceress = new unit({
@@ -130,7 +140,10 @@ let sorceress = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
 });
 
 let reaper = new unit({
@@ -152,7 +165,10 @@ let reaper = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
 });
 
 let skeleton = new unit({
@@ -170,11 +186,65 @@ let skeleton = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'draw', amount: 1, triggerTiming: 'onKilled', cost: null },
+    ability: { effect: 'draw', amount: 1, triggerTiming: 'onKilled', cost: null, target: false },
     status: 'none',
     canAttack: false,
     type: 'unit',
-    killed: false
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: []
+});
+
+let crow = new unit({
+    name: 'crow',
+    op: {
+        original: 2,
+        current: 2
+    },
+    hp: {
+        original: 1,
+        current: 1
+    },
+    imgPath: './src/assets/img/cards/crow.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: null,
+    status: 'none',
+    canAttack: true,
+    type: 'unit',
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: ['fly']
+});
+
+
+let golem = new unit({
+    name: 'golem',
+    op: {
+        original: 1,
+        current: 1
+    },
+    hp: {
+        original: 4,
+        current: 4
+    },
+    imgPath: './src/assets/img/cards/golem.png',
+    cost: {
+        original: 1,
+        current: 1
+    },
+    ability: null,
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    killed: false,
+    playerOwned: false,
+    color: 'black',
+    attributes: ['guardian']
 });
 
 
@@ -185,7 +255,9 @@ let inner_fear = new gameCard({
     imgPath: './src/assets/img/cards/inner_fear.png',
     cost: 1,
     ability: { effect: 'modifyStat', amount: 2, selfTarget: false, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null, condition: null, target: true },
-    type: 'spell'
+    type: 'spell',
+    playerOwned: false,
+    color: 'black'
 })
 
 let pot_of_malice = new gameCard({
@@ -196,7 +268,9 @@ let pot_of_malice = new gameCard({
         current: 1
     },
     ability: { effect: 'draw', amount: 2 },
-    type: 'spell'
+    type: 'spell',
+    playerOwned: false,
+    color: null
 })
 
 let brain_control = new gameCard({
@@ -207,7 +281,9 @@ let brain_control = new gameCard({
         current: 1
     },
     ability: { effect: 'steal', amount: 1, target: true, triggerTiming: 'onPlay', cost: null },
-    type: 'spell'
+    type: 'spell',
+    playerOwned: false,
+    color: 'black'
 })
 
 //*** CARDS [TRAPS] */
@@ -220,7 +296,9 @@ let dimensional_gate = new gameCard({
         current: 1
     },
     ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onAttack', cost: null },
-    type: 'trap'
+    type: 'trap',
+    playerOwned: false,
+    color: null
 })
 
 let trap_hole = new gameCard({
@@ -230,11 +308,13 @@ let trap_hole = new gameCard({
         original: 1,
         current: 1
     },
-    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onSummon', cost: null, condition: "trapTarget.op.current < 2" },
-    type: 'trap'
+    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onSummon', cost: null, condition: "trapTarget.op.current <= 2" },
+    type: 'trap',
+    playerOwned: false,
+    color: null
 })
 
-export const allCards = [trap_hole, skeleton, knight]
+export const allCards = [crow, trap_hole, golem, knight, reaper]
 export const allCommanders = [black, green]
 
 
