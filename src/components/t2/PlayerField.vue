@@ -77,7 +77,6 @@ export default {
     watch: {
         'generalStore.opponent.lastAction': function (newValue, oldValue) {
             if (newValue !== oldValue && newValue.action) {
-                console.log('action')
                 let action = this.generalStore.opponent.lastAction
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
             }

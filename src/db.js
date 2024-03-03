@@ -462,7 +462,7 @@ let trap_hole = new gameCard({
     color: null
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, reaper, sorceress, golem, inner_fear, pot_of_malice, brain_control, blessing, dimensional_gate, trap_hole]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight,  pot_of_malice, brain_control, blessing, dimensional_gate, trap_hole]
 export const allCommanders = [black, white]
 
 

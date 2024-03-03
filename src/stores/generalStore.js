@@ -171,11 +171,11 @@ export const useGeneralStore = defineStore('generalStore', {
             switch (this.color) {
                 case 'black':
                     this.player.commander = allCommanders[0];
-                    console.log('black')
+
                     break;
                 case 'white':
                     this.player.commander = allCommanders[1];
-                    console.log('white')
+
                     break;
                 default:
                     this.player.commander = allCommanders[0];
@@ -291,6 +291,7 @@ export const useGeneralStore = defineStore('generalStore', {
 
         },
         battle(attacker, target) {
+
             if (this.player.activeTurn && this.opponent.traps.length > 0) {
                 const trapFound = this.checkTraps(attacker, target, 'onAttack');
                 if (trapFound) return;
@@ -300,10 +301,10 @@ export const useGeneralStore = defineStore('generalStore', {
             target.hp.current -= attacker.op.current;
             if (attacker.hp.current <= 0) {
                 attacker.killed = true
-                console.log(attacker)
+
             } if (target.hp.current <= 0) {
                 target.killed = true
-                console.log(attacker)
+
             }
 
             this.updateBothDb()
@@ -441,6 +442,7 @@ export const useGeneralStore = defineStore('generalStore', {
                     ? new Function('trapTarget', `return ${trap.ability.condition}`)
                     : new Function('trapTarget', 'return true');
                 if (trap.ability.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
+
                     foundTrap = true
                     this.opponent.activatedCard = trap
                     this.opponent.traps.splice(index, 1)

@@ -29,6 +29,7 @@ export default {
             this.commanderImage = '/img' + this.generalStore.opponent.commander.artwork
         },
         directAttack(e) {
+
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;
@@ -61,7 +62,8 @@ export default {
             this.generalStore.animateAttack(attackerProxy, document.getElementById('enemy-hero-cont'), damage)
             // Function to update LP value gradually
             if (this.generalStore.player.activeTurn && this.generalStore.opponent.traps.length > 0) {
-                const trapFound = this.generalStore.checkTraps(attacker, target, 'onAttack');
+                const trapFound = this.generalStore.checkTraps(attacker, null, 'onAttack');
+
                 if (trapFound) return;
             }
             const updateLP = () => {

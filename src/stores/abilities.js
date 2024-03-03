@@ -106,6 +106,7 @@ export const abilities = {
         useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
     },
     kill(card, target) {
+
         if (card.ability.cost) {
             this.checkCost(card.ability.cost);
         }
@@ -113,7 +114,8 @@ export const abilities = {
         const index = cardField.indexOf(target);
         if (index !== -1) {
             target.killed = true;
-            useGeneralStore().updateDB()
+
+            useGeneralStore().updateBothDb()
             setTimeout(() => {
                 useGeneralStore().$state.opponent.activatedCard = null;
                 useGeneralStore().$state.freeze = false;
@@ -141,11 +143,10 @@ export const abilities = {
                 const modifiedCard = JSON.parse(JSON.stringify(selectedCard));
                 modifiedCard.id = modifiedCard.id += 'copy'
                 selectedCard.killed = true
-                console.log(modifiedCard)
-                // modifiedCard.killed = false
+
                 modifiedCard.canAttack = false
                 playerField.push(modifiedCard);
-                useGeneralStore().updateOpponentDB()
+                useGeneralStore().updateBothDb()
 
             }
         };

@@ -23,7 +23,7 @@
 
 <script>
 import { useGeneralStore } from '../../stores/generalStore'
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import gsap from 'gsap'
 import { connectStorageEmulator } from 'firebase/storage';
 export default {
@@ -36,7 +36,7 @@ export default {
                 original_hp: undefined
             },
             cardKilledHandled: false,
-            cardImage: null,
+
         }
     },
     props: {
@@ -53,7 +53,7 @@ export default {
         }
     },
     mounted() {
-        this.loadImage()
+
         this.$nextTick(() => {
             gsap.to(this.$el, {
                 width: '170px',
@@ -64,10 +64,6 @@ export default {
 
     },
     methods: {
-        async loadImage() {
-            const imagePath = './img' + this.propCard.imgPath;
-            this.cardImage = imagePath; // Access the default export
-        },
         attacked(e) {
             const attacker = this.generalStore.draggedCardObj
             const attackerProxy = this.generalStore.draggedCard
@@ -161,10 +157,17 @@ export default {
 
     },
     watch: {
+        // 'propCard.killed': {
+        //     handler(newVal, oldVal) {
+
+        //     },
+        //     immediate: true
+        // },
         'propCard.killed': {
             handler(newVal, oldVal) {
                 if (newVal) {
-                    if (!this.propCard.cardKilledHandled) {
+                    console.log(this.propCard)
+                    if (!this.propCard.cardKilledHandled && this.isPlayerOwned) {
                         this.propCard.cardKilledHandled = true;
 
                         if (this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled' && this.isPlayerOwned) {

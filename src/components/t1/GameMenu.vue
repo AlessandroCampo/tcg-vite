@@ -45,24 +45,21 @@ export default {
             this.$router.push('/battle')
         },
         async findMatch() {
-            // Get a reference to the Firestore user collection
+
             const usersCollection = collection(db, 'Users');
 
-            // Query users who are in the queue
+
             const querySnapshot = await getDocs(query(usersCollection, where('inQueue', '==', true)));
 
-            // Iterate through the query snapshot to find a match
+
             for (const doc of querySnapshot.docs) {
                 const opponent = doc.data();
 
-                // Check if the opponent is not the current player, is in the queue, and has a valid UID
-                if (opponent.uid !== this.generalStore.player.uid && opponent.uid !== undefined) {
-                    console.log(opponent, opponent.uid);
 
-                    // Assign the opponent's UID to the player's opponent UID
+                if (opponent.uid !== this.generalStore.player.uid && opponent.uid !== undefined) {
+
                     this.generalStore.opponentUid = opponent.uid;
 
-                    // Remove both players from the queue
 
 
                     // Update the database with the changes
@@ -72,7 +69,7 @@ export default {
                     // Redirect to the battle page
                     this.generalStore.battlePageFlag = true
                     this.$router.push('/battle');
-                    // this.generalStore.player.inQueue = false;
+
                     // opponent.inQueue = false;
                     // this.generalStore.battlePageFlag = false
 
@@ -81,13 +78,12 @@ export default {
                 }
             }
 
-            // If no match was found, log a message
-            console.log('No match found');
 
-            // Call the function recursively after a delay (e.g., 5 seconds)
+
+
             setTimeout(() => {
                 this.findMatch();
-            }, 1000); // Adjust the delay as needed
+            }, 1000);
         },
         changeFaction(color) {
             this.generalStore.color = color
