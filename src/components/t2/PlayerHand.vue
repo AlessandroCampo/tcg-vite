@@ -36,10 +36,8 @@ export default {
 
     watch: {
         'generalStore.player.activeTurn': async function (newTurn, oldTurn) {
-            if (newTurn) {
-
+            if (newTurn && this.generalStore.player.mana.total !== 1) {
                 this.generalStore.drawOne()
-
             }
         }
     }

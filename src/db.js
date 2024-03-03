@@ -39,19 +39,19 @@ class unit extends gameCard {
 let black = {
 
     name: 'black',
-    artwork: './src/assets/img/commanders/black.png',
+    artwork: '/commanders/black.png',
     colors: ['black']
 }
 
 let white = {
     name: 'white',
-    artwork: './src/assets/img/commanders/white.png',
+    artwork: '/commanders/white.png',
     colors: ['white']
 }
 
 let green = {
     name: 'green',
-    artwork: './src/assets/img/commanders/green.png',
+    artwork: '/commanders/green.png',
     colors: ['green']
 }
 
@@ -64,7 +64,7 @@ let wolf = new unit({
     name: 'wolf',
     op: { original: 2, current: 2 },
     hp: { original: 1, current: 1 },
-    imgPath: './src/assets/img/cards/wolf.png',
+    imgPath: '/cards/wolf.png',
     cost: { original: 1, current: 1 },
     ability: null,
     status: 'none',
@@ -87,7 +87,7 @@ let knight = new unit({
         current: 3
     },
     ability: null,
-    imgPath: './src/assets/img/cards/knight.png',
+    imgPath: '/cards/knight.png',
     cost: {
         original: 1,
         current: 1
@@ -111,7 +111,7 @@ let ogre = new unit({
         original: 2,
         current: 2
     },
-    imgPath: './src/assets/img/cards/ogre.png',
+    imgPath: '/cards/ogre.png',
     cost: {
         original: 2,
         current: 2
@@ -136,7 +136,7 @@ let sorceress = new unit({
         original: 1,
         current: 1
     },
-    imgPath: './src/assets/img/cards/sorceress.png',
+    imgPath: '/cards/sorceress.png',
     cost: {
         original: 1,
         current: 1
@@ -161,7 +161,7 @@ let reaper = new unit({
         original: 5,
         current: 5
     },
-    imgPath: './src/assets/img/cards/reaper.png',
+    imgPath: '/cards/reaper.png',
     cost: {
         original: 4,
         current: 4
@@ -186,7 +186,7 @@ let skeleton = new unit({
         original: 1,
         current: 1
     },
-    imgPath: './src/assets/img/cards/skeleton.png',
+    imgPath: '/cards/skeleton.png',
     cost: {
         original: 1,
         current: 1
@@ -211,7 +211,7 @@ let crow = new unit({
         original: 1,
         current: 1
     },
-    imgPath: './src/assets/img/cards/crow.png',
+    imgPath: '/cards/crow.png',
     cost: {
         original: 2,
         current: 2
@@ -237,7 +237,7 @@ let golem = new unit({
         original: 4,
         current: 4
     },
-    imgPath: './src/assets/img/cards/golem.png',
+    imgPath: '/cards/golem.png',
     cost: {
         original: 3,
         current: 3
@@ -264,7 +264,7 @@ let crusader = new unit({
         original: 2,
         current: 2
     },
-    imgPath: './src/assets/img/cards/crusader.png',
+    imgPath: '/cards/crusader.png',
     cost: {
         original: 1,
         current: 1
@@ -289,7 +289,7 @@ let peacekeeper = new unit({
         original: 5,
         current: 5
     },
-    imgPath: './src/assets/img/cards/peacekeeper.png',
+    imgPath: '/cards/peacekeeper.png',
     cost: {
         original: 4,
         current: 4
@@ -314,7 +314,7 @@ let pegasus = new unit({
         original: 4,
         current: 4
     },
-    imgPath: './src/assets/img/cards/pegasus.png',
+    imgPath: '/cards/pegasus.png',
     cost: {
         original: 3,
         current: 3
@@ -339,7 +339,7 @@ let joyce = new unit({
         original: 1,
         current: 1
     },
-    imgPath: './src/assets/img/cards/joyce.png',
+    imgPath: '/cards/joyce.png',
     cost: {
         original: 1,
         current: 1
@@ -364,7 +364,7 @@ let leonidas = new unit({
         original: 7,
         current: 7
     },
-    imgPath: './src/assets/img/cards/leonidas.png',
+    imgPath: '/cards/leonidas.png',
     cost: {
         original: 5,
         current: 5
@@ -384,7 +384,7 @@ let leonidas = new unit({
 
 let inner_fear = new gameCard({
     name: 'Inner Fear',
-    imgPath: './src/assets/img/cards/inner_fear.png',
+    imgPath: '/cards/inner_fear.png',
     cost: {
         original: 1,
         current: 1
@@ -397,7 +397,7 @@ let inner_fear = new gameCard({
 
 let pot_of_malice = new gameCard({
     name: 'Pot of Malice',
-    imgPath: './src/assets/img/cards/pot_of_malice.png',
+    imgPath: '/cards/pot_of_malice.png',
     cost: {
         original: 2,
         current: 2
@@ -410,7 +410,7 @@ let pot_of_malice = new gameCard({
 
 let blessing = new gameCard({
     name: 'Elijahs Blessing',
-    imgPath: './src/assets/img/cards/blessing.png',
+    imgPath: '/cards/blessing.png',
     cost: {
         original: 2,
         current: 2
@@ -423,7 +423,7 @@ let blessing = new gameCard({
 
 let brain_control = new gameCard({
     name: 'Pot of Malice',
-    imgPath: './src/assets/img/cards/brain_control.png',
+    imgPath: '/cards/brain_control.png',
     cost: {
         original: 3,
         current: 3
@@ -438,7 +438,7 @@ let brain_control = new gameCard({
 
 let dimensional_gate = new gameCard({
     name: 'Dimensional gate',
-    imgPath: './src/assets/img/cards/dimensional_gate.png',
+    imgPath: '/cards/dimensional_gate.png',
     cost: {
         original: 2,
         current: 2
@@ -451,7 +451,7 @@ let dimensional_gate = new gameCard({
 
 let trap_hole = new gameCard({
     name: 'Trap Hole',
-    imgPath: './src/assets/img/cards/trap_hole.png',
+    imgPath: '/cards/trap_hole.png',
     cost: {
         original: 2,
         current: 2

@@ -1,9 +1,10 @@
 <template>
-    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }"
-        :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
+    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + cardImage + ')' }" :draggable="isDraggable()"
+        @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
         :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
-        <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{ propCard.cost.current
-        }}
+        <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{
+        propCard.cost.current
+    }}
         </span>
         <span class="op stat" :class="statClass(propCard?.op.current, propCard?.op.original)"
             v-if="propCard.type == 'unit'"> {{ propCard?.op.current }}
@@ -15,7 +16,7 @@
             v-if="propCard.status === 'onField' && !propCard.canAttack">
     </div>
 </template>
-  
+
 
 <script>
 import { useGeneralStore } from '../../stores/generalStore'
@@ -32,6 +33,7 @@ export default {
                 original_hp: undefined
             },
             cardKilledHandled: false,
+            cardImage: null,
         }
     },
     props: {
@@ -48,6 +50,7 @@ export default {
         }
     },
     mounted() {
+        this.loadImage()
         this.$nextTick(() => {
             gsap.to(this.$el, {
                 width: '170px',
@@ -58,6 +61,10 @@ export default {
 
     },
     methods: {
+        async loadImage() {
+            const imagePath = './img' + this.propCard.imgPath;
+            this.cardImage = imagePath; // Access the default export
+        },
         attacked(e) {
             const attacker = this.generalStore.draggedCardObj
             const attackerProxy = this.generalStore.draggedCard
@@ -65,10 +72,10 @@ export default {
             const targetProxy = e.target
 
             if (!this.isValidAttackTarget(target, attacker, this.generalStore.opponent.field)) {
-    return
+                return
             }
 
-            
+
 
             this.generalStore.battle(attacker, target)
             this.generalStore.sendActionObj(attacker, target, 'attack')
@@ -125,64 +132,64 @@ export default {
             this.generalStore.draggedCard = this.$el;
             this.generalStore.draggedCardObj = this.propCard;
         },
-        isValidAttackTarget(target, attacker, opponentField, ) {
-    // Check if the attacker is owned by the player or if its status isn't 'onField'
-    if (this.isPlayerOwned || attacker.status !== 'onField') {
-        return false;
-    }
+        isValidAttackTarget(target, attacker, opponentField,) {
+            // Check if the attacker is owned by the player or if its status isn't 'onField'
+            if (this.isPlayerOwned || attacker.status !== 'onField') {
+                return false;
+            }
 
-    let foundGuardians = false;
+            let foundGuardians = false;
 
-    // Check if there are any guardians on the opponent's field
-    opponentField.forEach(unit => {
-        if (unit.attributes.includes('guardian')) {
-            foundGuardians = true;
+            // Check if there are any guardians on the opponent's field
+            opponentField.forEach(unit => {
+                if (unit.attributes.includes('guardian')) {
+                    foundGuardians = true;
+                }
+            });
+
+            // If guardians are found and the target is not a guardian, return false
+            if (foundGuardians && !target.attributes.includes('guardian') && !attacker.attributes.includes('fly')) {
+                return false;
+            } else {
+                // Otherwise, the attack target is valid
+                return true;
+            }
         }
-    });
-
-    // If guardians are found and the target is not a guardian, return false
-    if (foundGuardians && !target.attributes.includes('guardian') && !attacker.attributes.includes('fly')) {
-        return false;
-    } else {
-        // Otherwise, the attack target is valid
-        return true;
-    }
-}
 
     },
     watch: {
-       'propCard.killed': {
-    handler(newVal, oldVal) {
-        if (newVal) {   
-            if (!this.propCard.cardKilledHandled) {
-                this.propCard.cardKilledHandled = true;
+        'propCard.killed': {
+            handler(newVal, oldVal) {
+                if (newVal) {
+                    if (!this.propCard.cardKilledHandled) {
+                        this.propCard.cardKilledHandled = true;
 
-                if (this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled'  && this.isPlayerOwned) {
-                        
-                        this.generalStore.resolveAbility(this.propCard)
+                        if (this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled' && this.isPlayerOwned) {
+
+                            this.generalStore.resolveAbility(this.propCard)
+                        }
+
+                        setTimeout(() => {
+                            const player = this.generalStore.player;
+                            const opponent = this.generalStore.opponent;
+                            const removedFromPlayerField = player.field.some(card => card.id === this.propCard.id);
+                            const removedFromOpponentField = opponent.field.some(card => card.id === this.propCard.id);
+
+                            if (removedFromPlayerField) {
+                                player.field = player.field.filter(card => card.id !== this.propCard.id);
+                                this.generalStore.updateDB();
+                            } else if (removedFromOpponentField) {
+                                opponent.field = opponent.field.filter(card => card.id !== this.propCard.id);
+                                this.generalStore.updateOpponentDB();
+                            }
+
+
+                        }, 1500);
                     }
-
-                setTimeout(() => {
-                    const player = this.generalStore.player;
-                    const opponent = this.generalStore.opponent;
-                    const removedFromPlayerField = player.field.some(card => card.id === this.propCard.id);
-                    const removedFromOpponentField = opponent.field.some(card => card.id === this.propCard.id);
-
-                    if (removedFromPlayerField) {
-                        player.field = player.field.filter(card => card.id !== this.propCard.id);
-                        this.generalStore.updateDB();
-                    } else if (removedFromOpponentField) {
-                        opponent.field = opponent.field.filter(card => card.id !== this.propCard.id);
-                        this.generalStore.updateOpponentDB();
-                    }
-
-                    
-                }, 1500);
-            }
+                }
+            },
+            immediate: true
         }
-    },
-    immediate: true
-}
 
 
 
@@ -284,11 +291,11 @@ export default {
     }
 
     35% {
-        opacity: 0.8; 
+        opacity: 0.8;
     }
 
     100% {
-        opacity: 0.1; 
+        opacity: 0.1;
     }
 }
 </style>

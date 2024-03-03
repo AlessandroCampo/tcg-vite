@@ -14,7 +14,7 @@ export const abilities = {
             setTimeout(() => {
                 useGeneralStore().$state.player.activatedCard = null
                 useGeneralStore().updateDB()
-            }, 500)
+            }, 1000)
         }
     },
     modifyStat(card) {
@@ -118,7 +118,7 @@ export const abilities = {
                 useGeneralStore().$state.opponent.activatedCard = null;
                 useGeneralStore().$state.freeze = false;
                 useGeneralStore().updateBothDb()
-            }, 1000)
+            }, 1300)
         }
     },
     steal(card) {
@@ -182,7 +182,7 @@ export const abilities = {
         setTimeout(() => {
             useGeneralStore().$state.player.activatedCard = null
             useGeneralStore().updateDB()
-        }, 800)
+        }, 1200)
 
     }
 

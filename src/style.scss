@@ -12,7 +12,16 @@ body {
 }
 
 .playerfield-container .card-base {
-  scale: 0.8 !important
+  scale: 0.8 !important;
+
+  &:hover {
+    scale: 1.2 !important;
+  }
+
+  &:active {
+    scale: 0.8 !important;
+    transform: 0 !important;
+  }
 }
 
 

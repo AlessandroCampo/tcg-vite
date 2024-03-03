@@ -3,7 +3,7 @@ import { reactive } from 'vue';
 import { allCards, allCommanders } from '../db.js'
 import { abilities } from './abilities.js';
 import { useFirestore, useDocument } from 'vuefire'
-import { doc, collection, setDoc, updateDoc } from 'firebase/firestore'
+import { doc, collection, setDoc, updateDoc, runTransaction, writeBatch } from 'firebase/firestore'
 import gsap from 'gsap'
 
 
@@ -31,6 +31,7 @@ export const useGeneralStore = defineStore('generalStore', {
         player: {
             inQueue: false,
             winner: false,
+            decided: false,
             uid: '',
             username: '',
             activeTurn: true,
@@ -113,8 +114,12 @@ export const useGeneralStore = defineStore('generalStore', {
             }
         },
         firstTurn() {
-            this.player.activeTurn = !this.opponent.activeTurn
-            this.updateBothDb();
+            if (!this.opponent.decided) {
+                this.player.activeTurn = !this.opponent.activeTurn
+                this.player.decided = true
+                this.updateBothDb();
+            }
+
         }
         ,
         isPlayerOne(id) {
@@ -194,6 +199,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 if (card.type == 'spell') {
                     this.player.activatedCard = null
                     this.updateDB()
+                    setTimeout(() => { this.player.activatedCard = null }, 1000)
                 } else if (card.type == 'unit') {
                 }
                 return
@@ -233,7 +239,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 return
             }
             let effect = new Image()
-            effect.src = "./src/assets/img/animations/effect.gif"
+            effect.src = "./img/animations/effect.gif"
             effect.className = "icon"
             if (cardElement) {
                 cardElement.append(effect)
@@ -310,10 +316,15 @@ export const useGeneralStore = defineStore('generalStore', {
             this.updateDB()
 
         },
-        updateBothDb() {
-            this.updateDB()
-            this.updateOpponentDB()
-        },
+        async updateBothDb() {
+            const batch = writeBatch(db);
+            const playerRef = doc(db, 'Users', this.player.uid);
+            batch.update(playerRef, { ...this.player });
+            const opponentRef = doc(db, 'Users', this.opponentUid);
+            batch.update(opponentRef, { ...this.opponent });
+            await batch.commit();
+        }
+        ,
         summonUnit(propCard) {
             const playerFieldArray = this.player.field
             const playerHandArray = this.player.hand
@@ -370,8 +381,8 @@ export const useGeneralStore = defineStore('generalStore', {
                     dmgIcon.classList.add('icon')
                     let dmgIcon2 = document.createElement('div')
                     dmgIcon2.classList.add('icon')
-                    dmgIcon.style.backgroundImage = "url('./src/assets/img/animations/icon_damage.png')"
-                    dmgIcon2.style.backgroundImage = "url('./src/assets/img/animations/icon_damage.png')"
+                    dmgIcon.style.backgroundImage = "url('./img/animations/icon_damage.png')"
+                    dmgIcon2.style.backgroundImage = "url('./img/animations/icon_damage.png')"
                     dmgIcon.innerText = '-' + defDmg
                     dmgIcon2.innerText = '-' + attackDmg
                     if (defDmg) {
@@ -435,6 +446,7 @@ export const useGeneralStore = defineStore('generalStore', {
                     this.opponent.traps.splice(index, 1)
                     abilities[trap.ability.effect](trap, trapTarget, attackTarget);
                     this.updateBothDb()
+                    // setTimeout(() => { this.opponent.activatedCard = null; this.player.activatedCard = null; this.updateBothDb }, 1400)
                 }
             })
             return foundTrap

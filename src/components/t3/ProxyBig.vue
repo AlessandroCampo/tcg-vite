@@ -1,7 +1,8 @@
 <template>
-    <div class="card-base" :style="{ 'background-image': 'url(' + propCard.imgPath + ')' }" ref="card-big" :class="[]">
+    <div class="card-base" :style="{ 'background-image': 'url(' + 'img/' + propCard.imgPath + ')' }" ref="card-big"
+        :class="[]">
         <span class="cost stat"> {{ propCard.cost.current
-        }}
+            }}
         </span>
         <span class="op stat" v-if="propCard.type == 'unit'"> {{ propCard?.op.current }}
         </span>

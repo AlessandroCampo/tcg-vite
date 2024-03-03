@@ -1,6 +1,6 @@
 <template>
     <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent id="enemy-hero-cont">
-        <img :src="generalStore.opponent.commander?.artwork" alt="" id="enemy-hero" class="hero-avatar"
+        <img :src="'/img' + generalStore.opponent.commander?.artwork" alt="" id="enemy-hero" class="hero-avatar"
             :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
@@ -17,10 +17,17 @@ import ManaBar from './ManaBar.vue'
 export default {
     data() {
         return {
-            generalStore: useGeneralStore()
+            generalStore: useGeneralStore(),
+            commanderImage: null
         }
     },
+    created() {
+        // this.getImage()
+    },
     methods: {
+        getImage() {
+            this.commanderImage = '/img' + this.generalStore.opponent.commander.artwork
+        },
         directAttack(e) {
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
