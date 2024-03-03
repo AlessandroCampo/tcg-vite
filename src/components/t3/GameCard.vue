@@ -1,20 +1,23 @@
 <template>
-    <div class="card-base in-hand" :style="{ 'background-image': 'url(' + cardImage + ')' }" :draggable="isDraggable()"
-        @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
+    <div class="card-base in-hand" :style="{ 'background-image': `url(./img${propCard.imgPath})` }"
+        :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
         :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
-        <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)"> {{
-        propCard.cost.current
-    }}
+        <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)">
+            {{ propCard.cost.current }}
         </span>
         <span class="op stat" :class="statClass(propCard?.op.current, propCard?.op.original)"
-            v-if="propCard.type == 'unit'"> {{ propCard?.op.current }}
+            v-if="propCard.type == 'unit'">
+            {{ propCard?.op.current }}
         </span>
         <span class="hp stat" :class="statClass(propCard?.hp.current, propCard?.hp.original)"
-            v-if="propCard.type == 'unit'"> {{ propCard?.hp.current }}
+            v-if="propCard.type == 'unit'">
+            {{ propCard?.hp.current }}
         </span>
         <img src="../../assets/img/animations/sleep.gif" alt="" class="animation"
             v-if="propCard.status === 'onField' && !propCard.canAttack">
     </div>
+
+
 </template>
 
 
