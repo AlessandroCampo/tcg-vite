@@ -40,13 +40,13 @@ let black = {
 
     name: 'black',
     artwork: '/commanders/black.png',
-    colors: ['black']
+    colors: ['black'],
 }
 
 let white = {
     name: 'white',
     artwork: '/commanders/white.png',
-    colors: ['white']
+    colors: ['white'],
 }
 
 let green = {
@@ -462,7 +462,7 @@ let trap_hole = new gameCard({
     color: null
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight,  pot_of_malice, brain_control, blessing, dimensional_gate, trap_hole]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, reaper, sorceress, skeleton, pot_of_malice, brain_control, blessing, inner_fear, dimensional_gate, trap_hole]
 export const allCommanders = [black, white]
 
 

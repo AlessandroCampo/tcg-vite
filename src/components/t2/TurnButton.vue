@@ -33,8 +33,7 @@ export default {
             }
 
             this.generalStore.opponent.mana.current = this.generalStore.opponent.mana.total
-            this.generalStore.updateDB()
-            this.generalStore.updateOpponentDB()
+            this.generalStore.updateBothDb()
         }
     }
 }
