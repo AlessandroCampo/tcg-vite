@@ -39,6 +39,7 @@ export const useGeneralStore = defineStore('generalStore', {
             deck: [],
             hand: [],
             field: [],
+            graveyard: [],
             traps: [],
             commander: allCommanders[0],
             lp: 30,
@@ -113,11 +114,11 @@ export const useGeneralStore = defineStore('generalStore', {
                 this.freeze = false;
             }
         },
-        firstTurn() {
+        async firstTurn() {
             if (!this.opponent.decided) {
                 this.player.activeTurn = !this.opponent.activeTurn
                 this.player.decided = true
-                this.updateBothDb();
+                await this.updateBothDb();
             }
 
         }
@@ -287,6 +288,8 @@ export const useGeneralStore = defineStore('generalStore', {
             } else if (activated.status == 'onField' && activated.ability.triggerTiming == 'onKilled' && activated.type == 'unit') {
                 abilities[activated.ability.effect](activated);
                 // this.updateBothDb()
+            } else if (activated.type == 'commander') {
+                abilities[activated.ability.effect](activated);
             }
 
         },
@@ -310,13 +313,15 @@ export const useGeneralStore = defineStore('generalStore', {
             this.updateBothDb()
         },
         drawOne() {
-            let randomIndex = Math.floor(Math.random() * this.player.deck.length)
-            this.player.deck[randomIndex].status = 'inHand'
-            this.player.hand.push(this.player.deck[randomIndex])
-            this.player.deck.splice(randomIndex, 1)
-            this.updateDB()
-
-        },
+            let randomIndex = Math.floor(Math.random() * this.player.deck.length);
+            let drawnCard = this.player.deck[randomIndex]; // Store the drawn card in a variable
+            drawnCard.status = 'inHand';
+            this.player.hand.push(drawnCard);
+            this.player.deck.splice(randomIndex, 1);
+            this.updateDB();
+            return drawnCard; // Return the drawn card
+        }
+        ,
         async updateBothDb() {
             const batch = writeBatch(db);
             const playerRef = doc(db, 'Users', this.player.uid);

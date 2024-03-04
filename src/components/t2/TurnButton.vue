@@ -33,6 +33,7 @@ export default {
             }
 
             this.generalStore.opponent.mana.current = this.generalStore.opponent.mana.total
+            this.generalStore.opponent.commander.used = false
             this.generalStore.updateBothDb()
         }
     }

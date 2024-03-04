@@ -1,10 +1,14 @@
 <template>
     <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent id="enemy-hero-cont">
         <img :src="'/img' + generalStore.opponent.commander?.artwork" alt="" id="enemy-hero" class="hero-avatar"
-            :class="generalStore.opponent.activeTurn ? '' : 'disabled'">
+            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'">
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
         </SecretsCounter>
+
+        <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
+            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
+            class="commander-power">
     </figure>
 </template>
 
@@ -60,7 +64,6 @@ export default {
             this.generalStore.updateBothDb()
             this.generalStore.resetActionObj()
             this.generalStore.animateAttack(attackerProxy, document.getElementById('enemy-hero-cont'), damage)
-            // Function to update LP value gradually
             if (this.generalStore.player.activeTurn && this.generalStore.opponent.traps.length > 0) {
                 const trapFound = this.generalStore.checkTraps(attacker, null, 'onAttack');
 
@@ -68,20 +71,16 @@ export default {
             }
             const updateLP = () => {
                 if (this.generalStore.opponent.lp > initialLP - damage) {
-                    // Decrement LP value
                     this.generalStore.opponent.lp--;
                     if (this.generalStore.opponent.lp < 0) {
                         this.generalStore.opponent.lp = 0
                     }
-                    // Schedule next update
                     setTimeout(updateLP, interval);
                 }
             };
 
-            // Start countdown animation
             updateLP();
 
-            // Update database after countdown animation completes
             setTimeout(() => {
                 if (this.generalStore.opponent.lp <= 0) {
                     this.generalStore.player.winner = true
@@ -121,5 +120,19 @@ export default {
 
 img.disabled {
     filter: grayscale(70%);
+}
+
+.commander-power {
+    width: 150px;
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -80%;
+
+    &:hover {
+        scale: 2;
+        transform: translateY(-20%);
+    }
 }
 </style>

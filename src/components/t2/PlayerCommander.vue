@@ -1,10 +1,14 @@
 <template>
     <figure class="player-hero" id="player-hero-cont">
         <img :src="'/img' + generalStore.player.commander?.artwork" alt="" id="player-hero" class="hero-avatar"
-            :class="generalStore.player.activeTurn ? '' : 'disabled'">
+            :class="generalStore.player.activeTurn && !generalStore.player.commander.used ? '' : 'disabled'"
+            @click="commanderPower()">
         <ManaBar :propMana="generalStore.player.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore.player.traps.length > 0" :propCommander='"player"'>
         </SecretsCounter>
+        <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
+            :class="generalStore.player.activeTurn && !generalStore.player.commander.used ? '' : 'disabled'"
+            class="commander-power" @click="commanderPower()">
     </figure>
 </template>
 
@@ -12,6 +16,7 @@
 import { useGeneralStore } from '../../stores/generalStore';
 import ManaBar from './ManaBar.vue'
 import SecretsCounter from '../t3/SecretsCounter.vue';
+import { abilities } from '../../stores/abilities';
 
 export default {
     data() {
@@ -21,7 +26,12 @@ export default {
     },
     components: { ManaBar, SecretsCounter },
     methods: {
-
+        commanderPower() {
+            if (this.generalStore.player.commander.used) return
+            const commander = this.generalStore.player.commander
+            commander.used = true
+            this.generalStore.resolveAbility(commander)
+        }
     }
 }
 </script>
@@ -47,6 +57,20 @@ export default {
     bottom: 1.6%;
     width: fit-content;
     z-index: 4200;
+}
+
+.commander-power {
+    width: 150px;
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -80%;
+
+    &:hover {
+        scale: 2;
+        transform: translateY(-40%);
+    }
 }
 
 

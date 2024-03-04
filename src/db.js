@@ -40,13 +40,24 @@ let black = {
 
     name: 'black',
     artwork: '/commanders/black.png',
+    abilityArtwork: '/commanders/black_power.png',
     colors: ['black'],
+    ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: 'index == 0', ownGraveyard: true, description: 'Pay  2 mana: Reborn the first unit in your graveyard' },
+    type: 'commander',
+    used: false,
+
 }
 
 let white = {
     name: 'white',
     artwork: '/commanders/white.png',
+    abilityArtwork: '/commanders/white_power.png',
     colors: ['white'],
+    ability:
+        { effect: 'drawAndGain', draw_amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: null, gain_amount: 'card.cost.current', gain: true },
+
+    type: 'commander',
+    used: false,
 }
 
 let green = {
@@ -366,8 +377,8 @@ let leonidas = new unit({
     },
     imgPath: '/cards/leonidas.png',
     cost: {
-        original: 5,
-        current: 5
+        original: 6,
+        current: 6
     },
     ability: { effect: 'modifyStat', condition: "player.lp > 30", triggerTiming: 'onPlay', cost: null, amount: 5, selfTarget: true, buff: true, targetStat: 'op' },
     status: 'none',
@@ -434,6 +445,19 @@ let brain_control = new gameCard({
     color: 'black'
 })
 
+let called_from_grave = new gameCard({
+    name: 'Called from the grave',
+    imgPath: '/cards/called_from_grave.png',
+    cost: {
+        original: 3,
+        current: 3
+    },
+    ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: null, condition: 'index == graveyard.length - 1', ownGraveyard: true },
+    type: 'spell',
+    playerOwned: false,
+    color: null
+})
+
 //*** CARDS [TRAPS] */
 
 let dimensional_gate = new gameCard({
@@ -462,7 +486,7 @@ let trap_hole = new gameCard({
     color: null
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, reaper, sorceress, skeleton, pot_of_malice, brain_control, blessing, inner_fear, dimensional_gate, trap_hole]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave]
 export const allCommanders = [black, white]
 
 

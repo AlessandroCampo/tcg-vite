@@ -1,7 +1,8 @@
 <template>
     <div class="card-base in-hand" :style="{ 'background-image': `url(./img${propCard.imgPath})` }"
         :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
-        :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '']" :id="propCard.id">
+        :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '', playble() ? '' : 'not-playble']"
+        :id="propCard.id">
         <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)">
             {{ propCard.cost.current }}
         </span>
@@ -153,16 +154,17 @@ export default {
                 // Otherwise, the attack target is valid
                 return true;
             }
+        },
+        playble() {
+            if (this.generalStore.player.mana.current >= this.propCard.cost.current) {
+                return true
+            } else {
+                return false
+            }
         }
 
     },
     watch: {
-        // 'propCard.killed': {
-        //     handler(newVal, oldVal) {
-
-        //     },
-        //     immediate: true
-        // },
         'propCard.killed': {
             handler(newVal, oldVal) {
                 if (newVal) {
@@ -175,18 +177,20 @@ export default {
                             this.generalStore.resolveAbility(this.propCard)
                         }
 
-                        setTimeout(() => {
+                        setTimeout(async () => {
                             const player = this.generalStore.player;
                             const opponent = this.generalStore.opponent;
                             const removedFromPlayerField = player.field.some(card => card.id === this.propCard.id);
                             const removedFromOpponentField = opponent.field.some(card => card.id === this.propCard.id);
 
                             if (removedFromPlayerField) {
+                                player.graveyard.push(this.propCard)
                                 player.field = player.field.filter(card => card.id !== this.propCard.id);
-                                this.generalStore.updateDB();
+                                console.log(this.generalStore.player.graveyard)
+                                await this.generalStore.updateDB();
                             } else if (removedFromOpponentField) {
                                 opponent.field = opponent.field.filter(card => card.id !== this.propCard.id);
-                                this.generalStore.updateOpponentDB();
+                                await this.generalStore.updateOpponentDB();
                             }
 
 
@@ -226,6 +230,7 @@ export default {
         z-index: 20;
         cursor: grab;
     }
+
 
     &:active {
         scale: 1;
@@ -289,6 +294,10 @@ export default {
     animation: fadeOut 1.8s ease-out forwards;
 }
 
+.hand-container .card-base.not-playble:hover {
+    box-shadow: 0px 0px 10px 5px crimson;
+    border: 2px solid crimson;
+}
 
 
 @keyframes fadeOut {

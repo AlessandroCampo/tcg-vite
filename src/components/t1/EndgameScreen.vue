@@ -3,8 +3,8 @@
         <h2>
             {{ propWinner ? 'YOU WON' : 'YOU LOST' }}
         </h2>
-        <button>
-            <router-link to="/" class="link">BACK TO HOME </router-link>
+        <button @click="backToMenu">
+            BACK TO HOME
         </button>
     </div>
 
@@ -14,7 +14,13 @@
 
 import { RouterLink } from 'vue-router';
 export default {
-    props: ['propWinner']
+    props: ['propWinner'],
+    methods: {
+        backToMenu() {
+            this.player.winner = false
+            this.$router.push('/');
+        }
+    }
 }
 </script>
 
