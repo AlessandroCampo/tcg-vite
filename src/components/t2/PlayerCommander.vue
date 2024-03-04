@@ -2,11 +2,11 @@
     <figure class="player-hero" id="player-hero-cont">
         <img :src="'/img' + generalStore.player.commander?.artwork" alt="" id="player-hero" class="hero-avatar"
             :class="generalStore.player.activeTurn && !generalStore.player.commander.used ? '' : 'disabled'"
-            @click="commanderPower()">
+            @click="commanderPower()" draggable="true" @dragstart="startDrag($event)">
         <ManaBar :propMana="generalStore.player.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore.player.traps.length > 0" :propCommander='"player"'>
         </SecretsCounter>
-        <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
+        <img :src="'/img' + generalStore.player.commander?.abilityArtwork" alt=""
             :class="generalStore.player.activeTurn && !generalStore.player.commander.used ? '' : 'disabled'"
             class="commander-power" @click="commanderPower()">
     </figure>
@@ -31,6 +31,11 @@ export default {
             const commander = this.generalStore.player.commander
             commander.used = true
             this.generalStore.resolveAbility(commander)
+        },
+        startDrag(e) {
+            this.generalStore.draggedCard = this.$el;
+            this.generalStore.draggedCardObj = this.generalStore.player.commander
+            console.log(this.generalStore.draggedCardObj)
         }
     }
 }
