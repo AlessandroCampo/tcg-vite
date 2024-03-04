@@ -22,6 +22,7 @@
 
 <script>
 import { RouterLink } from 'vue-router';
+import { allCommanders } from '../../db';
 import { useGeneralStore } from '../../stores/generalStore';
 import { useFirestore, useDocument } from 'vuefire'
 import { doc, collection, getDocs, query, where, updateDoc } from 'firebase/firestore';
@@ -87,6 +88,12 @@ export default {
         },
         changeFaction(color) {
             this.generalStore.color = color
+            if (color == 'white') {
+                this.generalStore.player.commander = allCommanders[1]
+            } else if (color == 'black') {
+                this.generalStore.player.commander = allCommanders[0]
+            }
+
         }
     }
 }

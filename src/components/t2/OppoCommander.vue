@@ -1,15 +1,17 @@
 <template>
-    <figure class="enemy-hero" @drop="directAttack($event)" @dragover.prevent id="enemy-hero-cont">
+    <figure class="enemy-hero" id="enemy-hero-cont">
         <img :src="'/img' + generalStore.opponent.commander?.artwork" alt="" id="enemy-hero" class="hero-avatar"
-            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'">
+            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
+            @dragover.prevent @drop="directAttack($event)" @dragenter.prevent>
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
         </SecretsCounter>
 
-        <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
-            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
-            class="commander-power">
+
     </figure>
+    <!-- <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
+        :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
+        class="commander-power"> -->
 </template>
 
 <script>
@@ -33,7 +35,7 @@ export default {
             this.commanderImage = '/img' + this.generalStore.opponent.commander.artwork
         },
         directAttack(e) {
-
+            console.log('dropped')
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;
@@ -98,8 +100,9 @@ export default {
 <style lang="scss" scoped>
 .hero-avatar {
     clip-path: circle();
-
     width: 205px;
+    z-index: 10000000000;
+    margin: 0;
 }
 
 .secrets {
@@ -122,17 +125,16 @@ img.disabled {
     filter: grayscale(70%);
 }
 
-.commander-power {
-    width: 150px;
-    position: absolute;
-    cursor: pointer;
-    top: 50%;
-    transform: translateY(-50%);
-    right: -80%;
+// .commander-power {
+//     width: 150px;
+//     position: absolute;
+//     cursor: pointer;
+//     top: 50%;
+//     transform: translateY(-50%);
+//     right: -80%;
 
-    &:hover {
-        scale: 2;
-        transform: translateY(-20%);
-    }
-}
-</style>
+//     &:hover {
+//         scale: 2;
+//         transform: translateY(-20%);
+//     }
+// }</style>

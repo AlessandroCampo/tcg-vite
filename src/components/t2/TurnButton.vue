@@ -26,8 +26,8 @@ export default {
                     unit.canAttack = true
                 }
             });
-            this.generalStore.player.activeTurn = !this.generalStore.player.activeTurn
-            this.generalStore.opponent.activeTurn = !this.generalStore.opponent.activeTurn
+            this.generalStore.player.activeTurn = false
+            this.generalStore.opponent.activeTurn = true
             if (this.generalStore.opponent.mana.total < 10) {
                 this.generalStore.opponent.mana.total++
             }
