@@ -2,7 +2,7 @@
 
     <div class="home_menu">
         <nav>
-            <button @click="joinQueue"> {{ !this.generalStore.player.inQueue ? 'PLAY' : 'IN QUEUE' }} </button>
+            <button @click="joinQueue"> {{ !this.generalStore.playerInfo.inQueue ? 'PLAY' : 'IN QUEUE' }} </button>
             <button> COLLECTION </button>
             <button> SHOP </button>
             <button> QUIT </button>
@@ -37,9 +37,16 @@ export default {
     },
     methods: {
         async joinQueue() {
-            this.generalStore.player.inQueue = true
-            this.generalStore.updateDB()
-            await this.findMatch()
+            if (!this.generalStore.playerInfo.inQueue) {
+                this.generalStore.playerInfo.inQueue = true
+                this.generalStore.updatePlayerInfoDB()
+                await this.findMatch()
+            } else {
+                this.generalStore.playerInfo.inQueue = false
+                this.generalStore.updatePlayerInfoDB()
+            }
+
+
 
         },
         goToBattle() {

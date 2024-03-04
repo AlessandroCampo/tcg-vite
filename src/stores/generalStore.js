@@ -29,8 +29,8 @@ export const useGeneralStore = defineStore('generalStore', {
         summonedUnitCard: undefined,
         summonedUnitObj: undefined,
         player: {
-            inQueue: false,
             winner: false,
+            gameover: false,
             decided: false,
             uid: '',
             username: '',
@@ -54,6 +54,12 @@ export const useGeneralStore = defineStore('generalStore', {
                 total: 1
             }
 
+        },
+        playerInfo: {
+            inQueue: false,
+            uid: '',
+            username: '',
+            email: ''
         },
         opponent: {}
     }),
@@ -172,10 +178,12 @@ export const useGeneralStore = defineStore('generalStore', {
             switch (this.color) {
                 case 'black':
                     this.player.commander = allCommanders[0];
+                    this.player.lp = this.player.commander.lp
 
                     break;
                 case 'white':
                     this.player.commander = allCommanders[1];
+                    this.player.lp = this.player.commander.lp
 
                     break;
                 default:
@@ -183,17 +191,7 @@ export const useGeneralStore = defineStore('generalStore', {
             }
             this.updateDB()
         },
-        async updateDB() {
-            const playerRef = doc(db, 'Users', this.player.uid);
-            const playerObjCopy = { ...this.player };
-            await updateDoc(playerRef, playerObjCopy);
-        },
 
-        async updateOpponentDB() {
-            const opponentRef = doc(db, 'Users', this.opponentUid);
-            const opponentObjCopy = { ...this.opponent };
-            await updateDoc(opponentRef, opponentObjCopy);
-        },
 
         checkAbility(name, card) {
             if (card.ability.target && this.opponent.field.length == 0) {
@@ -320,15 +318,30 @@ export const useGeneralStore = defineStore('generalStore', {
             this.player.deck.splice(randomIndex, 1);
             this.updateDB();
             return drawnCard; // Return the drawn card
-        }
-        ,
+        },
+        async updateDB() {
+            const playerRef = doc(db, 'Users', this.player.uid, 'GameState', 'GameState' + this.player.uid);
+            const playerObjCopy = { ...this.player };
+            await updateDoc(playerRef, playerObjCopy);
+        },
+
+        async updateOpponentDB() {
+            const opponentRef = doc(db, 'Users', this.opponentUid, 'GameState', 'GameState' + this.opponentUid);
+            const opponentObjCopy = { ...this.opponent };
+            await updateDoc(opponentRef, opponentObjCopy);
+        },
         async updateBothDb() {
             const batch = writeBatch(db);
-            const playerRef = doc(db, 'Users', this.player.uid);
+            const playerRef = doc(db, 'Users', this.player.uid, 'GameState', 'GameState' + this.player.uid);
             batch.update(playerRef, { ...this.player });
-            const opponentRef = doc(db, 'Users', this.opponentUid);
+            const opponentRef = doc(db, 'Users', this.opponentUid, 'GameState', 'GameState' + this.opponentUid);
             batch.update(opponentRef, { ...this.opponent });
             await batch.commit();
+        },
+        async updatePlayerInfoDB() {
+            const playerRef = doc(db, 'Users', this.player.uid);
+            const playerInfoObjCopy = { ...this.playerInfo };
+            await updateDoc(playerRef, playerInfoObjCopy);
         }
         ,
         summonUnit(propCard) {

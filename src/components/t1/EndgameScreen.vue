@@ -13,11 +13,12 @@
 <script>
 
 import { RouterLink } from 'vue-router';
+import { useGeneralStore } from '../../stores/generalStore';
 export default {
     props: ['propWinner'],
     methods: {
         backToMenu() {
-            this.player.winner = false
+            useGeneralStore().player.winner = false
             this.$router.push('/');
         }
     }

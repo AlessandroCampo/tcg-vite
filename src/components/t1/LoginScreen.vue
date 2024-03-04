@@ -78,14 +78,29 @@ export default {
                 const userCredential = await createUserWithEmailAndPassword(auth, this.newAccData.mail, this.newAccData.pass);
                 const user = userCredential.user;
                 this.generalStore.player.username = this.newAccData.username
-                console.log(this.generalStore.player.username)
+                this.generalStore.playerInfo.username = this.newAccData.username
+                this.generalStore.playerInfo.uid = user.uid
+                this.generalStore.player.mail = this.newAccData.mail
 
-                await setDoc(doc(db, "Users", user.uid), {
+                // Assuming you have a reference to the Firestore database instance in 'db' and the user object in 'user'
+
+                // Create a document for the user with general information
+                const userDocRef = doc(db, "Users", user.uid);
+                await setDoc(userDocRef, {
                     username: this.newAccData.username,
-                    password: this.newAccData.pass,
                     email: this.newAccData.mail,
                     uid: user.uid,
                 });
+
+                // Create a subcollection within the user document
+                const gameStateCollectionRef = collection(userDocRef, 'GameState');
+
+                // Add a document to the subcollection (optional)
+                const gameStateDocRef = doc(gameStateCollectionRef, 'GameState' + user.uid); // Adjust 'specificDocumentId' as needed
+                await setDoc(gameStateDocRef, {
+                    collection: [],
+                });
+
 
                 console.log("User successfully signed up!");
             } catch (error) {

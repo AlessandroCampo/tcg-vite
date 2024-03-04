@@ -45,6 +45,7 @@ let black = {
     ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: 'index == 0', ownGraveyard: true, description: 'Pay  2 mana: Reborn the first unit in your graveyard' },
     type: 'commander',
     used: false,
+    lp: 27
 
 }
 
@@ -58,6 +59,7 @@ let white = {
 
     type: 'commander',
     used: false,
+    lp: 30
 }
 
 let green = {
@@ -486,7 +488,7 @@ let trap_hole = new gameCard({
     color: null
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice]
 export const allCommanders = [black, white]
 
 

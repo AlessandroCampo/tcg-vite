@@ -223,8 +223,9 @@ export const abilities = {
                 unit.killed = false;
                 unit.hp.current = unit.hp.original;
                 unit.canAttack = false
+                unit.cardKilledHandled = false
                 rebornTarget = unit;
-                break; // Exit the loop after reborn the first unit that meets the condition
+                break;
             }
         }
         if (rebornTarget) {

@@ -86,6 +86,8 @@ export default {
             setTimeout(() => {
                 if (this.generalStore.opponent.lp <= 0) {
                     this.generalStore.player.winner = true
+                    this.generalStore.player.gameover = true
+                    this.generalStore.opponent.gameover = true
                 }
                 this.generalStore.updateBothDb();
             }, interval * iterations);

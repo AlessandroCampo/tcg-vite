@@ -1,5 +1,5 @@
 <template>
-    <div id="battlefield-container" v-if="!this.generalStore.player.winner && !this.generalStore.opponent.winner">
+    <div id="battlefield-container" v-if="!this.generalStore.player.gameover">
         <transition name="fade">
             <div v-if="generalStore.player.activatedCard || generalStore.opponent.activatedCard">
                 <ProxyBig :propCard="generalStore.player.activatedCard || generalStore.opponent.activatedCard">
@@ -56,7 +56,7 @@ export default {
     async created() {
         this.generalStore.opponentUid
 
-        const oppo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.opponentUid), (doc) => {
+        const oppo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.opponentUid, 'GameState', 'GameState' + this.generalStore?.opponentUid), (doc) => {
             this.generalStore.opponent = doc.data()
         });
         setTimeout(() => {
