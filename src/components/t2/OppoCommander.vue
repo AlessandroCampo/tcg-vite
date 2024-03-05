@@ -6,12 +6,12 @@
         <ManaBar :propMana="generalStore.opponent.mana"></ManaBar>
         <SecretsCounter class="secrets" v-if="generalStore?.opponent?.traps?.length" :propCommander='"enemy"'> 0">
         </SecretsCounter>
-
+        <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
+            :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
+            class="commander-power">
 
     </figure>
-    <!-- <img :src="'/img' + generalStore.opponent.commander?.abilityArtwork" alt=""
-        :class="generalStore.opponent.activeTurn && !generalStore.opponent.commander.used ? '' : 'disabled'"
-        class="commander-power"> -->
+
 </template>
 
 <script>
@@ -127,16 +127,17 @@ img.disabled {
     filter: grayscale(70%);
 }
 
-// .commander-power {
-//     width: 150px;
-//     position: absolute;
-//     cursor: pointer;
-//     top: 50%;
-//     transform: translateY(-50%);
-//     right: -80%;
+.commander-power {
+    width: 150px;
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -80%;
 
-//     &:hover {
-//         scale: 2;
-//         transform: translateY(-20%);
-//     }
-// }</style>
+    &:hover {
+        scale: 2;
+        transform: translateY(-20%);
+    }
+}
+</style>

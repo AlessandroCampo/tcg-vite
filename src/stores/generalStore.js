@@ -61,7 +61,11 @@ export const useGeneralStore = defineStore('generalStore', {
             uid: '',
             username: '',
             email: '',
-            collection: []
+            collection: [],
+            deck: {
+                commander: null,
+                decklist: []
+            }
         },
         opponent: {}
     }),
@@ -154,17 +158,18 @@ export const useGeneralStore = defineStore('generalStore', {
             return ID + '-' + cardName + '-' + cardIndex
         },
         generateDeck() {
-            // for (let i = 0;i < 4;i++) {
-            //     this.cards.forEach((card) => {
-            //         if (card.color == this.color || !card.color) {
-            //             const cardCopy = { ...card };
-            //             const reactiveCard = reactive(cardCopy);
-            //             reactiveCard.id = this.generateCardId(i, card.name);
-            //             reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
-            //             this.player.deck.push(reactiveCard);
-            //         }
-            //     });
-            // }
+
+            this.playerInfo.deck.decklist.forEach((card, index) => {
+
+                const cardCopy = { ...card };
+                const reactiveCard = reactive(cardCopy);
+                reactiveCard.id = this.generateCardId(index, card.name);
+                reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
+                this.player.deck.push(reactiveCard);
+
+            });
+
+            // this.player.deck = this.playerInfo.deck.decklist
 
         },
         generateFirstHand(deck) {
@@ -177,20 +182,7 @@ export const useGeneralStore = defineStore('generalStore', {
 
         },
         assignCommander() {
-            switch (this.color) {
-                case 'black':
-                    this.player.commander = allCommanders[0];
-                    this.player.lp = this.player.commander.lp
-
-                    break;
-                case 'white':
-                    this.player.commander = allCommanders[1];
-                    this.player.lp = this.player.commander.lp
-
-                    break;
-                default:
-                    this.player.commander = allCommanders[0];
-            }
+            this.player.commander = this.playerInfo.deck.commander
             this.updateDB()
         },
 
@@ -341,6 +333,7 @@ export const useGeneralStore = defineStore('generalStore', {
             await batch.commit();
         },
         async updatePlayerInfoDB() {
+            console.log('info updated ')
             const playerRef = doc(db, 'Users', this.player.uid);
             const playerInfoObjCopy = { ...this.playerInfo };
             await updateDoc(playerRef, playerInfoObjCopy);

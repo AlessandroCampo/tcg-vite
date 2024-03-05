@@ -3,17 +3,18 @@
 
         <div class="deck-container" @dragenter.prevent @dragover.prevent @drop="addCard($event)">
             <div class="deck-commander"
-                :style="{ 'background-image': `url(./img${generalStore.player.commander.artwork})` }">
+                :style="{ 'background-image': `url(./img${generalStore.playerInfo.deck?.commander.artwork})` }"
+                v-if="generalStore.playerInfo.deck.commander">
                 <p class="total-cards">
-                    Cards in deck: {{ generalStore.player.deck.length }}
+                    Cards in deck: {{ generalStore.playerInfo.deck.decklist.length }}
                     <i class="fa-solid fa-trash-can" @click="emptyDeck"></i>
                 </p>
             </div>
 
             <!-- Iterate over deck cards -->
-            <template v-for="(card, index) in generalStore.player.deck">
+            <template v-for="(card, index) in generalStore.playerInfo.deck.decklist">
                 <!-- Check if it's the first occurrence of this card -->
-                <template v-if="index === generalStore.player.deck.findIndex(c => c.name === card.name)">
+                <template v-if="index === generalStore.playerInfo.deck.decklist.findIndex(c => c.name === card.name)">
                     <div class="deck-card" :style="{ 'background-image': `url(./img${card.imgPath})` }">
                         <div class="color-overlay" :style="{ background: generateGradient(card.color) }"></div>
                         <div class="deck-card-cost">
@@ -52,6 +53,16 @@
                     <option value="null">Factionless</option>
                 </select>
 
+                <button @click="saveDeck">
+                    SAVE
+                </button>
+
+                <router-link to="/">
+                    <button> BACK TO MENU </button>
+                </router-link>
+
+
+
             </div>
             <div class="card-container">
                 <span class="card-block" v-for="(block, index2) in transformArray(collection)" :key="index2">
@@ -79,6 +90,7 @@
 <script>
 
 import { useGeneralStore } from '../../stores/generalStore';
+import { RouterLink } from 'vue-router';
 
 export default {
     data() {
@@ -130,7 +142,7 @@ export default {
             return a.name.localeCompare(b.name);
         },
         countCopies(card) {
-            return this.generalStore.player.deck.filter(c => c.name === card.name).length;
+            return this.generalStore.playerInfo.deck.decklist.filter(c => c.name === card.name).length;
         },
         generateGradient(color) {
             let gradient;
@@ -176,34 +188,37 @@ export default {
         addCard() {
             const newCard = this.generalStore.draggedCardObj
             if (newCard.type == 'commander') {
-                this.generalStore.player.commander = newCard
+                this.generalStore.playerInfo.deck.commander = newCard
                 this.emptyDeck()
 
-            } else if (!this.generalStore.player.commander.colors.includes(newCard.color) && newCard.color !== null) {
+            } else if (!this.generalStore.playerInfo.deck.commander.colors.includes(newCard.color) && newCard.color !== null) {
                 window.alert("You can only add cards of the same faction as your deck's commander, or factionless cards")
                 return
             }
             else {
                 const index = this.generalStore.playerInfo.collection.indexOf(newCard)
-                this.generalStore.player.deck.push(newCard)
+                this.generalStore.playerInfo.deck.decklist.push(newCard)
                 this.generalStore.playerInfo.collection.splice(index, 1)
             }
-            this.generalStore.player.deck.sort(this.compareCards)
+            this.generalStore.playerInfo.deck.decklist.sort(this.compareCards)
         },
         removeCard(card) {
-            const index = this.generalStore.player.deck.indexOf(card)
+            const index = this.generalStore.playerInfo.deck.decklist.indexOf(card)
             if (index !== -1) {
-                this.generalStore.player.deck.splice(index, 1)
+                this.generalStore.playerInfo.deck.decklist.splice(index, 1)
                 this.generalStore.playerInfo.collection.push(card)
                 this.generalStore.playerInfo.collection.sort(this.compareCards)
             }
         },
         emptyDeck() {
-            this.generalStore.player.deck.forEach((card, index) => {
+            this.generalStore.playerInfo.deck.decklist.forEach((card, index) => {
                 this.generalStore.playerInfo.collection.push(card)
             })
-            this.generalStore.player.deck = []
+            this.generalStore.playerInfo.deck.decklist = []
             this.generalStore.playerInfo.collection.sort(this.compareCards)
+        },
+        saveDeck() {
+            this.generalStore.updatePlayerInfoDB()
         }
     }
 }
@@ -311,20 +326,33 @@ export default {
         width: 70%;
 
         .card-filter-bar {
-            height: 10%;
+            height: 12%;
             background-color: #412b28;
             display: flex;
             padding-inline: 30px;
             align-items: center;
-            gap: 35px;
+            justify-content: space-around;
 
             input,
-            select {
+            select,
+            button {
                 background-color: #201c18;
                 border: 0;
                 font-size: 1.5em;
                 color: white;
+            }
 
+            button {
+                background-color: #6b4828;
+                font-size: 1.2em;
+                height: 50px;
+                padding-inline: 25px;
+                border-radius: 20px;
+                cursor: pointer;
+
+                &:hover {
+                    scale: 1.1
+                }
             }
 
             select {
@@ -356,7 +384,7 @@ export default {
             margin: 0 auto;
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             overflow-y: auto;
             padding-block: 100px;
@@ -364,10 +392,11 @@ export default {
             margin-top: -50px;
 
             .card-block {
-                margin-right: 30px;
+                // margin-right: 30px;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
+                padding-inline: 10px;
                 width: fit-content;
             }
 
@@ -413,6 +442,15 @@ export default {
 
     .collection-card:not(:first-child) {
         margin-left: -110px;
+    }
+
+    .collection-card:last-child:hover {
+        scale: 1.5;
+        z-index: 12;
+    }
+
+    .collection-card:last-child:active {
+        scale: 1;
     }
 
     .copy-count {

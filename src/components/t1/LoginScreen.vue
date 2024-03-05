@@ -106,7 +106,11 @@ export default {
                     username: this.newAccData.username,
                     email: this.newAccData.mail,
                     uid: user.uid,
-                    collection: welcomePack
+                    collection: welcomePack,
+                    deck: {
+                        decklist: [],
+                        commander: null
+                    }
                 });
 
                 // Create a subcollection within the user document
@@ -117,6 +121,7 @@ export default {
                 await setDoc(gameStateDocRef, {
                     collection: [],
                 });
+                location.reload()
 
 
                 console.log("User successfully signed up!");

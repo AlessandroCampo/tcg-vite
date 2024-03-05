@@ -19,7 +19,8 @@ export default {
     methods: {
         backToMenu() {
             useGeneralStore().player.winner = false
-            this.$router.push('/');
+            // this.$router.push('/');
+            location.reload()
         }
     }
 }

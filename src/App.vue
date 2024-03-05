@@ -32,7 +32,6 @@ export default {
     // })
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-
         this.loading = false
         this.generalStore.user = user;
         this.generalStore.player.uid = user.uid
@@ -46,6 +45,7 @@ export default {
         });
 
         await this.generalStore.updateDB()
+        await this.generalStore.updatePlayerInfoDB()
 
 
 

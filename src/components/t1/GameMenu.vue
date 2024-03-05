@@ -9,7 +9,7 @@
             <button> SHOP </button>
             <button> QUIT </button>
         </nav>
-        <div class="side-selection">
+        <!-- <div class="side-selection">
             <h2> CHOOSE YOUR FACTION: </h2>
             <div>
                 <img src="../../assets/img/black.png" alt="" @click="changeFaction('black')"
@@ -18,7 +18,7 @@
                     :class="generalStore.color == 'black' ? 'inactive' : ''">
             </div>
 
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -39,7 +39,7 @@ export default {
     },
     methods: {
         async joinQueue() {
-            if (this.generalStore.player.deck.length < 30) {
+            if (this.generalStore.playerInfo.deck.decklist.length < 30) {
                 window.alert('You need at least 30 cards in your deck to start a game')
                 return
             }
