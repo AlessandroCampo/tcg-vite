@@ -183,8 +183,7 @@ export const abilities = {
         }
 
         useGeneralStore().updateDB();
-    }
-    ,
+    },
     checkCost(cost) {
         if (cost.from === 'hp') {
             useGeneralStore().$state.player.lp -= cost.amount;

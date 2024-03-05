@@ -35,7 +35,7 @@
         <div class="collection-right">
             <div class="card-filter-bar">
                 <div class="searchbar-container">
-                    <img src="../../../img/lens.png" alt="">
+                    <img src="../../../img/icons/lens.png" alt="">
                     <input type="text" v-model="searchString" placeholder="Search..." class="searchbar">
                 </div>
                 <select v-model="typeFilter">
@@ -187,6 +187,13 @@ export default {
         },
         addCard() {
             const newCard = this.generalStore.draggedCardObj
+            if (!this.generalStore.playerInfo.deck.commander) {
+                window.alert('Choose a commander for this deck first')
+            }
+            if (this.generalStore.playerInfo.deck.decklist.length >= 45) {
+                window.alert("Your deck can't contain more than 45 cards")
+                return
+            }
             if (newCard.type == 'commander') {
                 this.generalStore.playerInfo.deck.commander = newCard
                 this.emptyDeck()
@@ -228,10 +235,7 @@ export default {
 .collection-container {
     height: 100vh;
     width: 100vw;
-    // background-image: url('../../img/collection_background.png');
     background-color: #292627;
-    background-size: cover;
-    background-repeat: no-repeat;
     display: flex;
 
     .deck-container {

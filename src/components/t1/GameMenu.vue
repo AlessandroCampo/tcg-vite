@@ -4,21 +4,8 @@
         <nav>
             <button @click="joinQueue"> {{ !this.generalStore.playerInfo.inQueue ? 'PLAY' : 'IN QUEUE' }} </button>
             <button @click="goToCollection"> COLLECTION </button>
-
-
-            <button> SHOP </button>
-            <button> QUIT </button>
+            <button @click="goToShop"> SHOP </button>
         </nav>
-        <!-- <div class="side-selection">
-            <h2> CHOOSE YOUR FACTION: </h2>
-            <div>
-                <img src="../../assets/img/black.png" alt="" @click="changeFaction('black')"
-                    :class="generalStore.color !== 'black' ? 'inactive' : ''">
-                <img src="../../assets/img/white.png" alt="" @click="changeFaction('white')"
-                    :class="generalStore.color == 'black' ? 'inactive' : ''">
-            </div>
-
-        </div> -->
     </div>
 </template>
 
@@ -59,8 +46,12 @@ export default {
             this.generalStore.collectionPageFlag = true
             this.$router.push('/collection')
 
-        }
-        ,
+        },
+        goToShop() {
+            this.generalStore.shopPageFlag = true
+            this.$router.push('/shop')
+
+        },
         goToBattle() {
             this.$router.push('/battle')
         },

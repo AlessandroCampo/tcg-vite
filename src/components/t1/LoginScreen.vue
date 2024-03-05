@@ -85,6 +85,7 @@ export default {
                 this.generalStore.playerInfo.username = this.newAccData.username
                 this.generalStore.playerInfo.uid = user.uid
                 this.generalStore.player.mail = this.newAccData.mail
+                this.generalStore.playerInfo.coins = 500
 
                 // Assuming you have a reference to the Firestore database instance in 'db' and the user object in 'user'
                 const welcomePack = [];
@@ -107,6 +108,8 @@ export default {
                     email: this.newAccData.mail,
                     uid: user.uid,
                     collection: welcomePack,
+                    coins: 500,
+                    crystals: 0,
                     deck: {
                         decklist: [],
                         commander: null

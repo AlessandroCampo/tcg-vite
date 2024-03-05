@@ -17,6 +17,7 @@ export const useGeneralStore = defineStore('generalStore', {
     state: () => ({
         battlePageFlag: false,
         collectionPageFlag: false,
+        shopPageFlag: false,
         cards: [...allCards.map(card => ({ ...card }))],
         color: 'black',
         user: null,
@@ -62,6 +63,8 @@ export const useGeneralStore = defineStore('generalStore', {
             username: '',
             email: '',
             collection: [],
+            coins: 0,
+            crystals: 0,
             deck: {
                 commander: null,
                 decklist: []
