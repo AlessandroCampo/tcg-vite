@@ -16,6 +16,7 @@ const db = useFirestore()
 export const useGeneralStore = defineStore('generalStore', {
     state: () => ({
         battlePageFlag: false,
+        collectionPageFlag: false,
         cards: [...allCards.map(card => ({ ...card }))],
         color: 'black',
         user: null,
@@ -59,7 +60,8 @@ export const useGeneralStore = defineStore('generalStore', {
             inQueue: false,
             uid: '',
             username: '',
-            email: ''
+            email: '',
+            collection: []
         },
         opponent: {}
     }),
@@ -152,17 +154,17 @@ export const useGeneralStore = defineStore('generalStore', {
             return ID + '-' + cardName + '-' + cardIndex
         },
         generateDeck() {
-            for (let i = 0;i < 4;i++) {
-                this.cards.forEach((card) => {
-                    if (card.color == this.color || !card.color) {
-                        const cardCopy = { ...card };
-                        const reactiveCard = reactive(cardCopy);
-                        reactiveCard.id = this.generateCardId(i, card.name);
-                        reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
-                        this.player.deck.push(reactiveCard);
-                    }
-                });
-            }
+            // for (let i = 0;i < 4;i++) {
+            //     this.cards.forEach((card) => {
+            //         if (card.color == this.color || !card.color) {
+            //             const cardCopy = { ...card };
+            //             const reactiveCard = reactive(cardCopy);
+            //             reactiveCard.id = this.generateCardId(i, card.name);
+            //             reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
+            //             this.player.deck.push(reactiveCard);
+            //         }
+            //     });
+            // }
 
         },
         generateFirstHand(deck) {

@@ -7,6 +7,7 @@ import { firebaseApp } from './firebase'
 import { createRouter, createWebHashHistory } from 'vue-router';
 import GameMenu from './components/t1/GameMenu.vue'
 import GameBattlefield from './components/t1/GameBattlefield.vue'
+import GameCollection from './components/t1/GameCollection.vue'
 import App from './App.vue'
 import { useGeneralStore } from "../src/stores/generalStore";
 
@@ -24,7 +25,19 @@ const routes = [
                 next('/');
             }
         }
+    },
+    {
+        path: '/collection',
+        component: GameCollection,
+        beforeEnter: (to, from, next) => {
+            if (useGeneralStore().$state.collectionPageFlag) {
+                next();
+            } else {
+                next('/');
+            }
+        }
     }
+
 ]
 
 

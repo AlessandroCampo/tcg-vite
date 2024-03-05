@@ -3,7 +3,9 @@
     <div class="home_menu">
         <nav>
             <button @click="joinQueue"> {{ !this.generalStore.playerInfo.inQueue ? 'PLAY' : 'IN QUEUE' }} </button>
-            <button> COLLECTION </button>
+            <button @click="goToCollection"> COLLECTION </button>
+
+
             <button> SHOP </button>
             <button> QUIT </button>
         </nav>
@@ -37,6 +39,10 @@ export default {
     },
     methods: {
         async joinQueue() {
+            if (this.generalStore.player.deck.length < 30) {
+                window.alert('You need at least 30 cards in your deck to start a game')
+                return
+            }
             if (!this.generalStore.playerInfo.inQueue) {
                 this.generalStore.playerInfo.inQueue = true
                 this.generalStore.updatePlayerInfoDB()
@@ -49,6 +55,12 @@ export default {
 
 
         },
+        goToCollection() {
+            this.generalStore.collectionPageFlag = true
+            this.$router.push('/collection')
+
+        }
+        ,
         goToBattle() {
             this.$router.push('/battle')
         },

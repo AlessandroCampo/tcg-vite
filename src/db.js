@@ -45,7 +45,16 @@ let black = {
     ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: 'index == 0', ownGraveyard: true, description: 'Pay  2 mana: Reborn the first unit in your graveyard' },
     type: 'commander',
     used: false,
-    lp: 27
+    imgPath: '/cards/ades.png',
+    lp: 27,
+    hp: {
+        current: 27,
+        original: 27
+    },
+    cost: {
+        current: 2,
+        original: 2
+    }
 
 }
 
@@ -59,7 +68,16 @@ let white = {
 
     type: 'commander',
     used: false,
-    lp: 30
+    lp: 30,
+    imgPath: '/cards/zeus.png',
+    hp: {
+        current: 30,
+        original: 30
+    },
+    cost: {
+        current: 2,
+        original: 2
+    }
 }
 
 let green = {
@@ -392,6 +410,32 @@ let leonidas = new unit({
     attributes: []
 });
 
+//COLORLESS
+
+let landless_dragon = new unit({
+    name: 'landless_dragon',
+    op: {
+        original: 5,
+        current: 5
+    },
+    hp: {
+        original: 5,
+        current: 5
+    },
+    imgPath: '/cards/landless_dragon.png',
+    cost: {
+        original: 5,
+        current: 5
+    },
+    ability: null,
+    status: 'none',
+    canAttack: true,
+    type: 'unit',
+    killed: false,
+    playerOwned: false,
+    color: null,
+    attributes: ['fly']
+});
 
 //*** CARDS [SPELLS] */
 
@@ -488,8 +532,9 @@ let trap_hole = new gameCard({
     color: null
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, blessing, brain_control]
 export const allCommanders = [black, white]
+export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 
 
 

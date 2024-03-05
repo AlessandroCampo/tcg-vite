@@ -28,7 +28,7 @@ export default {
 
     async created() {
 
-        this.generalStore.generateDeck()
+        // this.generalStore.generateDeck()
         this.generalStore.generateFirstHand(this.generalStore.player.deck)
         await this.generalStore.updateDB()
     },

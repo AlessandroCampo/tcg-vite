@@ -41,6 +41,10 @@ import { useGeneralStore } from '../../stores/generalStore'
 import { doc, collection, setDoc } from 'firebase/firestore'
 import { setTransitionHooks } from 'vue';
 const db = useFirestore()
+import { welcomePack } from '../../db';
+import { forEach } from 'lodash';
+// Assuming welcomePack is an array of custom objects
+const serializedWelcomePack = welcomePack.map(card => ({ ...card }));
 
 
 // import { auth } from "./firebase";
@@ -83,13 +87,26 @@ export default {
                 this.generalStore.player.mail = this.newAccData.mail
 
                 // Assuming you have a reference to the Firestore database instance in 'db' and the user object in 'user'
+                const welcomePack = [];
 
+                serializedWelcomePack.forEach(card => {
+                    // Add only one copy of commander cards
+                    if (card.type === 'commander') {
+                        welcomePack.push(card);
+                    } else {
+                        // Add four copies of other cards
+                        for (let i = 0;i < 4;i++) {
+                            welcomePack.push(card);
+                        }
+                    }
+                });
                 // Create a document for the user with general information
                 const userDocRef = doc(db, "Users", user.uid);
                 await setDoc(userDocRef, {
                     username: this.newAccData.username,
                     email: this.newAccData.mail,
                     uid: user.uid,
+                    collection: welcomePack
                 });
 
                 // Create a subcollection within the user document

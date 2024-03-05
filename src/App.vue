@@ -32,10 +32,10 @@ export default {
     // })
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+
+        this.loading = false
         this.generalStore.user = user;
         this.generalStore.player.uid = user.uid
-        await this.generalStore.updateDB()
-        this.loading = false
 
 
         const player_unsub = onSnapshot(doc(db, "Users", this.generalStore?.user.uid, 'GameState', 'GameState' + this.generalStore?.user.uid), (doc) => {
@@ -44,6 +44,10 @@ export default {
         const playerInfo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.user.uid), (doc) => {
           this.generalStore.playerInfo = doc.data()
         });
+
+        await this.generalStore.updateDB()
+
+
 
 
 
