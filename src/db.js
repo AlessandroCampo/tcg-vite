@@ -366,7 +366,7 @@ let blind_monk = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    ability: [{ effect: 'modifyStat', amount: 3, triggerTiming: 'onPlay', cost: null, targetStat: 'hp', buff: true, condition: 'unit.hp.current < unit.hp.original' }],
+    ability: [{ effect: 'modifyStat', amount: 3, triggerTiming: 'onPlay', cost: null, targetStat: 'hp', buff: true, condition: 'target.hp.current < target.hp.original', randomTarget: true }],
     playerOwned: false,
     color: 'white',
     attributes: [],
@@ -469,7 +469,7 @@ let armored_elephant = new unit({
     },
     ability: [{ effect: 'gainAttribute', condition: "player.lp > 30", triggerTiming: 'onPlay', cost: null, selfTarget: true, targetAttribute: 'rush', target: false }],
     status: 'none',
-    canAttack: true,
+    canAttack: false,
     type: 'unit',
     killed: false,
     playerOwned: false,
@@ -617,7 +617,7 @@ let divine_shield = new gameCard({
         original: 3,
         current: 3
     },
-    ability: [{ effect: 'modifyStat', amount: 'double', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'hp' }],
+    ability: [{ effect: 'modifyStat', amount: 'double', condition: null, target: true, buff: true, cost: null, targetStat: 'hp', selfTarget: false, randomTarget: false }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -631,7 +631,7 @@ let awaken_spirit = new gameCard({
         original: 3,
         current: 3
     },
-    ability: [{ effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'op' }],
+    ability: [{ effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: false, cost: null, targetStat: 'op', buff: true, }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -699,8 +699,7 @@ let drain_shield = new gameCard({
     },
     ability:
         [
-            { effect: 'negateAttack', amount: 1, target: false, triggerTiming: 'onAttack', cost: null },
-            { effect: 'modifyLp', amount: 'attacker.op', target: false, triggerTiming: 'onAttack', cost: null, gain: true },
+            { effect: 'modifyLp', amount: '= stat', target: false, triggerTiming: 'onAttack', cost: null, gain: true, targetStat: 'op' },
         ]
     ,
     type: 'trap',
@@ -713,7 +712,7 @@ export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeep
 export const allCommanders = [black, white]
 export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 export const basicPack = {
-    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control],
+    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit],
     name: 'BASIC PACK',
     imgPath: './img/icons/pack.png',
     price: 50,

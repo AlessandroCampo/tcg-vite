@@ -287,8 +287,6 @@ export default {
             else return false
         },
         revealCard(e) {
-            let questionMark = e.target.querySelector('i')
-            questionMark.remove()
             gsap.to(e.target, {
                 opacity: 0,
                 duration: 1,
@@ -610,7 +608,7 @@ div.popup {
                 position: absolute;
                 width: 100%;
                 height: 100%;
-                background-color: rgba($color: #000000, $alpha: 0.99);
+                background-color: rgba($color: #000000, $alpha: 0.999);
                 color: crimson;
                 display: flex;
                 align-items: center;
@@ -620,6 +618,7 @@ div.popup {
                 i {
                     font-size: 3em;
                     cursor: pointer;
+                    pointer-events: none;
                 }
             }
 

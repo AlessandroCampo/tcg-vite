@@ -53,9 +53,9 @@
                     <option value="null">Factionless</option>
                 </select>
 
-                <button @click="saveDeck">
+                <!-- <button @click="saveDeck">
                     SAVE
-                </button>
+                </button> -->
 
                 <router-link to="/">
                     <button> BACK TO MENU </button>
@@ -68,7 +68,7 @@
                 <span class="card-block" v-for="(block, index2) in transformArray(collection)" :key="index2">
                     <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }"
                         :draggable="true" v-for="(card, index) in block" :key="index" @dragstart="startDrag(card)"
-                        v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander')">
+                        v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander') && !generalStore.playerInfo.deck.decklist.includes(card)">
                         <span class="cost stat">
                             {{ card.cost.current }}
                         </span>
@@ -204,9 +204,9 @@ export default {
                 return
             }
             else {
-                const index = this.generalStore.playerInfo.collection.indexOf(newCard)
+                // const index = this.generalStore.playerInfo.collection.indexOf(newCard)
                 this.generalStore.playerInfo.deck.decklist.push(newCard)
-                this.generalStore.playerInfo.collection.splice(index, 1)
+                // this.generalStore.playerInfo.collection.splice(index, 1)
             }
             this.generalStore.playerInfo.deck.decklist.sort(this.compareCards)
         },
@@ -214,18 +214,19 @@ export default {
             const index = this.generalStore.playerInfo.deck.decklist.indexOf(card)
             if (index !== -1) {
                 this.generalStore.playerInfo.deck.decklist.splice(index, 1)
-                this.generalStore.playerInfo.collection.push(card)
+                // this.generalStore.playerInfo.collection.push(card)
                 this.generalStore.playerInfo.collection.sort(this.compareCards)
             }
         },
         emptyDeck() {
-            this.generalStore.playerInfo.deck.decklist.forEach((card, index) => {
-                this.generalStore.playerInfo.collection.push(card)
-            })
+            // this.generalStore.playerInfo.deck.decklist.forEach((card, index) => {
+            //     this.generalStore.playerInfo.collection.push(card)
+            // })
             this.generalStore.playerInfo.deck.decklist = []
             this.generalStore.playerInfo.collection.sort(this.compareCards)
         },
         saveDeck() {
+            //FIXME - 
             this.generalStore.updatePlayerInfoDB()
         }
     }
@@ -329,6 +330,10 @@ export default {
 
     div.collection-right {
         width: 70%;
+        height: 100vh;
+
+        display: flex;
+        flex-direction: column;
 
         .card-filter-bar {
             height: 12%;
@@ -392,10 +397,9 @@ export default {
             justify-content: flex-start;
             align-items: center;
             overflow-y: auto;
-            padding-block: 100px;
+            padding-block: 30px;
             padding-inline: 30px;
-            margin-top: -50px;
-            height: 100%;
+            height: 88%;
 
             .card-block {
                 // margin-right: 30px;

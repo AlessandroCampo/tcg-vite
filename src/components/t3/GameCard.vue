@@ -65,6 +65,16 @@ export default {
 
     },
     methods: {
+        hasOnKillEff(card) {
+            let result = false
+            card.ability.forEach((singleAbility) => {
+                if (singleAbility.triggerTiming == 'onKilled') {
+                    result = true
+                }
+            })
+            console.log(result)
+            return result
+        },
         attacked(e) {
             const attacker = this.generalStore.draggedCardObj
             const attackerProxy = this.generalStore.draggedCard
@@ -172,8 +182,8 @@ export default {
                     if (!this.propCard.cardKilledHandled && this.isPlayerOwned) {
                         this.propCard.cardKilledHandled = true;
 
-                        if (this.propCard.type === 'unit' && this.propCard.ability && this.propCard.ability.triggerTiming === 'onKilled' && this.isPlayerOwned) {
-
+                        if (this.propCard.type === 'unit' && this.propCard.ability && this.hasOnKillEff(this.propCard) && this.isPlayerOwned) {
+                            console.log('onKill')
                             this.generalStore.resolveAbility(this.propCard)
                         }
 
@@ -268,7 +278,7 @@ export default {
 
 .card-base.disabled {
     cursor: not-allowed;
-    filter: grayscale(70%);
+    filter: grayscale(70%) !important;
 }
 
 

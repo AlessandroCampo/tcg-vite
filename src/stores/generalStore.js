@@ -100,6 +100,7 @@ export const useGeneralStore = defineStore('generalStore', {
             return array;
         },
         generateChoice(targets, condition, selectionCallback) {
+            console.log(targets)
             let selectedCard;
             let foundTargets = false
             targets.forEach((unit) => {
@@ -108,7 +109,6 @@ export const useGeneralStore = defineStore('generalStore', {
                     proxy.style.cursor = 'pointer';
                     this.$state.freeze = true;
                     foundTargets = true
-
 
                     gsap.killTweensOf(proxy);
 
@@ -133,13 +133,17 @@ export const useGeneralStore = defineStore('generalStore', {
 
 
                         // Remove event listener and reset visuals
-                        const oppoFieldProxies = document.querySelectorAll('#oppoField .card-base');
+                        const oppoFieldProxies = document.querySelectorAll('.playerfield-container .card-base');
                         oppoFieldProxies.forEach((el) => {
                             gsap.killTweensOf(el);
                             gsap.set(el, {
                                 scale: 1,
-                                filter: el.classList.contains('disabled') ? "grayscale(70%)" : "brightness(1.0)"
+                                filter: el.classList.contains('disabled') ? "grayscale(70%)" : "brightness(0.9)"
                             });
+                            if (selectedCard.canAttack) {
+                                el.style.filter = "brightness(0.9)"
+                            }
+
                             el.removeEventListener('click', handleClick);
                         });
                     };
@@ -212,54 +216,14 @@ export const useGeneralStore = defineStore('generalStore', {
             this.player.commander = this.playerInfo.deck.commander
             this.updateDB()
         },
-
-
-        // checkAbility(name, card) {
-        //     if (card.ability.target && this.opponent.field.length == 0) {
-        //         if (card.type == 'spell') {
-        //             this.player.activatedCard = null
-        //             this.updateDB()
-        //             setTimeout(() => { this.player.activatedCard = null }, 1000)
-        //         } else if (card.type == 'unit') {
-        //         }
-        //         return
-        //     } else {
-        //         this.freeze = true
-        //     }
-        //     if (abilities.hasOwnProperty(name)) {
-        //         if (card.type == 'unit') {
-        //             setTimeout(() => {
-        //                 this.player.field.forEach((unit) => {
-        //                     if (unit.id == card.id) {
-        //                         const playerField = document.getElementById('player-field')
-        //                         const cardElement = document.getElementById(unit.id)
-        //                         this.animateAbility(cardElement, unit)
-        //                         if (unit.ability.triggerTiming !== 'onKilled' && unit) {
-
-        //                             this.sendActionObj(unit, unit, 'effectTrigger')
-        //                         }
-        //                         this.resetActionObj()
-
-        //                     }
-        //                 });
-        //             }, 700);
-        //         } else if (card.type == 'spell') {
-
-        //             this.player.activatedCard = card
-        //             this.updateDB()
-        //             setTimeout(() => { this.resolveAbility(card) }, 500)
-
-        //         }
-
-        //     }
-        // },
         checkAbility(card) {
             console.log(card)
             card.ability.forEach((ability, index) => {
-                if ((ability.target && this.opponent.field.length == 0 && !selfTarget) || (ability.target && this.player.field.length == 0 && selfTarget)) {
+                if ((ability.target && this.opponent.field.length == 0 && !ability.selfTarget && !ability.buff) || (ability.target && this.player.field.length == 0 && ability.buff)) {
                     if (card.type == 'spell') {
                         this.player.activatedCard = card
                         this.updateDB()
+
                         setTimeout(() => { this.player.activatedCard = null }, 1000)
                     }
                     return
@@ -282,9 +246,15 @@ export const useGeneralStore = defineStore('generalStore', {
                         }, 700);
                     } else if (card.type == 'spell') {
 
-                        this.player.activatedCard = card
-                        this.updateDB()
-                        setTimeout(() => { this.resolveAbility(card, index) }, 500)
+
+                        if (this.checkTraps(undefined, undefined, 'onOppoSpellOrTrap')) return
+                        else {
+                            this.player.activatedCard = card
+                            this.updateDB()
+                            setTimeout(() => { this.resolveAbility(card, index) }, 500)
+                        }
+
+
                     }
                 }
             })
@@ -323,15 +293,17 @@ export const useGeneralStore = defineStore('generalStore', {
                     }
                 });
         },
-        resolveAbility(activated) {
+        async resolveAbility(activated) {
+            console.log(activated.ability)
             activated.ability.forEach((el, index) => {
                 if (activated.status == 'onField' && el.triggerTiming == 'onPlay' && activated.type == 'unit') {
-                    this.player.field.forEach((card) => {
+                    this.player.field.forEach(async (card) => {
                         if (card.id === activated.id) {
-                            abilities[el.effect](card, index);
-                            if (!activated.ability.target) {
+                            if (!el.target && (!activated.attributes.includes('fly') && !activated.attributes.includes('rush'))) {
                                 card.canAttack = false;
+                                console.log('this card cant attack')
                             }
+                            await abilities[el.effect](card, index)
                             this.updateDB()
 
                         }
@@ -340,7 +312,7 @@ export const useGeneralStore = defineStore('generalStore', {
                     abilities[el.effect](activated, index);
                     this.updateDB()
 
-                } else if (activated.status == 'onField' && activated.ability.triggerTiming == 'onKilled' && activated.type == 'unit') {
+                } else if (activated.status == 'onField' && el.triggerTiming == 'onKilled' && activated.type == 'unit') {
                     abilities[el.effect](activated, index);
                     // this.updateBothDb()
                 } else if (activated.type == 'commander') {
@@ -365,7 +337,10 @@ export const useGeneralStore = defineStore('generalStore', {
 
             } if (target.hp.current <= 0) {
                 target.killed = true
-
+            }
+            if (attacker.attributes.includes('lifesteal')) {
+                console.log('lifesteal')
+                this.player.lp += attacker.op.current
             }
 
             this.updateBothDb()
@@ -513,8 +488,6 @@ export const useGeneralStore = defineStore('generalStore', {
             this.updateDB()
         },
         checkTraps(trapTarget, attackTarget, triggerType) {
-
-
             let foundTrap = false
             this.opponent.traps.forEach((trap, index) => {
                 trap.ability.forEach((singleAbility, abilityIndex) => {
@@ -522,7 +495,6 @@ export const useGeneralStore = defineStore('generalStore', {
                         ? new Function('trapTarget', `return ${trap.ability.condition}`)
                         : new Function('trapTarget', 'return true');
                     if (singleAbility.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
-
                         foundTrap = true
                         this.opponent.activatedCard = trap
                         this.opponent.traps.splice(index, 1)

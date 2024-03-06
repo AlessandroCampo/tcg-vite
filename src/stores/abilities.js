@@ -22,28 +22,31 @@ export const abilities = {
         let ability = card.ability[abilityIndex];
         let player = useGeneralStore().$state.player;
         let opponent = useGeneralStore().$state.opponent;
+        let target;
         const condition = ability.condition
-            ? new Function('player', `return ${card.ability.condition}`)
+            ? new Function('player', 'target', `return ${ability.condition}`)
             : () => true;
 
-        if (!condition(player)) {
-            useGeneralStore().$state.freeze = false
-            return;
-        }
-
         if (ability.cost) this.checkCost(ability.cost);
-        let target;
+        console.log(card)
         if (ability.selfTarget) {
             target = card;
-        } else {
-
+        } else if (!ability.selfTarget && !ability.randomTarget) {
+            console.log("were here")
             const condition = ability.condition
                 ? new Function('unit', `return ${ability.condition}`)
                 : new Function('unit', 'return true');
 
             const oppoField = useGeneralStore().$state.opponent.field;
+            const allyField = useGeneralStore().$state.player.field;
+            const targetArray = ability.buff ? allyField : oppoField
             const selectionCallback = (selectedCard, array) => {
                 const index = array.indexOf(selectedCard);
+                if (isNaN(ability.amount)) {
+                    console.log(selectedCard)
+                    ability.amount = this.convertAmount(ability.amount, ability.targetStat, selectedCard)
+
+                }
                 if (card.type == 'spell') {
                     useGeneralStore().$state.player.activatedCard = null
                 }
@@ -60,12 +63,38 @@ export const abilities = {
                 }
             }
 
-            useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
+            useGeneralStore().generateChoice(targetArray, condition, (selectedCard) => selectionCallback(selectedCard, targetArray));
 
+        } else if (!ability.selfTarget && ability.randomTarget) {
+            let validTargetsIndexes = [];
+            if (ability.buff) {
+                console.log('here');
+                player.field.forEach((unit, index) => {
+                    console.log(condition(player, unit));
+                    if (condition(player, unit)) {
+                        validTargetsIndexes.push(index);
+                    }
+                });
+            } else {
+                opponent.field.forEach((unit, index) => {
+                    if (condition(player, unit)) {
+                        validTargetsIndexes.push(index);
+                    }
+                });
+            }
+            if (validTargetsIndexes.length > 0) {
+                const randomIndex = Math.floor(Math.random() * validTargetsIndexes.length);
+                const selectedIndex = validTargetsIndexes[randomIndex];
+                target = ability.buff ? player.field[selectedIndex] : opponent.field[selectedIndex];
+            }
         }
-        if (ability.buff) {
+
+        if (isNaN(ability.amount)) {
+            ability.amount = this.convertAmount(ability.amount, ability.targetStat, target)
+        }
+        if (ability.buff && target && condition(player, target)) {
             target[ability.targetStat].current += ability.amount;
-        } else {
+        } else if (!ability.buff && target && condition(player, target)) {
             target[ability.targetStat].current -= ability.amount;
         }
         useGeneralStore().$state.freeze = false;
@@ -155,27 +184,50 @@ export const abilities = {
 
         useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
     },
-    async modifyLp(card, abilityIndex) {
+    async modifyLp(card, abilityIndex, abilityIndexBackup) {
+        // "creative" solution in case I need to pass abilityIndex as 3rd param
+        let trapTarget
+        if (card.type == 'trap') {
+            if (isNaN(abilityIndex)) {
+                trapTarget = abilityIndex
+                abilityIndex = abilityIndexBackup
+                setTimeout(() => { useGeneralStore().$state.opponent.activatedCard = null; useGeneralStore().updateBothDb() }, 1000)
+            }
+        }
+
         let ability = card.ability[abilityIndex]
         useGeneralStore().$state.freeze = false;
+
+
         if (ability.cost) {
             this.checkCost(ability.cost);
+        }
+
+        if (isNaN(ability.amount)) {
+            ability.amount = this.convertAmount(ability.amount, ability.targetStat, trapTarget)
         }
 
         const increment = 1;
         const delay = 300;
 
         if (ability.gain) {
-            const initialLP = useGeneralStore().$state.player.lp;
+            const isPlayerOwned = useGeneralStore().isPlayerOwned(card.id);
+            const initialLP = isPlayerOwned ? useGeneralStore().$state.player.lp : useGeneralStore().$state.opponent.lp;
             const finalLP = initialLP + ability.amount;
 
 
             for (let lp = initialLP;lp <= finalLP;lp += increment) {
-                useGeneralStore().$state.player.lp = lp;
+                if (isPlayerOwned) {
+                    useGeneralStore().$state.player.lp = lp
+                } else {
+                    useGeneralStore().$state.opponent.lp = lp
+                }
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
-        } else {
-            const initialLP = useGeneralStore().$state.opponent.lp;
+            console.log(playerToUpdate.lp)
+        }
+        else {
+            const initialLP = useGeneralStore().isPlayerOwned(card.id) ? useGeneralStore().$state.player.lp : useGeneralStore().$state.opponent.lp;
             const finalLP = initialLP - ability.amount;
 
 
@@ -185,7 +237,7 @@ export const abilities = {
             }
         }
 
-        useGeneralStore().updateDB();
+        useGeneralStore().updateBothDb();
     },
     checkCost(cost) {
         if (cost.from === 'hp') {
@@ -264,6 +316,52 @@ export const abilities = {
             }
         }
         await useGeneralStore().updateDB();
+    },
+    async gainAttribute(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player;
+        let opponent = useGeneralStore().$state.opponent;
+        let target;
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        if (ability.selfTarget) {
+            target = card
+        }
+        const condition = ability.condition
+            ? new Function('player', 'target', `return ${ability.condition}`)
+            : () => true;
+        if (condition(player, target)) {
+            card.attributes.push(ability.targetAttribute)
+            if (card.attributes.includes('rush') || card.attributes.includes('fly')) {
+
+                card.canAttack = true
+                console.log(card.canAttack, 'card can Attack?')
+            }
+        }
+        useGeneralStore().$state.freeze = false
+        useGeneralStore().updateBothDb()
+    },
+    convertAmount(amount, stat, target) {
+        console.log(target)
+        if (amount == 'double') {
+            return target[stat].current
+        }
+        if (amount == '= hp') {
+            return target.hp.current - target[stat].current
+        }
+        if (amount == '= stat') {
+            return target[stat].current
+        }
+    },
+    negate(card, target, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        if (card.type == 'trap') {
+            setTimeout(() => { useGeneralStore().$state.opponent.activatedCard = null; useGeneralStore().updateBothDb() }, 1000)
+        }
     }
 
 };
