@@ -709,14 +709,16 @@ let drain_shield = new gameCard({
     rarity: 'common'
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon]
 export const allCommanders = [black, white]
-export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
+export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate, knight]
 export const basicPack = {
     cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control],
     name: 'BASIC PACK',
     imgPath: './img/icons/pack.png',
-    price: 50
+    price: 50,
+    description: 'Contains 5 cards of any color from the first expansion',
+    productType: 'pack'
 }
 export const allPacks = [basicPack]
 

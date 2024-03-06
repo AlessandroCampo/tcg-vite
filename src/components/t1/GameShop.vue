@@ -50,10 +50,25 @@
 
             </div>
             <div class="products-container">
+                <div class="popup" v-show="buying">
+                    <p>
+                        <span>
+                            Are you sure you want to buy {{ activeProduct.name }} for {{ activeProduct.price }}
+                        </span> <img :src="`./img/icons/${activeProduct.currency}.png`" alt=""
+                            style="width: 50px; transform: translateY(10%);">
+                        ?
+                    </p>
+                    <div class="selection">
+                        <i class="fa-solid fa-square-check" @click="buyItem"></i>
+                        <i class="fa-solid fa-square-xmark" @click="() => { buying = !buying }"></i>
+                    </div>
+
+                </div>
                 <div class="pack" v-for="(pack, index) in allPacks" :key="index" v-if="currentProduct == 'packs'">
-                    <img :src="pack.imgPath" alt="">
+                    <img :src="pack.imgPath" alt="" class="preview">
                     <div class="pack-name"> {{ pack.name }}</div>
-                    <button> BUY FOR {{ pack.price }} <img src="../../../img/icons/coins.png" alt=""></button>
+                    <button @click="openConfirm(pack)"> BUY FOR {{ pack.price }} <img src="../../../img/icons/coins.png"
+                            alt=""></button>
                 </div>
                 <div class="singles" v-for="(card, index) in allCards" :key="card.name"
                     v-else-if="currentProduct == 'singles'">
@@ -69,6 +84,8 @@
                             {{ card?.hp.current }}
                         </span>
                     </div>
+                    <button @click="openConfirm(card)"> BUY FOR {{ calcSinglePrice(card.rarity) }} <img
+                            src="../../../img/icons/crystal.png" alt=""></button>
                 </div>
             </div>
         </div>
@@ -79,6 +96,7 @@
 
 import { useGeneralStore } from '../../stores/generalStore';
 import { allPacks, allCards } from '../../db';
+import { pull } from 'lodash';
 
 
 export default {
@@ -92,11 +110,17 @@ export default {
             colorFilter: 'all',
             rarityFilter: 'all',
             allPacks: allPacks,
-            allCards: allCards
+            allCards: allCards,
+            buying: false,
+            activeProduct: {
+                name: '',
+                price: 0,
+                currency: 'crystal'
+            },
+            buyProduct: {}
         }
     },
     created() {
-        console.log(allPacks.length)
         this.allCards.sort(this.compareCards)
     },
     methods: {
@@ -123,7 +147,120 @@ export default {
                 return a.cost.current - b.cost.current;
             }
             return a.name.localeCompare(b.name);
+        },
+        calcSinglePrice(rarity) {
+            if (rarity == 'common') {
+                return 50
+            } else if (rarity == 'rare') {
+                return 150
+            } else if (rarity == 'epic') {
+                return 500
+            } else if (rarity == 'legendary') {
+                return 2000
+            }
+        },
+        openConfirm(product) {
+            this.activeProduct = product
+            this.buyProduct = product
+            if (!product.price) {
+                this.activeProduct.price = this.calcSinglePrice(product.rarity)
+                this.activeProduct.currency = 'crystal'
+            } else {
+                this.activeProduct.price = product.price
+                this.activeProduct.currency = 'coins'
+            }
+            this.buying = true
+            this.activeProduct.name = product.name
+
+
+        },
+        buyItem() {
+            console.log('buying')
+            if (this.buyProduct.type) {
+
+                if (this.alreadyMaxCopies(this.buyProduct)) {
+                    window.alert(`You already own maximum copies of ${this.buyProduct.name}`)
+                    this.buying = false
+                    return
+                } else {
+                    if (this.generalStore.playerInfo.crystals >= this.calcSinglePrice(this.buyProduct.rarity)) {
+                        this.generalStore.playerInfo.crystals -= this.calcSinglePrice(this.buyProduct.rarity)
+                        this.generalStore.playerInfo.collection.push({ ...this.buyProduct })
+                        console.log(this.playerInfo.collection)
+                        this.generalStore.updatePlayerInfoDB()
+                    } else {
+                        window.alert(`You don't have enough crystals to buy ${this.buyProduct}`)
+                        this.buying = false
+                        return
+                    }
+
+                }
+            }
+            else if (this.buyProduct.productType == 'pack') {
+                console.log('pack')
+                if (this.generalStore.playerInfo.coins >= this.buyProduct.price) {
+                    this.generalStore.playerInfo.coins -= this.buyProduct.price
+                    let pull = []
+                    let cardList = this.generalStore.shuffle(this.buyProduct.cardList)
+                    while (pull.length < 5) {
+                        cardList.forEach((card) => {
+                            if (this.isPulled(card.rarity)) {
+                                pull.push({ ...card })
+                            }
+                        })
+                    }
+                    pull.forEach((card) => {
+                        if (!this.alreadyMaxCopies(card)) {
+                            this.generalStore.playerInfo.collection.push(card)
+                        } else {
+                            this.generalStore.playerInfo.crystals += (this.calcSinglePrice(card.rarity) / 5)
+                        }
+                    })
+                    console.log(this.generalStore.playerInfo.collection)
+                    this.generalStore.updatePlayerInfoDB()
+                } else {
+                    window.alert(`You don't have enough coins to buy ${this.activeProduct.name}`)
+                }
+
+            }
+        },
+        isPulled(rarity) {
+            let pullProbability
+            let randomNumber = Math.floor(Math.random() * 500)
+            switch (rarity) {
+                case 'common':
+                    pullProbability = 200 // Adjusted probability for common cards
+                    break;
+
+                case 'rare':
+                    pullProbability = 150 // Adjusted probability for rare cards
+                    break;
+
+                case 'epic':
+                    pullProbability = 100 // Adjusted probability for epic cards
+                    break;
+
+                case 'legendary':
+                    pullProbability = 50 // Adjusted probability for legendary cards
+                    break;
+            }
+            if (pullProbability > randomNumber) {
+                return true
+            } else {
+                return false
+            }
+        },
+        alreadyMaxCopies(newCard) {
+            let ownedCopies = 0
+            this.generalStore.playerInfo.collection.forEach((card) => {
+                if (newCard.name == card.name) {
+                    ownedCopies++
+                }
+            })
+            if (ownedCopies >= 4) return true
+            else return false
         }
+
     }
 }
 </script>
@@ -182,11 +319,38 @@ export default {
         .products-container {
             display: flex;
             flex-wrap: wrap;
+            align-items: flex-start;
             padding-block: 30px;
             padding-inline: 60px;
             gap: 20px;
             overflow-y: auto;
             max-width: 85vw;
+            height: 100%;
+
+            button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding-block: 5px;
+                padding-inline: 20px;
+                border-radius: 25px;
+                background-color: #1c1714;
+                justify-content: center;
+                border: 3px solid #0d0605;
+                color: white;
+                cursor: pointer;
+                font-size: 1.1em;
+                text-align: center;
+
+                &:hover {
+                    border-color: aqua;
+                    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                }
+
+                img {
+                    width: 25px;
+                }
+            }
 
             .pack {
                 position: relative;
@@ -195,7 +359,7 @@ export default {
                 align-items: center;
                 justify-content: center;
 
-                img {
+                img.preview {
                     width: 200px;
                 }
 
@@ -214,28 +378,7 @@ export default {
                     border-radius: 15px;
                 }
 
-                button {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding-block: 5px;
-                    padding-inline: 20px;
-                    border-radius: 25px;
-                    background-color: #1c1714;
-                    border: 3px solid #0d0605;
-                    color: white;
-                    cursor: pointer;
 
-                    &:hover {
-                        border-color: aqua;
-                        box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-                    }
-
-                    img {
-                        width: 25px;
-
-                    }
-                }
             }
 
 
@@ -302,7 +445,6 @@ export default {
     background-repeat: no-repeat;
     position: relative;
     display: inline-block;
-    cursor: grab;
 
 
     .stat {
@@ -345,5 +487,47 @@ button {
         box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         cursor: pointer;
     }
+}
+
+div.popup {
+    position: absolute;
+    z-index: 10;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    background-color: rgba($color: #121212, $alpha: 0.6);
+    padding: 60px;
+    border-radius: 150px;
+
+    .selection {
+        display: flex;
+        gap: 30px;
+        margin-top: 30px;
+        font-size: 1.5em;
+
+
+        .fa-square-xmark {
+            color: crimson;
+            cursor: pointer;
+        }
+
+        .fa-square-check {
+            color: greenyellow;
+            cursor: pointer;
+        }
+    }
+}
+
+.singles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 </style>
