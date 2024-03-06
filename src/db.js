@@ -43,7 +43,7 @@ let black = {
     artwork: '/commanders/black.png',
     abilityArtwork: '/commanders/black_power.png',
     colors: ['black'],
-    ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: 'index == 0', ownGraveyard: true, description: 'Pay  2 mana: Reborn the first unit in your graveyard' },
+    ability: [{ effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: 'index == 0', ownGraveyard: true, description: 'Pay  2 mana: Reborn the first unit in your graveyard' }],
     type: 'commander',
     used: false,
     imgPath: '/cards/ades.png',
@@ -66,8 +66,8 @@ let white = {
     abilityArtwork: '/commanders/white_power.png',
     colors: ['white'],
     ability:
-        { effect: 'drawAndGain', draw_amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: null, gain_amount: 'card.cost.current', gain: true },
-
+        [{ effect: 'drawAndGain', draw_amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 2 }, condition: null, gain_amount: 'card.cost.current', gain: true }
+        ],
     type: 'commander',
     used: false,
     lp: 30,
@@ -152,7 +152,7 @@ let ogre = new unit({
         original: 2,
         current: 2
     },
-    ability: { effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null },
+    ability: [{ effect: 'modifyStat', amount: 1, selfTarget: true, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -178,7 +178,7 @@ let sorceress = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'discard', condition: null, triggerTiming: 'onPlay', cost: { from: 'hp', amount: 2 }, amount: 1 },
+    ability: [{ effect: 'discard', condition: null, triggerTiming: 'onPlay', cost: { from: 'hp', amount: 2 }, amount: 1 }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -204,7 +204,7 @@ let reaper = new unit({
         original: 4,
         current: 4
     },
-    ability: { effect: 'targetKill', condition: "unit.cost.current <= 2", triggerTiming: 'onPlay', cost: null, target: true },
+    ability: [{ effect: 'targetKill', condition: "unit.cost.current <= 2", triggerTiming: 'onPlay', cost: null, target: true }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -230,7 +230,7 @@ let skeleton = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'draw', amount: 1, triggerTiming: 'onKilled', cost: null, target: false },
+    ability: [{ effect: 'draw', amount: 1, triggerTiming: 'onKilled', cost: null, target: false }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -309,7 +309,7 @@ let incarnation = new unit({
         original: 7,
         current: 7
     },
-    ability: { effect: 'draw', amount: 0, cost: { from: 'hp', amount: 5 }, triggerTiming: 'onPlay' },
+    ability: [{ effect: 'draw', amount: 0, cost: { from: 'hp', amount: 5 }, triggerTiming: 'onPlay' }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -340,7 +340,7 @@ let crusader = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    ability: { effect: 'modifyLp', amount: 2, triggerTiming: 'onKilled', cost: null, target: false, gain: true, condition: null },
+    ability: [{ effect: 'modifyLp', amount: 2, triggerTiming: 'onKilled', cost: null, target: false, gain: true, condition: null }],
     playerOwned: false,
     color: 'white',
     attributes: [],
@@ -366,7 +366,7 @@ let blind_monk = new unit({
     status: 'none',
     canAttack: false,
     type: 'unit',
-    ability: { effect: 'modifyStat', amount: 3, triggerTiming: 'onPlay', cost: null, targetStat: 'hp', buff: true, condition: 'unit.hp.current < unit.hp.original' },
+    ability: [{ effect: 'modifyStat', amount: 3, triggerTiming: 'onPlay', cost: null, targetStat: 'hp', buff: true, condition: 'unit.hp.current < unit.hp.original' }],
     playerOwned: false,
     color: 'white',
     attributes: [],
@@ -441,7 +441,7 @@ let joyce = new unit({
         original: 1,
         current: 1
     },
-    ability: { effect: 'modifyLp', condition: null, triggerTiming: 'onPlay', cost: null, amount: 3, gain: true },
+    ability: [{ effect: 'modifyLp', condition: null, triggerTiming: 'onPlay', cost: null, amount: 3, gain: true }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -493,7 +493,7 @@ let leonidas = new unit({
         original: 6,
         current: 6
     },
-    ability: { effect: 'modifyStat', condition: "player.lp > 30", triggerTiming: 'onPlay', cost: null, amount: 5, selfTarget: true, buff: true, targetStat: 'op' },
+    ability: [{ effect: 'modifyStat', condition: "player.lp > 30", triggerTiming: 'onPlay', cost: null, amount: 5, selfTarget: true, buff: true, targetStat: 'op' }],
     status: 'none',
     canAttack: false,
     type: 'unit',
@@ -543,7 +543,7 @@ let pot_of_malice = new gameCard({
         original: 2,
         current: 2
     },
-    ability: { effect: 'draw', amount: 2 },
+    ability: [{ effect: 'draw', amount: 2 }],
     type: 'spell',
     playerOwned: false,
     color: null,
@@ -557,7 +557,7 @@ let called_from_grave = new gameCard({
         original: 3,
         current: 3
     },
-    ability: { effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: null, condition: 'index == graveyard.length - 1', ownGraveyard: true },
+    ability: [{ effect: 'reborn', amount: 1, triggerTiming: 'onPlay', cost: null, condition: 'index == graveyard.length - 1', ownGraveyard: true }],
     type: 'spell',
     playerOwned: false,
     color: null,
@@ -573,7 +573,7 @@ let inner_fear = new gameCard({
         original: 1,
         current: 1
     },
-    ability: { effect: 'modifyStat', amount: 2, selfTarget: false, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null, condition: null, target: true },
+    ability: [{ effect: 'modifyStat', amount: 2, selfTarget: false, triggerTiming: 'onPlay', buff: false, targetStat: 'hp', cost: null, condition: null, target: true }],
     type: 'spell',
     playerOwned: false,
     color: 'black',
@@ -587,7 +587,7 @@ let brain_control = new gameCard({
         original: 3,
         current: 3
     },
-    ability: { effect: 'steal', amount: 1, target: true, triggerTiming: 'onPlay', cost: null },
+    ability: [{ effect: 'steal', amount: 1, target: true, triggerTiming: 'onPlay', cost: null }],
     type: 'spell',
     playerOwned: false,
     color: 'black',
@@ -603,7 +603,7 @@ let blessing = new gameCard({
         original: 2,
         current: 2
     },
-    ability: { effect: 'healAll', cost: null, condition: null },
+    ability: [{ effect: 'healAll', cost: null, condition: null }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -617,7 +617,7 @@ let divine_shield = new gameCard({
         original: 3,
         current: 3
     },
-    ability: { effect: 'modifyStat', amount: 'double', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'hp' },
+    ability: [{ effect: 'modifyStat', amount: 'double', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'hp' }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -631,7 +631,7 @@ let awaken_spirit = new gameCard({
         original: 3,
         current: 3
     },
-    ability: { effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'op' },
+    ability: [{ effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: true, cost: null, targetStat: 'op' }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -651,7 +651,7 @@ let dimensional_gate = new gameCard({
         original: 2,
         current: 2
     },
-    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onAttack', cost: null },
+    ability: [{ effect: 'kill', amount: 1, target: false, triggerTiming: 'onAttack', cost: null }],
     type: 'trap',
     playerOwned: false,
     color: null,
@@ -665,7 +665,7 @@ let trap_hole = new gameCard({
         original: 2,
         current: 2
     },
-    ability: { effect: 'kill', amount: 1, target: false, triggerTiming: 'onSummon', cost: null, condition: "trapTarget.op.current <= 2" },
+    ability: [{ effect: 'kill', amount: 1, target: false, triggerTiming: 'onSummon', cost: null, condition: "trapTarget.op.current <= 2" }],
     type: 'trap',
     playerOwned: false,
     color: null,
@@ -681,7 +681,7 @@ let dark_bribe = new gameCard({
         original: 2,
         current: 2
     },
-    ability: { effect: 'negate', triggerTiming: 'onOppoSpellOrTrap', cost: { amount: 2, from: 'hp' }, condition: null },
+    ability: [{ effect: 'negate', triggerTiming: 'onOppoSpellOrTrap', cost: { amount: 2, from: 'hp' }, condition: null }],
     type: 'trap',
     playerOwned: false,
     color: 'black',

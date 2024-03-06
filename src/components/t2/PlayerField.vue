@@ -26,6 +26,15 @@ export default {
     },
     components: { GameCard },
     methods: {
+        hasOnPlayEffect(card) {
+            let result = false
+            card.ability.forEach((singleAbility) => {
+                if (singleAbility.triggerTiming == 'onPlay') {
+                    result = true
+                }
+            })
+            return result
+        },
         allowDrop(event) {
             event.preventDefault();
         },
@@ -61,15 +70,15 @@ export default {
 
             const propProxy = document.getElementById(propCard.id)
 
-            if (propCard && propCard.ability && propCard.ability.triggerTiming == 'onPlay' && propCard.type == 'unit') {
-                this.generalStore.checkAbility(propCard.ability.effect, propCard)
+            if (propCard && propCard.ability && this.hasOnPlayEffect(propCard) && propCard.type == 'unit') {
+                this.generalStore.checkAbility(propCard)
                 propCard.canAttack = true
                 if (propCard.ability.target && this.generalStore.opponent.field.length == 0) {
                     propCard.canAttack = false
                 }
 
             } else if (propCard && propCard.ability && propCard.type == 'spell') {
-                this.generalStore.checkAbility(propCard.ability.effect, propCard)
+                this.generalStore.checkAbility(propCard)
             }
             this.generalStore.updateDB()
         }

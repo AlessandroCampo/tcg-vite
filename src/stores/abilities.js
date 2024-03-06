@@ -4,9 +4,10 @@ import gsap from 'gsap'
 // const generalStore = useGeneralStore()
 
 export const abilities = {
-    async draw(card) {
+    async draw(card, abilityIndex) {
+        let ability = card.ability[abilityIndex];
         useGeneralStore().$state.freeze = false
-        for (let i = 0;i < card.ability.amount;i++) {
+        for (let i = 0;i < ability.amount;i++) {
             useGeneralStore().drawOne()
         }
         useGeneralStore().$state.freeze = false
@@ -17,11 +18,11 @@ export const abilities = {
             }, 1200)
         }
     },
-    modifyStat(card) {
-        let ability = card.ability;
+    modifyStat(card, abilityIndex) {
+        let ability = card.ability[abilityIndex];
         let player = useGeneralStore().$state.player;
         let opponent = useGeneralStore().$state.opponent;
-        const condition = card.ability.condition
+        const condition = ability.condition
             ? new Function('player', `return ${card.ability.condition}`)
             : () => true;
 
@@ -30,14 +31,14 @@ export const abilities = {
             return;
         }
 
-        if (card.ability.cost) this.checkCost(card.ability.cost);
+        if (ability.cost) this.checkCost(ability.cost);
         let target;
         if (ability.selfTarget) {
             target = card;
         } else {
 
-            const condition = card.ability.condition
-                ? new Function('unit', `return ${card.ability.condition}`)
+            const condition = ability.condition
+                ? new Function('unit', `return ${ability.condition}`)
                 : new Function('unit', 'return true');
 
             const oppoField = useGeneralStore().$state.opponent.field;
@@ -69,24 +70,26 @@ export const abilities = {
         }
         useGeneralStore().$state.freeze = false;
     },
-    discard(card) {
-        if (card.ability.cost) this.checkCost(card.ability.cost);
+    discard(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) this.checkCost(ability.cost);
         let oppoHand = useGeneralStore().$state.opponent.hand;
-        for (let i = 0;i < card.ability.amount;i++) {
+        for (let i = 0;i < ability.amount;i++) {
             let randomOppoHandCardIndex = Math.floor(Math.random() * oppoHand.length);
             oppoHand.splice(randomOppoHandCardIndex, 1);
         }
         useGeneralStore().$state.freeze = false;
         useGeneralStore().updateBothDb()
     },
-    targetKill(card) {
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+    targetKill(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
 
         const oppoField = useGeneralStore().$state.opponent.field;
-        const condition = card.ability.condition
-            ? new Function('unit', `return ${card.ability.condition}`)
+        const condition = ability.condition
+            ? new Function('unit', `return ${ability.condition}`)
             : new Function('unit', 'return true');
 
 
@@ -96,19 +99,17 @@ export const abilities = {
 
                 card.canAttack = false
                 selectedCard.killed = true
-
                 useGeneralStore().updateOpponentDB()
-                // array.splice(index, 1)
-                // setTimeout(() => { useGeneralStore().$state.opponent.field.splice(index, 1); useGeneralStore().updateBothDb(); }, 1000)
             }
         };
 
         useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
     },
-    kill(card, target) {
+    kill(card, target, abilityIndex) {
+        let ability = card.ability[abilityIndex]
         let delay = card.type !== 'trap' ? 1000 : 2000
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
         const cardField = useGeneralStore().$state.player.field;
         const index = cardField.indexOf(target);
@@ -123,15 +124,16 @@ export const abilities = {
             }, delay)
         }
     },
-    steal(card) {
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+    steal(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
 
         const oppoField = useGeneralStore().$state.opponent.field;
         const playerField = useGeneralStore().$state.player.field;
-        const condition = card.ability.condition
-            ? new Function('unit', `return ${card.ability.condition}`)
+        const condition = ability.condition
+            ? new Function('unit', `return ${ability.condition}`)
             : new Function('unit', 'return true');
 
         const selectionCallback = (selectedCard, array) => {
@@ -153,18 +155,19 @@ export const abilities = {
 
         useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
     },
-    async modifyLp(card) {
+    async modifyLp(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
         useGeneralStore().$state.freeze = false;
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
 
         const increment = 1;
         const delay = 300;
 
-        if (card.ability.gain) {
+        if (ability.gain) {
             const initialLP = useGeneralStore().$state.player.lp;
-            const finalLP = initialLP + card.ability.amount;
+            const finalLP = initialLP + ability.amount;
 
 
             for (let lp = initialLP;lp <= finalLP;lp += increment) {
@@ -173,7 +176,7 @@ export const abilities = {
             }
         } else {
             const initialLP = useGeneralStore().$state.opponent.lp;
-            const finalLP = initialLP - card.ability.amount;
+            const finalLP = initialLP - ability.amount;
 
 
             for (let lp = initialLP;lp >= finalLP;lp -= increment) {
@@ -191,9 +194,10 @@ export const abilities = {
             useGeneralStore().$state.player.mana.current -= cost.amount;
         }
     },
-    healAll(card) {
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+    healAll(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
         useGeneralStore().$state.freeze = false
         useGeneralStore().$state.player.field.forEach((unit) => {
@@ -205,15 +209,15 @@ export const abilities = {
         }, 1200)
 
     },
-    reborn(card) {
-
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+    reborn(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
-        const graveyard = card.ability.ownGraveyard ? useGeneralStore().$state.player.graveyard : useGeneralStore().$state.opponent.graveyard;
+        const graveyard = ability.ownGraveyard ? useGeneralStore().$state.player.graveyard : useGeneralStore().$state.opponent.graveyard;
         if (graveyard.length == 0) return;
-        const condition = card.ability.condition
-            ? new Function('unit', 'index', 'graveyard', `return ${card.ability.condition}`)
+        const condition = ability.condition
+            ? new Function('unit', 'index', 'graveyard', `return ${ability.condition}`)
             : new Function('unit', 'index', 'graveyard', 'return true');
         let rebornTarget = null;
         for (let i = 0;i < graveyard.length;i++) {
@@ -239,14 +243,15 @@ export const abilities = {
             }, 1200);
         }
     },
-    async drawAndGain(card) {
+    async drawAndGain(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
         useGeneralStore().$state.freeze = false;
-        if (card.ability.cost) {
-            this.checkCost(card.ability.cost);
+        if (ability.cost) {
+            this.checkCost(ability.cost);
         }
         const drawnCard = useGeneralStore().drawOne();
         console.log(drawnCard);
-        if (card.ability.gain) {
+        if (ability.gain) {
             const initialLP = useGeneralStore().$state.player.lp;
             const finalLP = initialLP + drawnCard.cost.current;
             const increment = 1;
@@ -260,9 +265,6 @@ export const abilities = {
         }
         await useGeneralStore().updateDB();
     }
-
-
-
 
 };
 

@@ -44,8 +44,11 @@ export default {
           this.generalStore.playerInfo = doc.data()
         });
 
+
+
         await this.generalStore.updateDB()
         await this.generalStore.updatePlayerInfoDB()
+        this.generalStore.updatePlayerCollection()
 
 
 

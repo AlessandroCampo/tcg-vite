@@ -76,6 +76,22 @@ export const useGeneralStore = defineStore('generalStore', {
 
     },
     actions: {
+        updatePlayerCollection() {
+            this.playerInfo.collection.forEach((playerCard) => {
+                const dbCard = this.cards.find((card) => card.name === playerCard.name);
+                if (dbCard) {
+                    Object.assign(playerCard, dbCard);
+                }
+            });
+            this.playerInfo.deck.decklist.forEach((playerCard) => {
+                const dbCard = this.cards.find((card) => card.name === playerCard.name);
+                if (dbCard) {
+                    Object.assign(playerCard, dbCard);
+                }
+            });
+
+        }
+        ,
         shuffle(array) {
             for (let i = array.length - 1;i > 0;i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -175,6 +191,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 const reactiveCard = reactive(cardCopy);
                 reactiveCard.id = this.generateCardId(index, card.name);
                 reactiveCard.playerOwned = this.isPlayerOwned(reactiveCard.id)
+                reactiveCard.killed = false
                 this.player.deck.push(reactiveCard);
 
             });
@@ -197,44 +214,80 @@ export const useGeneralStore = defineStore('generalStore', {
         },
 
 
-        checkAbility(name, card) {
-            if (card.ability.target && this.opponent.field.length == 0) {
-                if (card.type == 'spell') {
-                    this.player.activatedCard = null
-                    this.updateDB()
-                    setTimeout(() => { this.player.activatedCard = null }, 1000)
-                } else if (card.type == 'unit') {
-                }
-                return
-            } else {
-                this.freeze = true
-            }
-            if (abilities.hasOwnProperty(name)) {
-                if (card.type == 'unit') {
-                    setTimeout(() => {
-                        this.player.field.forEach((unit) => {
-                            if (unit.id == card.id) {
-                                const playerField = document.getElementById('player-field')
-                                const cardElement = document.getElementById(unit.id)
-                                this.animateAbility(cardElement, unit)
-                                if (unit.ability.triggerTiming !== 'onKilled' && unit) {
+        // checkAbility(name, card) {
+        //     if (card.ability.target && this.opponent.field.length == 0) {
+        //         if (card.type == 'spell') {
+        //             this.player.activatedCard = null
+        //             this.updateDB()
+        //             setTimeout(() => { this.player.activatedCard = null }, 1000)
+        //         } else if (card.type == 'unit') {
+        //         }
+        //         return
+        //     } else {
+        //         this.freeze = true
+        //     }
+        //     if (abilities.hasOwnProperty(name)) {
+        //         if (card.type == 'unit') {
+        //             setTimeout(() => {
+        //                 this.player.field.forEach((unit) => {
+        //                     if (unit.id == card.id) {
+        //                         const playerField = document.getElementById('player-field')
+        //                         const cardElement = document.getElementById(unit.id)
+        //                         this.animateAbility(cardElement, unit)
+        //                         if (unit.ability.triggerTiming !== 'onKilled' && unit) {
 
-                                    this.sendActionObj(unit, unit, 'effectTrigger')
+        //                             this.sendActionObj(unit, unit, 'effectTrigger')
+        //                         }
+        //                         this.resetActionObj()
+
+        //                     }
+        //                 });
+        //             }, 700);
+        //         } else if (card.type == 'spell') {
+
+        //             this.player.activatedCard = card
+        //             this.updateDB()
+        //             setTimeout(() => { this.resolveAbility(card) }, 500)
+
+        //         }
+
+        //     }
+        // },
+        checkAbility(card) {
+            console.log(card)
+            card.ability.forEach((ability, index) => {
+                if ((ability.target && this.opponent.field.length == 0 && !selfTarget) || (ability.target && this.player.field.length == 0 && selfTarget)) {
+                    if (card.type == 'spell') {
+                        this.player.activatedCard = card
+                        this.updateDB()
+                        setTimeout(() => { this.player.activatedCard = null }, 1000)
+                    }
+                    return
+                } else this.freeze = true
+
+                if (abilities.hasOwnProperty(ability.effect)) {
+                    if (card.type == 'unit') {
+                        setTimeout(() => {
+                            this.player.field.forEach((unit) => {
+                                if (unit.id == card.id) {
+                                    const playerField = document.getElementById('player-field')
+                                    const cardElement = document.getElementById(unit.id)
+                                    this.animateAbility(cardElement, unit)
+                                    if (unit.ability.triggerTiming !== 'onKilled' && unit) {
+                                        this.sendActionObj(unit, unit, 'effectTrigger')
+                                    }
+                                    this.resetActionObj()
                                 }
-                                this.resetActionObj()
+                            });
+                        }, 700);
+                    } else if (card.type == 'spell') {
 
-                            }
-                        });
-                    }, 700);
-                } else if (card.type == 'spell') {
-
-                    this.player.activatedCard = card
-                    this.updateDB()
-                    setTimeout(() => { this.resolveAbility(card) }, 500)
-
+                        this.player.activatedCard = card
+                        this.updateDB()
+                        setTimeout(() => { this.resolveAbility(card, index) }, 500)
+                    }
                 }
-
-            }
+            })
         },
         animateAbility(cardElement, unit) {
             if (unit.ability.triggerTiming == 'onKilled') {
@@ -271,28 +324,31 @@ export const useGeneralStore = defineStore('generalStore', {
                 });
         },
         resolveAbility(activated) {
+            activated.ability.forEach((el, index) => {
+                if (activated.status == 'onField' && el.triggerTiming == 'onPlay' && activated.type == 'unit') {
+                    this.player.field.forEach((card) => {
+                        if (card.id === activated.id) {
+                            abilities[el.effect](card, index);
+                            if (!activated.ability.target) {
+                                card.canAttack = false;
+                            }
+                            this.updateDB()
 
-            if (activated.status == 'onField' && activated.ability.triggerTiming == 'onPlay' && activated.type == 'unit') {
-                this.player.field.forEach((card) => {
-                    if (card.id === activated.id) {
-                        abilities[card.ability.effect](card);
-                        if (!activated.ability.target) {
-                            card.canAttack = false;
                         }
-                        this.updateDB()
+                    });
+                } else if (activated.type == 'spell') {
+                    abilities[el.effect](activated, index);
+                    this.updateDB()
 
-                    }
-                });
-            } else if (activated.type == 'spell') {
-                abilities[activated.ability.effect](activated);
-                this.updateDB()
+                } else if (activated.status == 'onField' && activated.ability.triggerTiming == 'onKilled' && activated.type == 'unit') {
+                    abilities[el.effect](activated, index);
+                    // this.updateBothDb()
+                } else if (activated.type == 'commander') {
+                    abilities[el.effect](activated, index);
+                }
+            })
 
-            } else if (activated.status == 'onField' && activated.ability.triggerTiming == 'onKilled' && activated.type == 'unit') {
-                abilities[activated.ability.effect](activated);
-                // this.updateBothDb()
-            } else if (activated.type == 'commander') {
-                abilities[activated.ability.effect](activated);
-            }
+
 
         },
         battle(attacker, target) {
@@ -461,18 +517,20 @@ export const useGeneralStore = defineStore('generalStore', {
 
             let foundTrap = false
             this.opponent.traps.forEach((trap, index) => {
-                const condition = trap.ability.condition
-                    ? new Function('trapTarget', `return ${trap.ability.condition}`)
-                    : new Function('trapTarget', 'return true');
-                if (trap.ability.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
+                trap.ability.forEach((singleAbility, abilityIndex) => {
+                    const condition = trap.ability.condition
+                        ? new Function('trapTarget', `return ${trap.ability.condition}`)
+                        : new Function('trapTarget', 'return true');
+                    if (singleAbility.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
 
-                    foundTrap = true
-                    this.opponent.activatedCard = trap
-                    this.opponent.traps.splice(index, 1)
-                    abilities[trap.ability.effect](trap, trapTarget, attackTarget);
-                    this.updateBothDb()
-                    // setTimeout(() => { this.opponent.activatedCard = null; this.player.activatedCard = null; this.updateBothDb }, 1400)
-                }
+                        foundTrap = true
+                        this.opponent.activatedCard = trap
+                        this.opponent.traps.splice(index, 1)
+                        abilities[singleAbility.effect](trap, trapTarget, abilityIndex, attackTarget);
+                        this.updateBothDb()
+                    }
+                })
+
             })
             return foundTrap
         }
