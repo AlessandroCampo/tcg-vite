@@ -3,6 +3,9 @@
         <h2>
             {{ propWinner ? 'YOU WON' : 'YOU LOST' }}
         </h2>
+        <p v-if="propWinner">
+            Congratulations for your win! 25 coins have been added to your wealth as reward
+        </p>
         <button @click="backToMenu">
             BACK TO HOME
         </button>

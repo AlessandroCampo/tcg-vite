@@ -69,13 +69,13 @@
                     <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }"
                         :draggable="true" v-for="(card, index) in block" :key="index" @dragstart="startDrag(card)"
                         v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander')">
-                        <span class="cost stat" v-if="card.type !== 'commander'">
+                        <span class="cost stat">
                             {{ card.cost.current }}
                         </span>
                         <span class="op stat" v-if="card.type == 'unit'">
                             {{ card?.op.current }}
                         </span>
-                        <span class="hp stat" v-if="card.type == 'unit'">
+                        <span class="hp stat" v-if="card.type == 'unit' || card.type == 'commander'">
                             {{ card?.hp.current }}
                         </span>
                     </div>
@@ -187,8 +187,9 @@ export default {
         },
         addCard() {
             const newCard = this.generalStore.draggedCardObj
-            if (!this.generalStore.playerInfo.deck.commander) {
+            if (!this.generalStore.playerInfo.deck.commander && newCard.type !== 'commander') {
                 window.alert('Choose a commander for this deck first')
+                return
             }
             if (this.generalStore.playerInfo.deck.decklist.length >= 45) {
                 window.alert("Your deck can't contain more than 45 cards")
@@ -394,6 +395,7 @@ export default {
             padding-block: 100px;
             padding-inline: 30px;
             margin-top: -50px;
+            height: 100%;
 
             .card-block {
                 // margin-right: 30px;
@@ -417,7 +419,7 @@ export default {
 
                 .stat {
                     position: absolute;
-                    font-size: 1em;
+                    font-size: 0.8em;
                     font-weight: bold;
                     color: white;
                 }

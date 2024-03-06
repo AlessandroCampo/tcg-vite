@@ -71,9 +71,9 @@
                             alt=""></button>
                 </div>
                 <div class="singles" v-for="(card, index) in allCards" :key="card.name"
-                    v-else-if="currentProduct == 'singles'">
-                    <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }"
-                        v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander') && (card.rarity == rarityFilter || rarityFilter == 'all')">
+                    v-else-if="currentProduct == 'singles'"
+                    v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander') && (card.rarity == rarityFilter || rarityFilter == 'all')">
+                    <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }">
                         <span class="cost stat" v-if="card.type !== 'commander'">
                             {{ card.cost.current }}
                         </span>
@@ -89,6 +89,27 @@
                 </div>
             </div>
         </div>
+        <div class="pull-popup" v-if="newPull.length > 0">
+            <div class="pull-container">
+                <button class="close-icon" @click="() => { newPull = [] }"> CLOSE </button>
+                <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }"
+                    v-for="(card, index) in newPull" :key="index">
+                    <span class="cost stat" v-if="card.type !== 'commander'">
+                        {{ card.cost.current }}
+                    </span>
+                    <span class="op stat" v-if="card.type == 'unit'">
+                        {{ card?.op.current }}
+                    </span>
+                    <span class="hp stat" v-if="card.type == 'unit'">
+                        {{ card?.hp.current }}
+                    </span>
+                    <div class="overlay" @click="revealCard($event)">
+                        <i class="fa-solid fa-question"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </template>
 
@@ -96,7 +117,7 @@
 
 import { useGeneralStore } from '../../stores/generalStore';
 import { allPacks, allCards } from '../../db';
-import { pull } from 'lodash';
+import gsap from 'gsap';
 
 
 export default {
@@ -117,7 +138,8 @@ export default {
                 price: 0,
                 currency: 'crystal'
             },
-            buyProduct: {}
+            buyProduct: {},
+            newPull: []
         }
     },
     created() {
@@ -188,6 +210,7 @@ export default {
                         this.generalStore.playerInfo.collection.push({ ...this.buyProduct })
                         console.log(this.playerInfo.collection)
                         this.generalStore.updatePlayerInfoDB()
+                        this.buying = false
                     } else {
                         window.alert(`You don't have enough crystals to buy ${this.buyProduct}`)
                         this.buying = false
@@ -202,13 +225,14 @@ export default {
                     this.generalStore.playerInfo.coins -= this.buyProduct.price
                     let pull = []
                     let cardList = this.generalStore.shuffle(this.buyProduct.cardList)
-                    while (pull.length < 5) {
+                    while (pull.length !== 5) {
                         cardList.forEach((card) => {
-                            if (this.isPulled(card.rarity)) {
-                                pull.push({ ...card })
+                            if (this.isPulled(card.rarity) && pull.length !== 5) {
+                                pull.push({ ...card });
                             }
-                        })
+                        });
                     }
+
                     pull.forEach((card) => {
                         if (!this.alreadyMaxCopies(card)) {
                             this.generalStore.playerInfo.collection.push(card)
@@ -216,8 +240,10 @@ export default {
                             this.generalStore.playerInfo.crystals += (this.calcSinglePrice(card.rarity) / 5)
                         }
                     })
-                    console.log(this.generalStore.playerInfo.collection)
+                    console.log(pull)
                     this.generalStore.updatePlayerInfoDB()
+                    this.buying = false
+                    this.newPull = pull
                 } else {
                     window.alert(`You don't have enough coins to buy ${this.activeProduct.name}`)
                 }
@@ -259,6 +285,14 @@ export default {
             })
             if (ownedCopies >= 4) return true
             else return false
+        },
+        revealCard(e) {
+            let questionMark = e.target.querySelector('i')
+            questionMark.remove()
+            gsap.to(e.target, {
+                opacity: 0,
+                duration: 1,
+            })
         }
 
     }
@@ -529,5 +563,93 @@ div.popup {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.pull-popup {
+
+    height: fit-content;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba($color: #000000, $alpha: 0.5);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+
+    .pull-container {
+        display: flex;
+        gap: 10px;
+        position: relative;
+        border: 1px solid white;
+        padding: 20px;
+
+        .close-icon {
+            position: absolute;
+            bottom: -40%;
+            left: 50%;
+            font-size: 2em;
+            color: crimson;
+            z-index: 10;
+            transform: translate(-50%, -50%);
+            background-color: rgba($color: #000000, $alpha: 0.99);
+        }
+
+        .collection-card {
+            width: 220px;
+            height: 330px;
+
+            &:hover {
+                border-color: aqua;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                cursor: pointer;
+            }
+
+            .overlay {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background-color: rgba($color: #000000, $alpha: 0.99);
+                color: crimson;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+
+                i {
+                    font-size: 3em;
+                    cursor: pointer;
+                }
+            }
+
+            .stat {
+                position: absolute;
+                font-size: 1.2em;
+                font-weight: bold;
+                color: white;
+            }
+
+            .op,
+            .hp {
+                bottom: 6%;
+            }
+
+            .op {
+                left: 10.5%;
+            }
+
+            .hp {
+                right: 10.5%;
+            }
+
+            .cost {
+                left: 10.5%;
+                top: 6.5%;
+            }
+        }
+    }
+
+
 }
 </style>

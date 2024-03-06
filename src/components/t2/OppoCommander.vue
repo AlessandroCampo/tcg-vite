@@ -88,8 +88,10 @@ export default {
                     this.generalStore.player.winner = true
                     this.generalStore.player.gameover = true
                     this.generalStore.opponent.gameover = true
+                    this.generalStore.playerInfo.coins += 25
                 }
                 this.generalStore.updateBothDb();
+                this.generalStore.updatePlayerInfoDB()
             }, interval * iterations);
         },
 
