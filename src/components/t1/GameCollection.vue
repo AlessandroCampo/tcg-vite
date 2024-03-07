@@ -35,7 +35,8 @@
         <div class="collection-right">
             <div class="card-filter-bar">
                 <div class="searchbar-container">
-                    <img src="../../../img/icons/lens.png" alt="">
+                    <!-- <img src="../../../img/icons/lens.png" alt=""> -->
+                    <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text" v-model="searchString" placeholder="Search..." class="searchbar">
                 </div>
                 <select v-model="typeFilter">
@@ -382,8 +383,10 @@ export default {
                 gap: 12px;
                 height: 50px;
 
-                img {
-                    width: 20px;
+                i {
+                    color: white;
+                    font-size: 1.2em;
+                    margin-top: 0.21;
                 }
             }
 

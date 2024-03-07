@@ -9,16 +9,17 @@
         <div class="shop-right">
             <div class="currency-bar">
                 <div class="coins">
-                    <img src="../../../img/icons/coins.png" alt="">
+                    <img src="/img/icons/coins.png" alt="">
                     <div> {{ generalStore.playerInfo.coins }} </div>
                 </div>
                 <div class="crystals">
-                    <img src="../../../img/icons/crystal.png" alt="">
+                    <img src="/img/icons/crystal.png" alt="">
                     <div> {{ generalStore.playerInfo.crystals }} </div>
                 </div>
                 <div class="filter-inputs" v-show="currentProduct == 'singles'">
                     <div class="searchbar-container">
-                        <img src="../../../img/lens.png" alt="">
+                        <!-- <img src="../../../img/lens.png" alt=""> -->
+                        <i class="fa-solid fa-magnifying-glass"></i>
                         <input type="text" v-model="searchString" placeholder="Search..." class="searchbar">
                     </div>
                     <select v-model="typeFilter">
@@ -67,7 +68,7 @@
                 <div class="pack" v-for="(pack, index) in allPacks" :key="index" v-if="currentProduct == 'packs'">
                     <img :src="pack.imgPath" alt="" class="preview">
                     <div class="pack-name"> {{ pack.name }}</div>
-                    <button @click="openConfirm(pack)"> BUY FOR {{ pack.price }} <img src="../../../img/icons/coins.png"
+                    <button @click="openConfirm(pack)"> BUY FOR {{ pack.price }} <img src="/img/icons/coins.png"
                             alt=""></button>
                 </div>
                 <div class="singles" v-for="(card, index) in allCards" :key="card.name"
@@ -85,7 +86,7 @@
                         </span>
                     </div>
                     <button @click="openConfirm(card)"> BUY FOR {{ calcSinglePrice(card.rarity) }} <img
-                            src="../../../img/icons/crystal.png" alt=""></button>
+                            src="/img/icons/crystal.png" alt=""></button>
                 </div>
             </div>
         </div>
@@ -464,8 +465,10 @@ export default {
         gap: 12px;
         height: 50px;
 
-        img {
-            width: 20px;
+        i {
+            color: white;
+            font-size: 1.2em;
+            margin-top: 0.21;
         }
     }
 }
