@@ -27,7 +27,7 @@ export default {
     components: { ManaBar, SecretsCounter },
     methods: {
         commanderPower() {
-            if (this.generalStore.player.commander.used) return
+            if (this.generalStore.player.commander.used || this.generalStore.freeze) return
             const commander = this.generalStore.player.commander
             commander.used = true
             this.generalStore.resolveAbility(commander)

@@ -100,37 +100,32 @@ export const useGeneralStore = defineStore('generalStore', {
             return array;
         },
         generateChoice(targets, condition, selectionCallback) {
-            console.log(targets)
             let selectedCard;
-            let foundTargets = false
+            let foundTargets = false;
+
             targets.forEach((unit) => {
-                if (condition(unit)) { // 
+                if (condition(unit)) {
                     const proxy = document.getElementById(unit.id);
                     proxy.style.cursor = 'pointer';
                     this.$state.freeze = true;
-                    foundTargets = true
+                    foundTargets = true;
 
                     gsap.killTweensOf(proxy);
 
-
-                    gsap.set(proxy, {
-                        scale: 1,
-                        filter: "brightness(1)"
-                    });
-
                     gsap.to(proxy, {
                         scale: 1.1,
-                        filter: "brightness(1.2)",
                         repeat: -1,
                         yoyo: true
                     });
+
+                    // Add green shade border with box-shadow to each possible target
+                    proxy.style.border = '2px solid green';
+                    proxy.style.boxShadow = '0 0 10px green';
 
                     const handleClick = (e) => {
                         this.freeze = false;
                         selectedCard = unit;
                         selectionCallback(selectedCard, targets);
-                        // this.updateBothDb()
-
 
                         // Remove event listener and reset visuals
                         const oppoFieldProxies = document.querySelectorAll('.playerfield-container .card-base');
@@ -138,20 +133,20 @@ export const useGeneralStore = defineStore('generalStore', {
                             gsap.killTweensOf(el);
                             gsap.set(el, {
                                 scale: 1,
-                                filter: el.classList.contains('disabled') ? "grayscale(70%)" : "brightness(0.9)"
                             });
-                            if (selectedCard.canAttack) {
-                                el.style.filter = "brightness(0.9)"
-                            }
-
                             el.removeEventListener('click', handleClick);
                         });
+
+                        // Remove green shade border and box-shadow from the selected target
+                        proxy.style.border = '';
+                        proxy.style.boxShadow = '';
                     };
 
                     // Add click event listener
                     proxy.addEventListener('click', handleClick);
                 }
             });
+
             if (!foundTargets) {
                 this.freeze = false;
             }
@@ -327,7 +322,7 @@ export const useGeneralStore = defineStore('generalStore', {
 
             if (this.player.activeTurn && this.opponent.traps.length > 0) {
                 const trapFound = this.checkTraps(attacker, target, 'onAttack');
-                if (trapFound) return;
+                if (trapFound && !attacker.attributes.includes('immune')) return;
             }
             attacker.canAttack = false
             attacker.hp.current -= target.op.current;

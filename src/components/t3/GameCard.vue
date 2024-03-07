@@ -204,7 +204,7 @@ export default {
                             }
 
 
-                        }, 1500);
+                        }, 1000);
                     }
                 }
             },
@@ -278,7 +278,7 @@ export default {
 
 .card-base.disabled {
     cursor: not-allowed;
-    filter: grayscale(70%) !important;
+    filter: grayscale(70%)
 }
 
 

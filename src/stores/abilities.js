@@ -6,6 +6,9 @@ import gsap from 'gsap'
 export const abilities = {
     async draw(card, abilityIndex) {
         let ability = card.ability[abilityIndex];
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
         useGeneralStore().$state.freeze = false
         for (let i = 0;i < ability.amount;i++) {
             useGeneralStore().drawOne()
@@ -32,7 +35,6 @@ export const abilities = {
         if (ability.selfTarget) {
             target = card;
         } else if (!ability.selfTarget && !ability.randomTarget) {
-            console.log("were here")
             const condition = ability.condition
                 ? new Function('unit', `return ${ability.condition}`)
                 : new Function('unit', 'return true');
@@ -41,6 +43,7 @@ export const abilities = {
             const allyField = useGeneralStore().$state.player.field;
             const targetArray = ability.buff ? allyField : oppoField
             const selectionCallback = (selectedCard, array) => {
+
                 const index = array.indexOf(selectedCard);
                 if (isNaN(ability.amount)) {
                     console.log(selectedCard)
@@ -51,6 +54,9 @@ export const abilities = {
                     useGeneralStore().$state.player.activatedCard = null
                 }
                 if (index !== -1) {
+                    if (selectedCard.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                        ability.amount = 0
+                    }
                     if (ability.buff) {
                         selectedCard[ability.targetStat].current += ability.amount;
                     } else {
@@ -92,6 +98,9 @@ export const abilities = {
         if (isNaN(ability.amount)) {
             ability.amount = this.convertAmount(ability.amount, ability.targetStat, target)
         }
+        if (target.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+            ability.amount = 0
+        }
         if (ability.buff && target && condition(player, target)) {
             target[ability.targetStat].current += ability.amount;
         } else if (!ability.buff && target && condition(player, target)) {
@@ -125,7 +134,7 @@ export const abilities = {
         const selectionCallback = (selectedCard, array) => {
             const index = array.indexOf(selectedCard);
             if (index !== -1) {
-
+                if (selectedCard.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) return
                 card.canAttack = false
                 selectedCard.killed = true
                 useGeneralStore().updateOpponentDB()
@@ -143,7 +152,11 @@ export const abilities = {
         const cardField = useGeneralStore().$state.player.field;
         const index = cardField.indexOf(target);
         if (index !== -1) {
+
             target.killed = true;
+            if (target.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                target.killed = false
+            }
 
             useGeneralStore().updateBothDb()
             setTimeout(() => {
@@ -224,7 +237,7 @@ export const abilities = {
                 }
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
-            console.log(playerToUpdate.lp)
+
         }
         else {
             const initialLP = useGeneralStore().isPlayerOwned(card.id) ? useGeneralStore().$state.player.lp : useGeneralStore().$state.opponent.lp;
@@ -359,6 +372,7 @@ export const abilities = {
         if (ability.cost) {
             this.checkCost(ability.cost);
         }
+        useGeneralStore().$state.freeze = false
         if (card.type == 'trap') {
             setTimeout(() => { useGeneralStore().$state.opponent.activatedCard = null; useGeneralStore().updateBothDb() }, 1000)
         }
