@@ -617,7 +617,7 @@ let divine_shield = new gameCard({
         original: 3,
         current: 3
     },
-    ability: [{ effect: 'modifyStat', amount: 'double', condition: null, target: true, buff: true, cost: null, targetStat: 'hp', selfTarget: false, randomTarget: false }],
+    ability: [{ effect: 'modifyStat', amount: 'double', condition: null, target: true, buff: true, cost: null, targetStat: 'hp', selfTarget: false, randomTarget: false, newOriginal: true }],
     type: 'spell',
     playerOwned: false,
     color: 'white',
@@ -631,7 +631,7 @@ let awaken_spirit = new gameCard({
         original: 3,
         current: 3
     },
-    ability: [{ effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: false, cost: null, targetStat: 'op', buff: true, }],
+    ability: [{ effect: 'modifyStat', amount: '= hp', condition: null, target: true, selfTarget: false, cost: null, targetStat: 'op', buff: true, newOriginal: true }],
     type: 'spell',
     playerOwned: false,
     color: 'white',

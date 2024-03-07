@@ -65,6 +65,9 @@ export const abilities = {
                     if (selectedCard[ability.targetStat].current < 0) {
                         selectedCard[ability.targetStat].current = 0
                     }
+                    if (ability.newOriginal) {
+                        selectedCard[ability.targetStat].original = selectedCard[ability.targetStat].current
+                    }
                     useGeneralStore().updateBothDb()
                 }
             }
@@ -105,6 +108,9 @@ export const abilities = {
             target[ability.targetStat].current += ability.amount;
         } else if (!ability.buff && target && condition(player, target)) {
             target[ability.targetStat].current -= ability.amount;
+        }
+        if (ability.newOriginal) {
+            target[ability.targetStat].original = target[ability.targetStat].current
         }
         useGeneralStore().$state.freeze = false;
     },

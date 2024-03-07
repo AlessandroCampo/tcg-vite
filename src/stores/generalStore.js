@@ -209,6 +209,7 @@ export const useGeneralStore = defineStore('generalStore', {
         },
         assignCommander() {
             this.player.commander = this.playerInfo.deck.commander
+            this.player.lp = this.player.commander.lp
             this.updateDB()
         },
         checkAbility(card) {

@@ -206,7 +206,12 @@ export default {
             }
             else {
                 // const index = this.generalStore.playerInfo.collection.indexOf(newCard)
-                this.generalStore.playerInfo.deck.decklist.push(newCard)
+                if (this.countCopies(newCard) < 4) {
+                    this.generalStore.playerInfo.deck.decklist.push(newCard)
+                } else {
+                    window.alert('You cant use more than 4 copies of the same card')
+                }
+
                 // this.generalStore.playerInfo.collection.splice(index, 1)
             }
             this.generalStore.playerInfo.deck.decklist.sort(this.compareCards)
@@ -265,6 +270,7 @@ export default {
                 i {
                     margin-left: 10px;
                     color: crimson;
+                    cursor: pointer;
                 }
             }
         }
