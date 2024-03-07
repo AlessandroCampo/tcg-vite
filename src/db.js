@@ -7,7 +7,7 @@
 
 
 
-
+//deploy comment
 class gameCard {
     constructor({ name, ability, imgPath, cost, type, playerOwned, color, rarity }) {
         this.name = name
