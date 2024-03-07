@@ -532,7 +532,34 @@ let landless_dragon = new unit({
     rarity: 'common'
 });
 
+let trapsniffer = new unit({
+    name: 'Trapsniffer Kitstune',
+    op: {
+        original: 3,
+        current: 3
+    },
+    hp: {
+        original: 1,
+        current: 1
+    },
+    imgPath: '/cards/trapsniffer.png',
+    cost: {
+        original: 4,
+        current: 4
+    },
+    ability: [{ effect: 'removeTrap', condition: null, triggerTiming: 'onPlay', cost: null, amount: 1 }],
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    killed: false,
+    playerOwned: false,
+    color: 'white',
+    attributes: [],
+    rarity: 'epic'
+});
+
 //*** CARDS [SPELLS] */
+
 
 
 
@@ -548,6 +575,19 @@ let pot_of_malice = new gameCard({
     playerOwned: false,
     color: null,
     rarity: 'common'
+})
+let typhoon = new gameCard({
+    name: 'Sky Typhoon',
+    imgPath: '/cards/typhoon.png',
+    cost: {
+        original: 2,
+        current: 2
+    },
+    ability: [{ effect: 'removeTrap', condition: null, triggerTiming: 'onPlay', cost: null, amount: 1 }],
+    type: 'spell',
+    playerOwned: false,
+    color: null,
+    rarity: 'rare'
 })
 
 let called_from_grave = new gameCard({
@@ -708,11 +748,11 @@ let drain_shield = new gameCard({
     rarity: 'common'
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon]
 export const allCommanders = [black, white]
 export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 export const basicPack = {
-    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit],
+    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, called_from_grave, trapsniffer, typhoon],
     name: 'BASIC PACK',
     imgPath: './img/icons/pack.png',
     price: 50,

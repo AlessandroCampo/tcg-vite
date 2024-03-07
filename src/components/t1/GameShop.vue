@@ -359,6 +359,7 @@ export default {
             overflow-y: auto;
             max-width: 85vw;
             height: 100%;
+            padding-bottom: 110px;
 
             button {
                 display: flex;
@@ -480,6 +481,7 @@ export default {
     background-repeat: no-repeat;
     position: relative;
     display: inline-block;
+
 
 
     .stat {

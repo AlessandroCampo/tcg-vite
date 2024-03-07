@@ -155,15 +155,16 @@ export const abilities = {
         if (ability.cost) {
             this.checkCost(ability.cost);
         }
+        const condition = ability.condition
+            ? new Function('player', 'target', `return ${ability.condition}`)
+            : () => true;
         const cardField = useGeneralStore().$state.player.field;
         const index = cardField.indexOf(target);
         if (index !== -1) {
-
             target.killed = true;
             if (target.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
                 target.killed = false
             }
-
             useGeneralStore().updateBothDb()
             setTimeout(() => {
                 useGeneralStore().$state.opponent.activatedCard = null;
@@ -382,6 +383,33 @@ export const abilities = {
         if (card.type == 'trap') {
             setTimeout(() => { useGeneralStore().$state.opponent.activatedCard = null; useGeneralStore().updateBothDb() }, 1000)
         }
+    },
+    removeTrap(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        const oppoTraps = useGeneralStore().$state.opponent.traps
+        const condition = ability.condition
+            ? new Function('player', 'target', `return ${ability.condition}`)
+            : () => true;
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        if (oppoTraps.length > 0) {
+            for (let i = 0;i < ability.amount;i++) {
+                console.log('inside loop')
+                let randomTrapIndex = Math.floor(Math.random() * oppoTraps.length)
+                oppoTraps.splice(randomTrapIndex, 1)
+            }
+        }
+        setTimeout(() => {
+            console.log(oppoTraps)
+            useGeneralStore().$state.player.activatedCard = null
+            useGeneralStore().$state.freeze = false
+            useGeneralStore().updateBothDb()
+        }, 1000)
+
+
+
+
     }
 
 };

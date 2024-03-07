@@ -487,9 +487,10 @@ export const useGeneralStore = defineStore('generalStore', {
             let foundTrap = false
             this.opponent.traps.forEach((trap, index) => {
                 trap.ability.forEach((singleAbility, abilityIndex) => {
-                    const condition = trap.ability.condition
-                        ? new Function('trapTarget', `return ${trap.ability.condition}`)
+                    const condition = singleAbility.condition
+                        ? new Function('trapTarget', `return ${singleAbility.condition}`)
                         : new Function('trapTarget', 'return true');
+                    console.log(condition(trapTarget))
                     if (singleAbility.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
                         foundTrap = true
                         this.opponent.activatedCard = trap
