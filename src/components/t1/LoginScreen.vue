@@ -110,10 +110,17 @@ export default {
                     collection: welcomePack,
                     coins: 500,
                     crystals: 0,
+                    level: 1,
+                    experience: 0,
+                    rankedPoints: 0,
                     deck: {
                         decklist: [],
-                        commander: null
-                    }
+                        commander: null,
+                        name: ''
+                    },
+                    otherDecks: [
+
+                    ]
                 });
 
                 // Create a subcollection within the user document

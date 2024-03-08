@@ -6,6 +6,9 @@
                 </ProxyBig>
             </div>
         </transition>
+        <div class="oppoName">
+            {{ generalStore.opponent.username }}
+        </div>
         <PlayerHand></PlayerHand>
         <PlayerField></PlayerField>
         <OppoField></OppoField>
@@ -95,5 +98,17 @@ export default {
 .fade-enter,
 .fade-leave-to {
     opacity: 0;
+}
+
+.oppoName {
+    position: absolute;
+    background-color: rgba($color: #000000, $alpha: 0.6);
+    color: white;
+    padding-block: 15px;
+    padding-inline: 60px;
+    font-size: 2em;
+    top: 3%;
+    left: 1%;
+    z-index: 200;
 }
 </style>

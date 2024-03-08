@@ -1,37 +1,52 @@
 <template>
     <div class="collection-container">
+        <div class="collection-left">
+            <div class="deck-container" @dragenter.prevent @dragover.prevent @drop="addCard($event)">
+                <div class="deck-commander"
+                    :style="{ 'background-image': `url(./img${generalStore.playerInfo.deck?.commander.artwork})` }"
+                    v-if="generalStore.playerInfo.deck.commander">
+                    <p class="total-cards">
+                        Cards in deck: {{ generalStore.playerInfo.deck.decklist.length }}
+                        <i class="fa-solid fa-trash-can" @click="emptyDeck"></i>
+                    </p>
+                    <input type="text" class="deck-name" v-model="generalStore.playerInfo.deck.name">
+                </div>
 
-        <div class="deck-container" @dragenter.prevent @dragover.prevent @drop="addCard($event)">
-            <div class="deck-commander"
-                :style="{ 'background-image': `url(./img${generalStore.playerInfo.deck?.commander.artwork})` }"
-                v-if="generalStore.playerInfo.deck.commander">
-                <p class="total-cards">
-                    Cards in deck: {{ generalStore.playerInfo.deck.decklist.length }}
-                    <i class="fa-solid fa-trash-can" @click="emptyDeck"></i>
-                </p>
+                <!-- Iterate over deck cards -->
+                <template v-for="(card, index) in generalStore.playerInfo.deck.decklist">
+                    <!-- Check if it's the first occurrence of this card -->
+                    <template
+                        v-if="index === generalStore.playerInfo.deck.decklist.findIndex(c => c.name === card.name)">
+                        <div class="deck-card" :style="{ 'background-image': `url(./img${card.imgPath})` }">
+                            <div class="color-overlay" :style="{ background: generateGradient(card.color) }"></div>
+                            <div class="deck-card-cost">
+                                {{ card.cost.original }}
+                            </div>
+                            <div class="deck-card-name" :style="{ color: card.color !== 'white' ? 'white' : 'black' }">
+                                {{ card.name }}
+                            </div>
+                            <!-- Show count of copies -->
+                            <div class="copy-count">
+                                <i class="fa-solid fa-circle-xmark remove-icon" @click="removeCard(card)"></i>
+                                <span>{{ countCopies(card) }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+            <div class="other-decks">
+                <div class="other-deck-cover"
+                    :style="{ 'background-image': deck.commander ? `url(img/${deck.commander.artwork})` : 'none' }"
+                    v-for="(deck, index) in generalStore.playerInfo.otherDecks" :key="index" @click="switchDeck(index)">
+                    <p> {{ deck.name || 'New Deck' }} </p>
+                    <i class="fa-solid fa-circle-xmark close-icon" @click="deleteDeck(index)"></i>
+
+                </div>
             </div>
 
-            <!-- Iterate over deck cards -->
-            <template v-for="(card, index) in generalStore.playerInfo.deck.decklist">
-                <!-- Check if it's the first occurrence of this card -->
-                <template v-if="index === generalStore.playerInfo.deck.decklist.findIndex(c => c.name === card.name)">
-                    <div class="deck-card" :style="{ 'background-image': `url(./img${card.imgPath})` }">
-                        <div class="color-overlay" :style="{ background: generateGradient(card.color) }"></div>
-                        <div class="deck-card-cost">
-                            {{ card.cost.original }}
-                        </div>
-                        <div class="deck-card-name" :style="{ color: card.color !== 'white' ? 'white' : 'black' }">
-                            {{ card.name }}
-                        </div>
-                        <!-- Show count of copies -->
-                        <div class="copy-count">
-                            <i class="fa-solid fa-circle-xmark remove-icon" @click="removeCard(card)"></i>
-                            <span>{{ countCopies(card) }}</span>
-                        </div>
-                    </div>
-                </template>
-            </template>
+
         </div>
+
         <div class="collection-right">
             <div class="card-filter-bar">
                 <div class="searchbar-container">
@@ -54,9 +69,13 @@
                     <option value="null">Factionless</option>
                 </select>
 
-                <!-- <button @click="saveDeck">
+                <button @click="createNewDeck">
+                    NEW DECK
+                </button>
+
+                <button @click="saveDeck">
                     SAVE
-                </button> -->
+                </button>
 
                 <router-link to="/">
                     <button> BACK TO MENU </button>
@@ -233,7 +252,30 @@ export default {
         },
         saveDeck() {
             //FIXME - 
+            let deckAlreadySaved = false
+            this.generalStore.playerInfo.otherDecks.forEach((deck) => {
+                if (deck.name == this.generalStore.playerInfo.deck.name) {
+                    deckAlreadySaved = true
+                }
+            })
+            if (!deckAlreadySaved) {
+                this.generalStore.playerInfo.otherDecks.push(this.generalStore.playerInfo.deck)
+            }
             this.generalStore.updatePlayerInfoDB()
+        },
+        createNewDeck() {
+            const newDeck = {
+                name: '',
+                commander: null,
+                decklist: []
+            }
+            this.generalStore.playerInfo.otherDecks.push(newDeck)
+        },
+        switchDeck(index) {
+            this.generalStore.playerInfo.deck = this.generalStore.playerInfo.otherDecks[index]
+        },
+        deleteDeck(index) {
+            this.generalStore.playerInfo.otherDecks.splice(index, 1)
         }
     }
 }
@@ -246,94 +288,158 @@ export default {
     background-color: #292627;
     display: flex;
 
-    .deck-container {
+    .collection-left {
         width: 30%;
-        height: 100%;
-        overflow-y: auto;
 
-        .deck-commander {
-            height: 200px;
-            background-image: url('./img/commanders/black.png');
-            background-position: center;
-            background-position-y: 10%;
-            position: relative;
+        .deck-container {
+            width: 100%;
+            height: 85%;
+            overflow-y: auto;
 
-            .total-cards {
-                position: absolute;
-                bottom: 5%;
-                right: 5%;
+            .deck-commander {
+                height: 200px;
+                background-image: url('./img/commanders/black.png');
+                background-position: center;
+                background-position-y: 10%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                padding-top: 20px;
+
+                .deck-name {
+                    background-color: rgba($color: black, $alpha: 0.6);
+                    color: white;
+                    font-size: 2em;
+                    text-align: center;
+                }
+
+                .total-cards {
+                    position: absolute;
+                    bottom: 5%;
+                    right: 5%;
+                    color: white;
+                    background-color: rgba($color: black, $alpha: 0.6);
+                    padding: 10px;
+                    font-size: 1.5em;
+
+                    i {
+                        margin-left: 10px;
+                        color: crimson;
+                        cursor: pointer;
+                    }
+                }
+            }
+
+            .deck-card {
+                width: 100%;
+                height: 50px;
+                border: 2px solid slategray;
                 color: white;
-                background-color: rgba($color: black, $alpha: 0.6);
-                padding: 10px;
-                font-size: 1.5em;
+                position: relative;
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position-y: 26%;
+                display: flex;
+                align-items: center;
+                gap: 50px;
+                padding-inline: 30px;
 
-                i {
-                    margin-left: 10px;
+                .deck-card-cost {
+                    font-weight: bold;
+                    font-size: 1.3em;
+                    background-color: #072851;
+                    width: 50px;
+                    position: absolute;
+                    z-index: 3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    width: 37px;
+                    height: 37px;
+                    border: 1px solid #036874;
+                }
+
+                .remove-icon {
+                    color: white;
+                    right: 5%;
                     color: crimson;
+                    background-color: white;
+                    clip-path: circle();
+                    font-size: 22px;
                     cursor: pointer;
+                }
+
+                .deck-card-name {
+                    font-weight: bold;
+                    font-size: 1.3em;
+                    position: absolute;
+                    z-index: 3;
+                    left: 15%;
+                    text-transform: uppercase;
+                }
+
+                .color-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+
+            }
+        }
+
+        .other-decks {
+            height: 15%;
+            display: flex;
+            gap: 20px;
+            justify-content: flex-start;
+
+            .other-deck-cover {
+                width: calc(100% / 4 - 20px);
+                height: 100%;
+                background-size: cover;
+                background-position: center;
+                border: 3px solid white;
+                background-color: #121212;
+                position: relative;
+                cursor: pointer;
+
+                &:hover i {
+                    display: initial;
+                }
+
+                .close-icon {
+                    position: absolute;
+                    top: -10%;
+                    right: -10%;
+                    font-size: 1.5em;
+                    color: crimson;
+                    display: none;
+                    cursor: pointer;
+                }
+
+                p {
+                    color: white;
+                    background-color: rgba($color: black, $alpha: 0.6);
+                    text-align: center;
+                    font-size: 1.2em;
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+
+
                 }
             }
         }
-
-        .deck-card {
-            width: 100%;
-            height: 50px;
-            border: 2px solid slategray;
-            color: white;
-            position: relative;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position-y: 26%;
-            display: flex;
-            align-items: center;
-            gap: 50px;
-            padding-inline: 30px;
-
-            .deck-card-cost {
-                font-weight: bold;
-                font-size: 1.3em;
-                background-color: #072851;
-                width: 50px;
-                position: absolute;
-                z-index: 3;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                width: 37px;
-                height: 37px;
-                border: 1px solid #036874;
-            }
-
-            .remove-icon {
-                color: white;
-                right: 5%;
-                color: crimson;
-                background-color: white;
-                clip-path: circle();
-                font-size: 22px;
-                cursor: pointer;
-            }
-
-            .deck-card-name {
-                font-weight: bold;
-                font-size: 1.3em;
-                position: absolute;
-                z-index: 3;
-                left: 15%;
-                text-transform: uppercase;
-            }
-
-            .color-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
-
-        }
     }
+
+
 
     div.collection-right {
         width: 70%;
@@ -388,6 +494,12 @@ export default {
                 align-items: center;
                 gap: 12px;
                 height: 50px;
+                width: 20%;
+
+                .searchbar {
+                    max-width: 88%;
+                }
+
 
                 i {
                     color: white;

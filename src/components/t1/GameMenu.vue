@@ -2,10 +2,17 @@
 
     <div class="home_menu">
         <nav>
-            <button @click="joinQueue"> {{ !this.generalStore.playerInfo.inQueue ? 'PLAY' : 'IN QUEUE' }} </button>
+            <button @click="joinQueue"> {{ !this.generalStore.playerInfo.inQueue ? 'PLAY' : 'IN QUEUE ' + queueTimer }}
+            </button>
             <button @click="goToCollection"> COLLECTION </button>
             <button @click="goToShop"> SHOP </button>
         </nav>
+        <div class="user" v-if="generalStore.user">
+            <img src="/img/simple_soldier.png" alt="">
+            <div> {{ generalStore.playerInfo.username }} </div>
+            <div> LEVEL: {{ levelName }} ({{ generalStore.playerInfo.level }}) </div>
+            <div> XP: {{ generalStore.playerInfo.experience }} / {{ xpForNextLevel }} </div>
+        </div>
     </div>
 </template>
 
@@ -21,8 +28,19 @@ const db = useFirestore()
 export default {
     data() {
         return {
-            generalStore: useGeneralStore()
+            generalStore: useGeneralStore(),
+            timerInterval: null,
+            minutes: 0,
+            seconds: 0,
+            playerLevel: '',
+            levelName: '',
+            experienceToNextLevel: 0,
+            xpForNextLevel: 0
         }
+    },
+    mounted() {
+        setTimeout(() => { this.calculatePlayerLevel() }, 1500)
+
     },
     methods: {
         async joinQueue() {
@@ -32,15 +50,22 @@ export default {
             }
             if (!this.generalStore.playerInfo.inQueue) {
                 this.generalStore.playerInfo.inQueue = true
+                this.timerInterval = setInterval(() => {
+                    this.seconds++
+                    if (this.seconds == 60) {
+                        this.seconds = 0
+                        this.minutes++
+                    }
+                }, 1000)
                 this.generalStore.updatePlayerInfoDB()
                 await this.findMatch()
             } else {
                 this.generalStore.playerInfo.inQueue = false
+                this.minutes = 0
+                this.seconds = 0
+                clearInterval(this.timerInterval)
                 this.generalStore.updatePlayerInfoDB()
             }
-
-
-
         },
         goToCollection() {
             this.generalStore.collectionPageFlag = true
@@ -104,8 +129,56 @@ export default {
                 this.generalStore.player.commander = allCommanders[0]
             }
 
+        },
+        calculatePlayerLevel() {
+            let currentPlayerLevel = this.generalStore.playerInfo.level;
+            let currentPlayerXp = this.generalStore.playerInfo.experience;
+            console.log(currentPlayerLevel)
+            let levelNames = {
+                11: 'Simple Soldier',
+                21: 'Experienced Warrior',
+                31: 'Seasoned Veteran',
+                41: 'Elite Commander',
+                51: 'Legendary Hero'
+            };
+
+
+            // Determine the player's current level name
+            for (let level in levelNames) {
+                if (currentPlayerLevel <= parseInt(level)) {
+                    this.levelName = levelNames[level];
+                    break;
+                }
+            }
+
+            if (currentPlayerLevel < 50) {
+                let nextLevel = Math.min(currentPlayerLevel + 1, 50);
+                this.xpForNextLevel = Math.pow(nextLevel, 2) * 10;
+
+                if (currentPlayerXp >= this.xpForNextLevel) {
+                    this.generalStore.playerInfo.level++;
+                    this.generalStore.playerInfo.experience = currentPlayerXp - this.xpForNextLevel;
+                }
+            }
+            this.generalStore.updatePlayerInfoDB()
+
+
+
+
+        }
+
+
+    },
+    computed: {
+        queueTimer() {
+            const formattedMinutes = String(this.minutes).padStart(2, '0');
+            const formattedSeconds = String(this.seconds).padStart(2, '0');
+
+            return `${formattedMinutes}:${formattedSeconds}`;
         }
     }
+
+
 }
 </script>
 
@@ -170,6 +243,28 @@ export default {
 
     .inactive {
         opacity: 0.3;
+    }
+
+
+}
+
+.user {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    background-color: rgba(55, 55, 55, 0.7);
+    padding: 30px;
+    text-align: center;
+
+    img {
+        max-width: 250px;
+        aspect-ratio: 1;
+        clip-path: circle();
+    }
+
+    div {
+        color: white;
+        font-size: 2em;
     }
 }
 </style>

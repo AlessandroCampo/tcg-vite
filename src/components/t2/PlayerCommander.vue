@@ -37,6 +37,9 @@ export default {
             this.generalStore.draggedCardObj = this.generalStore.player.commander
             console.log(this.generalStore.draggedCardObj)
         }
+    },
+    watch: {
+
     }
 }
 </script>

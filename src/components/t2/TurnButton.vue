@@ -20,6 +20,7 @@ export default {
             if (!this.generalStore.player.activeTurn || this.generalStore.freeze) {
                 return
             }
+            this.generalStore.game.currentTurn++
             let enemyUnits = this.generalStore.opponent.field
             enemyUnits.forEach(unit => {
                 if (!unit.canAttack) {

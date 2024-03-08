@@ -30,6 +30,9 @@ export const useGeneralStore = defineStore('generalStore', {
         clickedCardObj: undefined,
         summonedUnitCard: undefined,
         summonedUnitObj: undefined,
+        game: {
+            currentTurn: 1
+        },
         player: {
             winner: false,
             gameover: false,
@@ -65,10 +68,15 @@ export const useGeneralStore = defineStore('generalStore', {
             collection: [],
             coins: 0,
             crystals: 0,
+            level: 1,
+            experience: 0,
+            rankedPoints: 0,
             deck: {
                 commander: null,
-                decklist: []
-            }
+                decklist: [],
+                name: ''
+            },
+            otherDecks: []
         },
         opponent: {}
     }),
@@ -487,11 +495,12 @@ export const useGeneralStore = defineStore('generalStore', {
             let foundTrap = false
             this.opponent.traps.forEach((trap, index) => {
                 trap.ability.forEach((singleAbility, abilityIndex) => {
-                    const condition = singleAbility.condition
-                        ? new Function('trapTarget', `return ${singleAbility.condition}`)
-                        : new Function('trapTarget', 'return true');
-                    console.log(condition(trapTarget))
-                    if (singleAbility.triggerTiming == triggerType && !foundTrap && condition(trapTarget)) {
+
+                    if (singleAbility.triggerTiming == triggerType && !foundTrap) {
+                        const condition = singleAbility.condition
+                            ? new Function('trapTarget', `return ${singleAbility.condition}`)
+                            : new Function('trapTarget', 'return true');
+                        if (!condition(trapTarget)) { return foundTrap }
                         foundTrap = true
                         this.opponent.activatedCard = trap
                         this.opponent.traps.splice(index, 1)

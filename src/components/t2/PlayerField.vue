@@ -89,7 +89,7 @@ export default {
                 let action = this.generalStore.opponent.lastAction
                 this.generalStore.performLastAction(action.action, action.card, action.target, action.cardObj, action.targetObj)
             }
-        }
+        },
     }
 }
 </script>

@@ -34,6 +34,11 @@ export default {
         getImage() {
             this.commanderImage = '/img' + this.generalStore.opponent.commander.artwork
         },
+        handleEndGame() {
+            this.generalStore.player.winner = true
+            this.generalStore.player.gameover = true
+            this.generalStore.opponent.gameover = true
+        },
         directAttack(e) {
             console.log('dropped')
             const attacker = this.generalStore.draggedCardObj;
@@ -85,10 +90,7 @@ export default {
 
             setTimeout(() => {
                 if (this.generalStore.opponent.lp <= 0) {
-                    this.generalStore.player.winner = true
-                    this.generalStore.player.gameover = true
-                    this.generalStore.opponent.gameover = true
-                    this.generalStore.playerInfo.coins += 25
+                    this.handleEndGame()
                 }
                 this.generalStore.updateBothDb();
                 this.generalStore.updatePlayerInfoDB()

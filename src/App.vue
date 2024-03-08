@@ -44,7 +44,7 @@ export default {
           this.generalStore.playerInfo = doc.data()
         });
 
-
+        this.generalStore.player.username = this.generalStore.playerInfo.username
 
         await this.generalStore.updateDB()
         await this.generalStore.updatePlayerInfoDB()
