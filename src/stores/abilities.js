@@ -54,7 +54,7 @@ export const abilities = {
                     useGeneralStore().$state.player.activatedCard = null
                 }
                 if (index !== -1) {
-                    if (selectedCard.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                    if (selectedCard && selectedCard?.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
                         ability.amount = 0
                     }
                     if (ability.buff) {
