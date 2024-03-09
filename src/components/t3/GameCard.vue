@@ -10,11 +10,11 @@
             {{ propCard.cost.current }}
         </span>
         <span class="op stat" :class="statClass(propCard?.op.current, propCard?.op.original)"
-            v-if="propCard.type == 'unit'">
+            v-if="propCard.type == 'unit' || propCard.type == 'commander'">
             {{ propCard?.op.current }}
         </span>
         <span class="hp stat" :class="statClass(propCard?.hp.current, propCard?.hp.original)"
-            v-if="propCard.type == 'unit'">
+            v-if="propCard.type == 'unit' || propCard.type == 'commander'">
             {{ propCard?.hp.current }}
         </span>
         <img src="../../assets/img/animations/sleep.gif" alt="" class="animation"

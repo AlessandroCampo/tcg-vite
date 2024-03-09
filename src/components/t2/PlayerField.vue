@@ -40,6 +40,9 @@ export default {
         },
         playCard(event) {
             const propCard = this.generalStore.draggedCardObj
+            // if (propCard.type == 'commander') {
+            //     this.generalStore.summonUnit(propCard)
+            // }
             if (propCard.ability && propCard.type === 'spell' && propCard.ability.type === 'target_enemy' && this.generalStore.opponent.field.length === 0) {
                 return
             }

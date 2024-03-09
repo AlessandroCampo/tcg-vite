@@ -55,10 +55,18 @@ let black = {
         original: 27
     },
     cost: {
-        current: 2,
-        original: 2
+        current: 0,
+        original: 0
     },
-    rarity: 'legendary'
+    op:
+    {
+        current: 4,
+        original: 4
+    },
+    rarity: 'legendary',
+    attributes: [],
+    canAttack: false,
+    status: 'none'
 
 }
 
@@ -79,10 +87,19 @@ let white = {
         original: 30
     },
     cost: {
-        current: 2,
-        original: 2
+        current: 0,
+        original: 0
     },
-    rarity: 'legendary'
+    op:
+    {
+        current: 7,
+        original: 7
+    }
+    ,
+    rarity: 'legendary',
+    attributes: [],
+    canAttack: false,
+    status: 'none'
 }
 
 let green = {
@@ -102,15 +119,22 @@ let kagutsuchi = {
     used: false,
     imgPath: '/cards/kagutsuchi.png',
     lp: 27,
+    op: {
+        current: 5,
+        original: 5
+    },
     hp: {
         current: 29,
         original: 29
     },
     cost: {
-        current: 1,
-        original: 1
+        current: 0,
+        original: 0
     },
-    rarity: 'legendary'
+    rarity: 'legendary',
+    attributes: [],
+    canAttack: false,
+    status: 'none'
 
 }
 
@@ -747,6 +771,20 @@ let pot_of_malice = new gameCard({
     color: null,
     rarity: 'common'
 })
+
+let dark_hole = new gameCard({
+    name: 'Dark hole',
+    imgPath: '/cards/dark_hole.png',
+    cost: {
+        original: 0,
+        current: 0
+    },
+    ability: [{ effect: 'killAll', condition: null, triggerTiming: 'onPlay', cost: null, canTargetAlly: true }],
+    type: 'spell',
+    playerOwned: false,
+    color: null,
+    rarity: 'common'
+})
 let typhoon = new gameCard({
     name: 'Sky Typhoon',
     imgPath: '/cards/typhoon.png',
@@ -919,11 +957,11 @@ let drain_shield = new gameCard({
     rarity: 'common'
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon, adept, skilled_fire_magician, dragon_egg, dragon_mother, muspeleihm, kagutsuchi]
-export const allCommanders = [black, white]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon, adept, skilled_fire_magician, dragon_egg, dragon_mother, muspeleihm, kagutsuchi, dark_hole]
+export const allCommanders = [black, white, kagutsuchi]
 export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 export const basicPack = {
-    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, called_from_grave, trapsniffer, typhoon],
+    cardList: [leonidas, reaper, sorceress, skeleton, golem, inner_fear, blessing, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, called_from_grave, trapsniffer, typhoon, dark_hole],
     name: 'BASIC PACK',
     imgPath: './img/icons/pack.png',
     price: 50,

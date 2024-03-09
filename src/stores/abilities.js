@@ -559,6 +559,36 @@ export const abilities = {
         useGeneralStore().$state.freeze = false
         useGeneralStore().updateBothDb()
     },
+    killAll(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player
+        let opponent = useGeneralStore().$state.opponent
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        const condition = ability.condition
+            ? new Function('player', 'opponent', `return ${ability.condition}`)
+            : () => true;
+        if (!condition(player, opponent)) {
+            useGeneralStore().$state.freeze = false
+            return
+        }
+        opponent.field.forEach((unit, index) => {
+            unit.killed = true
+        })
+        if (ability.canTargetAlly) {
+            player.field.forEach((unit, index) => {
+                unit.killed = true
+            })
+        }
+        useGeneralStore().updateBothDb()
+        useGeneralStore().$state.freeze = false
+        setTimeout(() => {
+            useGeneralStore().player.activatedCard = null
+            useGeneralStore().updateBothDb()
+        }, 1200)
+
+    },
     converTarget(target, array) {
         if (target == 'lowest_cost') {
             let lowest_cost_unit;
