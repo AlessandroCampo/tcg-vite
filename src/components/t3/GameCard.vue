@@ -3,6 +3,9 @@
         :draggable="isDraggable()" @dragstart="startDrag($event)" @drop="attacked($event);" ref="card"
         :class="[propCard.killed == true ? 'fading' : '', disable() ? 'disabled' : '', playble() ? '' : 'not-playble']"
         :id="propCard.id">
+        <div class="foil">
+
+        </div>
         <span class="cost stat" :class="statClass(propCard.cost.current, propCard.cost.original)">
             {{ propCard.cost.current }}
         </span>
@@ -72,7 +75,7 @@ export default {
                     result = true
                 }
             })
-            console.log(result)
+
             return result
         },
         attacked(e) {
@@ -178,12 +181,12 @@ export default {
         'propCard.killed': {
             handler(newVal, oldVal) {
                 if (newVal) {
-                    console.log(this.propCard)
+
                     if (!this.propCard.cardKilledHandled && this.isPlayerOwned) {
                         this.propCard.cardKilledHandled = true;
 
                         if (this.propCard.type === 'unit' && this.propCard.ability && this.hasOnKillEff(this.propCard) && this.isPlayerOwned) {
-                            console.log('onKill')
+
                             this.generalStore.resolveAbility(this.propCard)
                         }
 
@@ -196,7 +199,7 @@ export default {
                             if (removedFromPlayerField) {
                                 player.graveyard.push(this.propCard)
                                 player.field = player.field.filter(card => card.id !== this.propCard.id);
-                                console.log(this.generalStore.player.graveyard)
+                                (this.generalStore.player.graveyard)
                                 await this.generalStore.updateDB();
                             } else if (removedFromOpponentField) {
                                 opponent.field = opponent.field.filter(card => card.id !== this.propCard.id);
@@ -209,6 +212,17 @@ export default {
                 }
             },
             immediate: true
+        },
+        'propCard.counter': function (newVal, oldVal) {
+            console.log(newVal)
+            if (this.propCard.transformation && newVal == this.propCard.transformation.time && this.isPlayerOwned && !this.propCard.transformationHandled) {
+                this.propCard.transformationHandled = true;
+                setTimeout(() => {
+                    this.generalStore.transformUnit(this.propCard)
+                }, 500)
+
+
+            }
         }
 
 
@@ -230,6 +244,7 @@ export default {
     z-index: 10;
     transform-style: preserve-3d;
     transition: transform 0.5s ease, opacity 1.2s ease;
+
 
     &:hover {
         scale: 1.4;
@@ -307,6 +322,20 @@ export default {
 .hand-container .card-base.not-playble:hover {
     box-shadow: 0px 0px 10px 5px crimson;
     border: 2px solid crimson;
+}
+
+@keyframes shimmer {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
 }
 
 

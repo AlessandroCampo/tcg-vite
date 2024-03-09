@@ -88,7 +88,8 @@
                 <span class="card-block" v-for="(block, index2) in transformArray(collection)" :key="index2">
                     <div class="collection-card" :style="{ 'background-image': `url(./img${card.imgPath})` }"
                         :draggable="true" v-for="(card, index) in block" :key="index" @dragstart="startDrag(card)"
-                        v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander') && !generalStore.playerInfo.deck.decklist.includes(card)">
+                        v-show="card.name.toLowerCase().includes(searchString.toLowerCase()) && (card.type == typeFilter || typeFilter == 'all') && (card.color == colorFilter || colorFilter == 'all' || colorFilter == 'null' && !card.color && card.type !== 'commander') && (!generalStore.playerInfo.deck.decklist.some(deckCard => deckCard.id === card.id))
+                ">
                         <span class="cost stat">
                             {{ card.cost.current }}
                         </span>
@@ -126,15 +127,14 @@ export default {
         // Define a function to compare cards based on color, type, and cost
 
         // Order the collection array using the compareCards function
+        console.log(this.generalStore.playerInfo.collection)
         this.collection = this.generalStore.playerInfo.collection
         this.collection.sort(this.compareCards);
 
-        // console.log(this.transformArray(this.collection))
 
     },
     mounted() {
-        console.log(this.generalStore.playerInfo.collection)
-        console.log(this.transformArray(this.collection))
+
     },
     methods: {
         compareCards(a, b) {
@@ -174,7 +174,8 @@ export default {
                     gradient = 'linear-gradient(rgba(225, 225, 225, 0.7), rgba(225, 225, 225, 0.7))';
                     break;
                 case 'red':
-                    gradient = 'linear-gradient(rgba(255, 0, 0, 0.7), rgba(255, 0, 0, 0.7))';
+                    gradient = 'linear-gradient(rgba(255, 0, 0, 0.5), rgba(255, 0, 0, 0.5))';
+
                     break;
                 default:
                     gradient = 'linear-gradient(rgba(30, 30, 30, 0.7), rgba(30, 30, 30, 0.7))';

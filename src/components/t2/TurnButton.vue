@@ -23,6 +23,7 @@ export default {
             this.generalStore.game.currentTurn++
             let enemyUnits = this.generalStore.opponent.field
             enemyUnits.forEach(unit => {
+                unit.counter++
                 if (!unit.canAttack) {
                     unit.canAttack = true
                 }

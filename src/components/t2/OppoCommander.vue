@@ -40,7 +40,7 @@ export default {
             this.generalStore.opponent.gameover = true
         },
         directAttack(e) {
-            console.log('dropped')
+
             const attacker = this.generalStore.draggedCardObj;
             const attackerProxy = this.generalStore.draggedCard
             const initialLP = this.generalStore.opponent.lp;

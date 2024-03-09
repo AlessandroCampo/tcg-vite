@@ -97,8 +97,11 @@ export default {
                     } else {
                         // Add four copies of other cards
                         for (let i = 0;i < 4;i++) {
-                            welcomePack.push(card);
+                            let newCard = { ...card };
+                            newCard.id = this.generalStore.generateCardId(i, card.name);
+                            welcomePack.push(newCard);
                         }
+
                     }
                 });
                 // Create a document for the user with general information

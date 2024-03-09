@@ -31,7 +31,7 @@ export const abilities = {
             : () => true;
 
         if (ability.cost) this.checkCost(ability.cost);
-        console.log(card)
+
         if (ability.selfTarget) {
             target = card;
         } else if (!ability.selfTarget && !ability.randomTarget) {
@@ -46,7 +46,7 @@ export const abilities = {
 
                 const index = array.indexOf(selectedCard);
                 if (isNaN(ability.amount)) {
-                    console.log(selectedCard)
+
                     ability.amount = this.convertAmount(ability.amount, ability.targetStat, selectedCard)
 
                 }
@@ -77,9 +77,8 @@ export const abilities = {
         } else if (!ability.selfTarget && ability.randomTarget) {
             let validTargetsIndexes = [];
             if (ability.buff) {
-                console.log('here');
+
                 player.field.forEach((unit, index) => {
-                    console.log(condition(player, unit));
                     if (condition(player, unit)) {
                         validTargetsIndexes.push(index);
                     }
@@ -95,13 +94,17 @@ export const abilities = {
                 const randomIndex = Math.floor(Math.random() * validTargetsIndexes.length);
                 const selectedIndex = validTargetsIndexes[randomIndex];
                 target = ability.buff ? player.field[selectedIndex] : opponent.field[selectedIndex];
+            } else {
+                // u sure?
+                useGeneralStore().$state.freeze = false;
+                return
             }
         }
 
         if (isNaN(ability.amount)) {
             ability.amount = this.convertAmount(ability.amount, ability.targetStat, target)
         }
-        if (target.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+        if (target && target?.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
             ability.amount = 0
         }
         if (ability.buff && target && condition(player, target)) {
@@ -322,7 +325,7 @@ export const abilities = {
             this.checkCost(ability.cost);
         }
         const drawnCard = useGeneralStore().drawOne();
-        console.log(drawnCard);
+
         if (ability.gain) {
             const initialLP = useGeneralStore().$state.player.lp;
             const finalLP = initialLP + drawnCard.cost.current;
@@ -356,14 +359,14 @@ export const abilities = {
             if (card.attributes.includes('rush') || card.attributes.includes('fly')) {
 
                 card.canAttack = true
-                console.log(card.canAttack, 'card can Attack?')
+
             }
         }
         useGeneralStore().$state.freeze = false
         useGeneralStore().updateBothDb()
     },
     convertAmount(amount, stat, target) {
-        console.log(target)
+
         if (amount == 'double') {
             return target[stat].current
         }
@@ -395,13 +398,13 @@ export const abilities = {
         }
         if (oppoTraps.length > 0) {
             for (let i = 0;i < ability.amount;i++) {
-                console.log('inside loop')
+
                 let randomTrapIndex = Math.floor(Math.random() * oppoTraps.length)
                 oppoTraps.splice(randomTrapIndex, 1)
             }
         }
         setTimeout(() => {
-            console.log(oppoTraps)
+
             useGeneralStore().$state.player.activatedCard = null
             useGeneralStore().$state.freeze = false
             useGeneralStore().updateBothDb()
@@ -410,7 +413,167 @@ export const abilities = {
 
 
 
+    },
+    dealDamage(card, abilityIndex) {
+        console.log('damaging ability activated')
+        console.log(card)
+        let ability = card.ability[abilityIndex]
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        let oppoField = useGeneralStore().$state.opponent.field
+        let playerField = useGeneralStore().$state.player.field
+        let player = useGeneralStore().$state.player
+        let target
+        const condition = ability.condition
+            ? new Function('player', 'target', `return ${ability.condition}`)
+            : () => true;
+        if (!condition(player, target)) {
+            useGeneralStore().$state.freeze = false
+            return
+        }
+        if (ability.targetSelection == 'random') {
+            let randomOppoTarget = oppoField[Math.floor(Math.random() * oppoField.length)];
+            let damageTarget;
+            if (ability.canTargetAlly) {
+                let randomAllyTarget = playerField[Math.floor(Math.random() * playerField.length)];
+                let coinFlip = Math.floor(Math.random() * 2);
+                if (coinFlip == 0 && !randomOppoTarget) {
+                    coinFlip = 1
+                }
+                if (coinFlip == 0) {
+                    damageTarget = randomOppoTarget;
+                } else {
+                    damageTarget = randomAllyTarget;
+                }
+            } else {
+                damageTarget = randomOppoTarget;
+            }
+            if (damageTarget.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                ability.amount = 0
+            }
+            damageTarget.hp.current -= ability.amount;
+            if (damageTarget.hp.current <= 0) {
+                damageTarget.killed = true
+            }
+        } else if (ability.targetSelection == 'all') {
+            console.log('dealing damage to all')
+            if (ability.canTargetAlly) {
+                oppoField.forEach((unit) => { unit.hp.current -= ability.amount })
+                playerField.forEach((unit) => {
+                    if (unit.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                        ability.amount = 0
+                    }
+                    unit.hp.current -= ability.amount
+                    if (unit.hp.current <= 0) {
+                        unit.killed = true
+                    }
+                })
+            } else {
+
+                oppoField.forEach((unit) => {
+                    if (unit.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) {
+                        ability.amount = 0
+                    }
+                    unit.hp.current -= ability.amount
+                    console.log(ability.amount)
+                    if (unit.hp.current <= 0) {
+                        unit.killed = true
+                    }
+
+                })
+            }
+        } else if (ability.targetSelection == 'choose') {
+            const selectionCallback = (selectedCard, array) => {
+                const index = array.indexOf(selectedCard);
+                if (index !== -1) {
+                    // if (selectedCard.attributes.includes('immune') && (card.type == 'spell' || card.type == 'trap')) return
+                    selectedCard.hp.current -= ability.amount
+                    if (selectedCard.hp.current <= 0) {
+                        selectedCard.killed = true
+                    }
+                    useGeneralStore().updateOpponentDB()
+                }
+            };
+
+            useGeneralStore().generateChoice(oppoField, condition, (selectedCard) => selectionCallback(selectedCard, oppoField));
+        }
+
+        useGeneralStore().$state.freeze = false
+        useGeneralStore().updateBothDb()
+
+
+    },
+    playFromDeck(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        const condition = ability.condition
+            ? new Function('player', `return ${ability.condition}`)
+            : () => true;
+        if (!condition(player)) {
+            useGeneralStore().$state.freeze = false
+            return
+        }
+        for (let i = 0;i < ability.amount;i++) {
+            let matchedCardIndex = undefined
+            player.deck.forEach((unit, index) => {
+                if (unit.type == 'unit' && ability.targetCard && unit.name == ability.targetCard) {
+                    matchedCardIndex = index
+                }
+            })
+            if (matchedCardIndex !== undefined) {
+                player.deck[matchedCardIndex].status = 'onField'
+                player.deck[matchedCardIndex].canAttack = false
+                player.field.push(player.deck[matchedCardIndex])
+                player.deck.splice(matchedCardIndex, 1)
+            }
+
+
+        }
+        useGeneralStore().updateBothDb()
+        useGeneralStore().$state.freeze = false
+    },
+    returnToDeck(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player
+        let opponent = useGeneralStore().$state.opponent
+        let target
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        const condition = ability.condition
+            ? new Function('player', `return ${ability.condition}`)
+            : () => true;
+        if (!condition(player, target)) {
+            useGeneralStore().$state.freeze = false
+            return
+        }
+        for (let i = 0;i < ability.amount;i++) {
+            let targetIndex = this.converTarget(ability.targetSelection, opponent.field)
+            opponent.deck.push(opponent.field[targetIndex])
+            opponent.field.splice(targetIndex, 1)
+        }
+        useGeneralStore().$state.freeze = false
+        useGeneralStore().updateBothDb()
+    },
+    converTarget(target, array) {
+        if (target == 'lowest_cost') {
+            let lowest_cost_unit;
+            let lowest_cost_unit_index;
+            array.forEach((card, index) => {
+                if (typeof lowest_cost_unit === 'undefined' || card.cost < lowest_cost_unit.cost) {
+                    lowest_cost_unit = card;
+                    lowest_cost_unit_index = index;
+                }
+            });
+            return lowest_cost_unit_index;
+        }
+
     }
+
 
 };
 

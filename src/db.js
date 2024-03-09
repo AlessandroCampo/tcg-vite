@@ -22,14 +22,16 @@ class gameCard {
 }
 
 class unit extends gameCard {
-    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed, playerOwned, color, attributes, rarity }) {
-        super({ name, ability, imgPath, cost, type, playerOwned, color, rarity });
+    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed, playerOwned, color, attributes, rarity, transformation, counter }) {
+        super({ name, ability, imgPath, cost, type, playerOwned, color, rarity, transformation });
         this.op = op;
         this.hp = hp;
         this.canAttack = canAttack;
         this.status = status;
         this.killed = killed
         this.attributes = attributes
+        this.transformation = transformation || null
+        this.counter = counter || 0
     }
 }
 
@@ -87,6 +89,29 @@ let green = {
     name: 'green',
     artwork: '/commanders/green.png',
     colors: ['green']
+}
+
+let kagutsuchi = {
+
+    name: 'kagutsuchi',
+    artwork: '/commanders/kagutsuchi.png',
+    abilityArtwork: '/commanders/kagutsuchi_power.png',
+    colors: ['red'],
+    ability: [{ effect: 'dealDamage', amount: 1, triggerTiming: 'onPlay', cost: { from: 'mana', amount: 1 }, condition: null, targetSelection: 'choose', canTargetAlly: false, target: true }],
+    type: 'commander',
+    used: false,
+    imgPath: '/cards/kagutsuchi.png',
+    lp: 27,
+    hp: {
+        current: 29,
+        original: 29
+    },
+    cost: {
+        current: 1,
+        original: 1
+    },
+    rarity: 'legendary'
+
 }
 
 
@@ -504,6 +529,152 @@ let leonidas = new unit({
     rarity: 'legendary'
 });
 
+// RED 
+
+let skilled_fire_magician = new unit({
+    name: 'Skilled Fire Magician',
+    op: {
+        original: 3,
+        current: 3
+    },
+    hp: {
+        original: 3,
+        current: 3
+    },
+    imgPath: '/cards/skilled_fire_magician.png',
+    cost: {
+        original: 5,
+        current: 5
+    },
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    ability: [{ effect: 'dealDamage', amount: 2, triggerTiming: 'onPlay', cost: null, canTargetAlly: true, condition: null, targetSelection: 'all', canTargetAlly: false, target: false }],
+    playerOwned: false,
+    color: 'red',
+    attributes: [],
+    killed: false,
+    rarity: 'rare',
+    counter: 0
+})
+
+let adept = new unit({
+    name: 'adept',
+    op: {
+        original: 1,
+        current: 1
+    },
+    hp: {
+        original: 2,
+        current: 2
+    },
+    imgPath: '/cards/adept.png',
+    cost: {
+        original: 2,
+        current: 2
+    },
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    ability: [{ effect: 'dealDamage', amount: 1, triggerTiming: 'onPlay', cost: null, targetSelection: 'random', canTargetAlly: true, condition: null, target: false, target_num: 1 }],
+    playerOwned: false,
+    color: 'red',
+    attributes: ['transform'],
+    killed: false,
+    rarity: 'rare',
+    counter: 0,
+    transformation: {
+        into: 'Skilled Fire Magician',
+        time: 1
+    }
+})
+
+let dragon_mother = new unit({
+    name: 'Dragon Mother',
+    op: {
+        original: 1,
+        current: 1
+    },
+    hp: {
+        original: 2,
+        current: 2
+    },
+    imgPath: '/cards/dragon_mother.png',
+    cost: {
+        original: 3,
+        current: 3
+    },
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    ability: [{ effect: 'playFromDeck', amount: 1, triggerTiming: 'onPlay', cost: null, targetCard: 'Dragon Egg', condition: null }],
+    playerOwned: false,
+    color: 'red',
+    attributes: [],
+    killed: false,
+    rarity: 'common',
+    counter: 0
+
+})
+
+let dragon_egg = new unit({
+    name: 'Dragon Egg',
+    op: {
+        original: 0,
+        current: 0
+    },
+    hp: {
+        original: 5,
+        current: 5
+    },
+    imgPath: '/cards/dragon_egg.png',
+    cost: {
+        original: 3,
+        current: 3
+    },
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    ability: null,
+    playerOwned: false,
+    color: 'red',
+    attributes: ['transform'],
+    killed: false,
+    rarity: 'common',
+    counter: 0,
+    transformation: {
+        into: 'Muspeleihm',
+        time: 3
+    }
+})
+
+let muspeleihm = new unit({
+    name: 'Muspeleihm',
+    op: {
+        original: 7,
+        current: 7
+    },
+    hp: {
+        original: 7,
+        current: 7
+    },
+    imgPath: '/cards/muspeleihm.png',
+    cost: {
+        original: 8,
+        current: 8
+    },
+    status: 'none',
+    canAttack: false,
+    type: 'unit',
+    ability: [{ effect: 'returnToDeck', amount: 1, triggerTiming: 'onPlay', cost: null, targetSelection: 'lowest_cost', canTargetAlly: false, condition: null }],
+    playerOwned: false,
+    color: 'red',
+    attributes: ['fly'],
+    killed: false,
+    rarity: 'legendary',
+    counter: 0,
+})
+
 //COLORLESS
 
 let landless_dragon = new unit({
@@ -748,7 +919,7 @@ let drain_shield = new gameCard({
     rarity: 'common'
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon, adept, skilled_fire_magician, dragon_egg, dragon_mother, muspeleihm, kagutsuchi]
 export const allCommanders = [black, white]
 export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 export const basicPack = {

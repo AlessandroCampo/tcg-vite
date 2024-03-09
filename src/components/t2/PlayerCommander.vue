@@ -35,7 +35,7 @@ export default {
         startDrag(e) {
             this.generalStore.draggedCard = this.$el;
             this.generalStore.draggedCardObj = this.generalStore.player.commander
-            console.log(this.generalStore.draggedCardObj)
+
         }
     },
     watch: {

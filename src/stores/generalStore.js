@@ -88,6 +88,7 @@ export const useGeneralStore = defineStore('generalStore', {
             this.playerInfo.collection.forEach((playerCard) => {
                 const dbCard = this.cards.find((card) => card.name === playerCard.name);
                 if (dbCard) {
+                    dbCard.id = playerCard.id
                     Object.assign(playerCard, dbCard);
                 }
             });
@@ -221,7 +222,7 @@ export const useGeneralStore = defineStore('generalStore', {
             this.updateDB()
         },
         checkAbility(card) {
-            console.log(card)
+            console.log('checking', card)
             card.ability.forEach((ability, index) => {
                 if ((ability.target && this.opponent.field.length == 0 && !ability.selfTarget && !ability.buff) || (ability.target && this.player.field.length == 0 && ability.buff)) {
                     if (card.type == 'spell') {
@@ -264,6 +265,7 @@ export const useGeneralStore = defineStore('generalStore', {
             })
         },
         animateAbility(cardElement, unit) {
+            console.log(unit)
             if (unit.ability.triggerTiming == 'onKilled') {
                 this.resolveAbility(unit)
                 return
@@ -298,14 +300,14 @@ export const useGeneralStore = defineStore('generalStore', {
                 });
         },
         async resolveAbility(activated) {
-            console.log(activated.ability)
+            console.log('resolving', activated)
             activated.ability.forEach((el, index) => {
                 if (activated.status == 'onField' && el.triggerTiming == 'onPlay' && activated.type == 'unit') {
                     this.player.field.forEach(async (card) => {
                         if (card.id === activated.id) {
                             if (!el.target && (!activated.attributes.includes('fly') && !activated.attributes.includes('rush'))) {
                                 card.canAttack = false;
-                                console.log('this card cant attack')
+
                             }
                             await abilities[el.effect](card, index)
                             this.updateDB()
@@ -343,7 +345,7 @@ export const useGeneralStore = defineStore('generalStore', {
                 target.killed = true
             }
             if (attacker.attributes.includes('lifesteal')) {
-                console.log('lifesteal')
+
                 this.player.lp += attacker.op.current
             }
 
@@ -378,7 +380,7 @@ export const useGeneralStore = defineStore('generalStore', {
             await batch.commit();
         },
         async updatePlayerInfoDB() {
-            console.log('info updated ')
+
             const playerRef = doc(db, 'Users', this.player.uid);
             const playerInfoObjCopy = { ...this.playerInfo };
             await updateDoc(playerRef, playerInfoObjCopy);
@@ -511,6 +513,26 @@ export const useGeneralStore = defineStore('generalStore', {
 
             })
             return foundTrap
+        },
+        transformUnit(unit) {
+            let transformedCard
+            let index = this.player.field.indexOf(unit)
+            this.cards.forEach((card) => {
+                if (card.name == unit.transformation.into) {
+                    if (index !== -1) {
+                        this.player.field.splice(index, 1)
+                        transformedCard = card
+                    }
+                }
+            })
+            console.log(transformedCard)
+            transformedCard.canAttack = true
+            transformedCard.status = 'onField'
+            transformedCard.id = this.generateCardId(transformedCard.name, Math.floor(Math.random() * 100))
+            this.player.field.push(transformedCard)
+            this.updateBothDb()
+            this.checkAbility(transformedCard)
+
         }
     },
 

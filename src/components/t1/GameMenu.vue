@@ -133,7 +133,7 @@ export default {
         calculatePlayerLevel() {
             let currentPlayerLevel = this.generalStore.playerInfo.level;
             let currentPlayerXp = this.generalStore.playerInfo.experience;
-            console.log(currentPlayerLevel)
+
             let levelNames = {
                 11: 'Simple Soldier',
                 21: 'Experienced Warrior',

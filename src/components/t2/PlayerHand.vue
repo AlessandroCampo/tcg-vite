@@ -38,10 +38,14 @@ export default {
         'generalStore.player.activeTurn': async function (newTurn, oldTurn) {
             if (newTurn && this.generalStore.player.mana.total !== 1) {
                 this.generalStore.drawOne()
+
+
+
             }
         }
     }
 }
+
 </script>
 
 

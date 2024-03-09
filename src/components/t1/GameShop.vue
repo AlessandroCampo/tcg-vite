@@ -197,8 +197,11 @@ export default {
 
 
         },
+        countCopies(card) {
+            return this.generalStore.playerInfo.collection.filter(c => c.name === card.name).length;
+        },
         buyItem() {
-            console.log('buying')
+
             if (this.buyProduct.type) {
 
                 if (this.alreadyMaxCopies(this.buyProduct)) {
@@ -208,8 +211,9 @@ export default {
                 } else {
                     if (this.generalStore.playerInfo.crystals >= this.calcSinglePrice(this.buyProduct.rarity)) {
                         this.generalStore.playerInfo.crystals -= this.calcSinglePrice(this.buyProduct.rarity)
+                        this.buyProduct.id = this.generalStore.generateCardId((this.countCopies(this.buyProduct) + 1), this.buyProduct.name)
                         this.generalStore.playerInfo.collection.push({ ...this.buyProduct })
-                        console.log(this.playerInfo.collection)
+
                         this.generalStore.updatePlayerInfoDB()
                         this.buying = false
                     } else {
@@ -221,7 +225,7 @@ export default {
                 }
             }
             else if (this.buyProduct.productType == 'pack') {
-                console.log('pack')
+
                 if (this.generalStore.playerInfo.coins >= this.buyProduct.price) {
                     this.generalStore.playerInfo.coins -= this.buyProduct.price
                     let pull = []
@@ -236,12 +240,14 @@ export default {
 
                     pull.forEach((card) => {
                         if (!this.alreadyMaxCopies(card)) {
+
                             this.generalStore.playerInfo.collection.push(card)
+                            card.id = this.generalStore.generateCardId((this.countCopies(card) + 1), card.name)
                         } else {
                             this.generalStore.playerInfo.crystals += (this.calcSinglePrice(card.rarity) / 5)
                         }
                     })
-                    console.log(pull)
+
                     this.generalStore.updatePlayerInfoDB()
                     this.buying = false
                     this.newPull = pull
