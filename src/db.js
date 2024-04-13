@@ -22,7 +22,7 @@ class gameCard {
 }
 
 class unit extends gameCard {
-    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed, playerOwned, color, attributes, rarity, transformation, counter }) {
+    constructor({ name, ability, imgPath, cost, type, op, hp, canAttack, status, killed, playerOwned, color, attributes, rarity, transformation, counter, condition }) {
         super({ name, ability, imgPath, cost, type, playerOwned, color, rarity, transformation });
         this.op = op;
         this.hp = hp;
@@ -32,6 +32,7 @@ class unit extends gameCard {
         this.attributes = attributes
         this.transformation = transformation || null
         this.counter = counter || 0
+        this.condition = condition || null
     }
 }
 
@@ -776,10 +777,24 @@ let dark_hole = new gameCard({
     name: 'Dark hole',
     imgPath: '/cards/dark_hole.png',
     cost: {
+        original: 6,
+        current: 6
+    },
+    ability: [{ effect: 'killAll', condition: null, triggerTiming: 'onPlay', cost: null, canTargetAlly: true }],
+    type: 'spell',
+    playerOwned: false,
+    color: null,
+    rarity: 'common'
+})
+
+let giant_wave = new gameCard({
+    name: 'Giant Wave',
+    imgPath: '/cards/giant_wave.png',
+    cost: {
         original: 0,
         current: 0
     },
-    ability: [{ effect: 'killAll', condition: null, triggerTiming: 'onPlay', cost: null, canTargetAlly: true }],
+    ability: [{ effect: 'returnToHand', condition: null, triggerTiming: 'onPlay', cost: null, canTargetAlly: false, targetSelection: 'all' }],
     type: 'spell',
     playerOwned: false,
     color: null,
@@ -957,7 +972,7 @@ let drain_shield = new gameCard({
     rarity: 'common'
 })
 
-export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon, adept, skilled_fire_magician, dragon_egg, dragon_mother, muspeleihm, kagutsuchi, dark_hole]
+export const allCards = [crusader, pegasus, blessing, leonidas, joyce, peacekeeper, wolf, crow, ogre, knight, called_from_grave, reaper, sorceress, skeleton, golem, trap_hole, dimensional_gate, pot_of_malice, inner_fear, brain_control, armored_elephant, drain_shield, dark_bribe, divine_shield, blind_monk, incarnation, awaken_spirit, landless_dragon, trapsniffer, typhoon, adept, skilled_fire_magician, dragon_egg, dragon_mother, muspeleihm, kagutsuchi, dark_hole, giant_wave]
 export const allCommanders = [black, white, kagutsuchi]
 export const welcomePack = [black, white, landless_dragon, crusader, pegasus, joyce, peacekeeper, wolf, crow, knight, ogre, pot_of_malice, trap_hole, dimensional_gate]
 export const basicPack = {

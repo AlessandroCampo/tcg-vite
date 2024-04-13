@@ -78,28 +78,35 @@ export const useGeneralStore = defineStore('generalStore', {
             },
             otherDecks: []
         },
-        opponent: {}
+        opponent: {
+            graveyard: []
+        }
     }),
     getters: {
 
     },
     actions: {
         updatePlayerCollection() {
+            const updateCard = (playerCard) => {
+                const dbCard = this.cards.find((card) => card.name === playerCard.name);
+                if (dbCard) {
+                    Object.assign(playerCard, dbCard);
+                    return true;
+                }
+                return false;
+            };
+
+
             this.playerInfo.collection.forEach((playerCard) => {
-                const dbCard = this.cards.find((card) => card.name === playerCard.name);
-                if (dbCard) {
-                    dbCard.id = playerCard.id
-                    Object.assign(playerCard, dbCard);
-                }
-            });
-            this.playerInfo.deck.decklist.forEach((playerCard) => {
-                const dbCard = this.cards.find((card) => card.name === playerCard.name);
-                if (dbCard) {
-                    Object.assign(playerCard, dbCard);
-                }
+                updateCard(playerCard);
             });
 
+
+            this.playerInfo.deck.decklist.forEach((playerCard) => {
+                updateCard(playerCard);
+            });
         }
+
         ,
         shuffle(array) {
             for (let i = array.length - 1;i > 0;i--) {

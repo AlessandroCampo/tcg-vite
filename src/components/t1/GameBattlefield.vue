@@ -9,6 +9,7 @@
         <div class="oppoName">
             {{ generalStore.opponent.username }}
         </div>
+        <GameOverlay :overlayData="overlayData" v-if="overlay" @close_overlay="overlay = false"></GameOverlay>
         <PlayerHand></PlayerHand>
         <PlayerField></PlayerField>
         <OppoField></OppoField>
@@ -16,6 +17,10 @@
         <TurnButton></TurnButton>
         <LpCounter :propLp="generalStore.player.lp" :playerLp="true"></LpCounter>
         <LpCounter :propLp="generalStore.opponent.lp" :playerLp="false"></LpCounter>
+        <GraveyardCounter :playerGy="true" @showOverlay="handleShowOverlay">
+        </GraveyardCounter>
+        <GraveyardCounter :playerGy="false" @showOverlay="handleShowOverlay">
+        </GraveyardCounter>
         <DeckProxy :propDeck="generalStore.player.deck" :playerDeck="true"></DeckProxy>
         <DeckProxy :propDeck="generalStore.opponent.deck" :playerDeck="false"></DeckProxy>
         <PlayerCommander></PlayerCommander>
@@ -30,6 +35,7 @@
 
 <script>
 
+import GameOverlay from '../t2/GameOverlay.vue';
 import EndgameScreen from '../t1/EndgameScreen.vue'
 import PlayerHand from '../t2/PlayerHand.vue';
 import PlayerField from '../t2/PlayerField.vue';
@@ -39,6 +45,7 @@ import ManaBar from '../t2/ManaBar.vue';
 import TurnButton from '../t2/TurnButton.vue';
 import DeckProxy from '../t2/DeckProxy.vue';
 import LpCounter from '../t2/LpCounter.vue';
+import GraveyardCounter from '../t2/GraveyardCounter.vue';
 import PlayerCommander from '../t2/PlayerCommander.vue';
 import OppoCommander from '../t2/OppoCommander.vue';
 import ProxyBig from '../t3/ProxyBig.vue';
@@ -52,13 +59,17 @@ const playerRef = doc(db, 'Users', 'Player1');
 export default {
     data() {
         return {
-            generalStore: useGeneralStore()
+            generalStore: useGeneralStore(),
+            overlayData: {
+                title: 'Default Title',
+                array: []
+            },
+            overlay: false
         }
     },
-    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, PlayerCommander, OppoCommander, ProxyBig, EndgameScreen },
+    components: { PlayerHand, PlayerField, ManaBar, OppoField, OppoHand, TurnButton, DeckProxy, LpCounter, GraveyardCounter, PlayerCommander, OppoCommander, ProxyBig, EndgameScreen, GameOverlay },
     async created() {
         this.generalStore.opponentUid
-
         const oppo_unsub = onSnapshot(doc(db, "Users", this.generalStore?.opponentUid, 'GameState', 'GameState' + this.generalStore?.opponentUid), (doc) => {
             this.generalStore.opponent = doc.data()
         });
@@ -66,7 +77,18 @@ export default {
             this.generalStore.firstTurn()
             this.generalStore.assignCommander()
             this.generalStore.player.inQueue = false
+            console.log(this.generalStore.opponent.username)
         }, 500)
+    },
+    methods: {
+        handleShowOverlay(data) {
+
+            this.overlay = true
+            console.log(this.overlay)
+            this.overlayData.title = data.title
+            this.overlayData.array = data.array
+            console.log('Overlay should be shown with data:', data);
+        }
     },
     computed: {
         getPlayerMana() {

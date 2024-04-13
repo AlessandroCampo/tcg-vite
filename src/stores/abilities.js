@@ -553,11 +553,58 @@ export const abilities = {
         }
         for (let i = 0;i < ability.amount;i++) {
             let targetIndex = this.converTarget(ability.targetSelection, opponent.field)
+            opponent.field[targetIndex].status = 'none'
             opponent.deck.push(opponent.field[targetIndex])
             opponent.field.splice(targetIndex, 1)
         }
         useGeneralStore().$state.freeze = false
         useGeneralStore().updateBothDb()
+    },
+    returnToHand(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player
+        let opponent = useGeneralStore().$state.opponent
+        let target
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        const condition = ability.condition
+            ? new Function('player', 'opponent', 'target', `return ${ability.condition}`)
+            : () => true;
+        if (!condition(player, opponent, target)) {
+            useGeneralStore().$state.freeze = false
+            return
+        }
+        if (ability.targetSelection == 'all') {
+            while (opponent.field.length > 0) {
+                const unit = opponent.field.pop();
+                unit.status = 'inHand';
+                opponent.hand.push(unit);
+            }
+
+            // Check if ability can target allies
+            if (ability.canTargetAlly) {
+                while (player.field.length > 0) {
+                    const unit = player.field.pop();
+                    unit.status = 'inHand';
+                    player.hand.push(unit);
+                }
+            }
+        }
+        else {
+            for (let i = 0;i < ability.amount;i++) {
+                let targetIndex = this.converTarget(ability.targetSelection, opponent.field)
+                opponent.hand.push(opponent.field[targetIndex])
+                opponent.field.splice(targetIndex, 1)
+            }
+        }
+
+        useGeneralStore().$state.freeze = false
+        setTimeout(() => {
+            player.activatedCard = null
+            useGeneralStore().updateBothDb()
+        }, 1200)
+
     },
     killAll(card, abilityIndex) {
         let ability = card.ability[abilityIndex]
@@ -602,6 +649,23 @@ export const abilities = {
             return lowest_cost_unit_index;
         }
 
+    },
+    setCondition(card, abilityIndex) {
+        let ability = card.ability[abilityIndex]
+        let player = useGeneralStore().$state.player
+        let opponent = useGeneralStore().$state.opponent
+        let target
+        if (ability.cost) {
+            this.checkCost(ability.cost);
+        }
+        const condition = ability.condition
+            ? new Function('player', 'opponent', 'target', `return ${ability.condition}`)
+            : () => true;
+
+
+
+        useGeneralStore().$state.freeze = false
+        useGeneralStore().updateBothDb()
     }
 
 
